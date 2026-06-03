@@ -224,3 +224,61 @@ export async function saveRevenueOverride(
 
   revalidatePath("/cost-setup");
 }
+
+// ───── FIXED CATEGORY CRUD ─────
+
+const addFixedCategorySchema = z.object({
+  name: z.string().trim().min(1, "ต้องระบุชื่อหมวด").max(80),
+});
+
+export async function addFixedCategory(
+  input: z.input<typeof addFixedCategorySchema>
+) {
+  await requireAccess();
+  const data = addFixedCategorySchema.parse(input);
+
+  // Reactivate if a soft-deleted category with same name exists
+  const existing = await prisma.fixedCostCategory.findUnique({
+    where: { name: data.name },
+  });
+  if (existing) {
+    if (existing.active) {
+      throw new Error("มีหมวดชื่อนี้อยู่แล้ว");
+    }
+    await prisma.fixedCostCategory.update({
+      where: { id: existing.id },
+      data: { active: true },
+    });
+  } else {
+    const last = await prisma.fixedCostCategory.findFirst({
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
+    await prisma.fixedCostCategory.create({
+      data: {
+        name: data.name,
+        sortOrder: (last?.sortOrder ?? 0) + 1,
+        active: true,
+      },
+    });
+  }
+
+  revalidatePath("/cost-setup");
+}
+
+export async function deleteFixedCategory(id: number) {
+  await requireAccess();
+
+  // Hard delete if no costs ever recorded; otherwise soft-delete (preserve history)
+  const usage = await prisma.fixedCost.count({ where: { categoryId: id } });
+  if (usage === 0) {
+    await prisma.fixedCostCategory.delete({ where: { id } });
+  } else {
+    await prisma.fixedCostCategory.update({
+      where: { id },
+      data: { active: false },
+    });
+  }
+
+  revalidatePath("/cost-setup");
+}
