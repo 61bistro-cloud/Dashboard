@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { FileUp, Loader2, Check, X, AlertCircle } from "lucide-react";
+import { FileUp, Loader2, Check, AlertCircle } from "lucide-react";
 import { parseStatementPdf, importStatementRows } from "../actions";
 import type { PreviewTx } from "../actions";
 import { fmtTHB } from "@/lib/fiscal";
