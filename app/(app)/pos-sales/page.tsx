@@ -50,14 +50,24 @@ export default async function PosSalesPage({
   if (sp.channel) where.channel = sp.channel;
   if (sp.payment) where.paymentType = sp.payment;
 
-  // Active bills = customer actually paid (matches Foodstory's "บิลที่ปิดไปแล้ว").
-  // Cancelled / voided bills have grandTotal == 0 (full discount or refund).
-  const activeWhere = { ...where, grandTotal: { gt: 0 } };
-  const cancelledWhere = { ...where, grandTotal: { lte: 0 } };
+  // Foodstory definition (verified against the dashboard):
+  //   - "บิลที่ปิดไปแล้ว" = bills NOT refunded/voided. Includes 100%-discount
+  //     bills like staff meals (grandTotal == 0 but bill is still closed).
+  //   - "บิลที่ยกเลิก" = refund > 0  OR  promotionType contains "Refund"/"Void"
+  //   - All summary numbers (ยอดขายสุทธิ / VAT / ส่วนลด) sum ACROSS every
+  //     imported bill (no filter — even cancelled bills have their grandTotal=0
+  //     included as zero so it doesn't change totals).
+  const cancelledFilter = {
+    OR: [
+      { refund: { gt: 0 } },
+      { promotionType: { contains: "Refund" } },
+      { promotionType: { contains: "Void" } },
+    ],
+  };
 
   const [
     stats,
-    cancelledStats,
+    cancelledCountVal,
     recentBatches,
     bills,
     totalBills,
@@ -67,12 +77,10 @@ export default async function PosSalesPage({
     prisma.posBill.aggregate({
       _count: { id: true },
       _sum: { grandTotal: true, totalDiscount: true, vatAmount: true },
-      where: activeWhere,
+      where,
     }),
-    prisma.posBill.aggregate({
-      _count: { id: true },
-      _sum: { totalDiscount: true, refund: true },
-      where: cancelledWhere,
+    prisma.posBill.count({
+      where: { AND: [where, cancelledFilter] },
     }),
     prisma.posImportBatch.findMany({
       orderBy: { createdAt: "desc" },
@@ -120,11 +128,11 @@ export default async function PosSalesPage({
         <Stat
           icon={Receipt}
           label="จำนวนบิล"
-          value={stats._count.id.toLocaleString("th-TH")}
+          value={(stats._count.id - cancelledCountVal).toLocaleString("th-TH")}
           sub={
-            cancelledStats._count.id > 0
-              ? `+ ${cancelledStats._count.id} ยกเลิก`
-              : "active เท่านั้น"
+            cancelledCountVal > 0
+              ? `+ ${cancelledCountVal} ยกเลิก (refund / void)`
+              : "ทั้งหมด"
           }
         />
         <Stat
@@ -136,10 +144,7 @@ export default async function PosSalesPage({
         <Stat
           icon={Tag}
           label="ส่วนลดรวม"
-          value={fmtTHB(
-            (stats._sum.totalDiscount ?? 0) +
-              (cancelledStats._sum.totalDiscount ?? 0)
-          )}
+          value={fmtTHB(stats._sum.totalDiscount ?? 0)}
         />
         <Stat
           icon={Percent}
