@@ -282,3 +282,119 @@ export async function deleteFixedCategory(id: number) {
 
   revalidatePath("/cost-setup");
 }
+
+// ───── EMPLOYEE CRUD ─────
+
+const addEmployeeSchema = z.object({
+  name: z.string().trim().min(1, "ต้องระบุชื่อพนักงาน").max(120),
+});
+
+export async function addEmployee(input: z.input<typeof addEmployeeSchema>) {
+  await requireAccess();
+  const data = addEmployeeSchema.parse(input);
+
+  // Reactivate inactive employee with same name if exists
+  const existing = await prisma.employee.findFirst({
+    where: { name: data.name },
+  });
+  if (existing) {
+    if (existing.active) {
+      throw new Error("มีพนักงานชื่อนี้อยู่แล้ว");
+    }
+    await prisma.employee.update({
+      where: { id: existing.id },
+      data: { active: true },
+    });
+  } else {
+    const last = await prisma.employee.findFirst({
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
+    await prisma.employee.create({
+      data: {
+        name: data.name,
+        sortOrder: (last?.sortOrder ?? 0) + 1,
+        active: true,
+      },
+    });
+  }
+
+  revalidatePath("/cost-setup");
+}
+
+export async function deleteEmployee(id: number) {
+  await requireAccess();
+
+  const usage = await prisma.employeePayroll.count({
+    where: { employeeId: id },
+  });
+  if (usage === 0) {
+    await prisma.employee.delete({ where: { id } });
+  } else {
+    await prisma.employee.update({
+      where: { id },
+      data: { active: false },
+    });
+  }
+
+  revalidatePath("/cost-setup");
+}
+
+// ───── SUPPLIER CRUD ─────
+
+const addSupplierSchema = z.object({
+  name: z.string().trim().min(1, "ต้องระบุชื่อ supplier").max(120),
+  category: z.enum(["FOOD", "BEVERAGE", "PACKAGING"]),
+});
+
+export async function addSupplier(input: z.input<typeof addSupplierSchema>) {
+  await requireAccess();
+  const data = addSupplierSchema.parse(input);
+
+  const existing = await prisma.supplier.findUnique({
+    where: { category_name: { category: data.category, name: data.name } },
+  });
+  if (existing) {
+    if (existing.active) {
+      throw new Error("มี supplier ชื่อนี้ในหมวดนี้อยู่แล้ว");
+    }
+    await prisma.supplier.update({
+      where: { id: existing.id },
+      data: { active: true },
+    });
+  } else {
+    const last = await prisma.supplier.findFirst({
+      where: { category: data.category },
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
+    await prisma.supplier.create({
+      data: {
+        name: data.name,
+        category: data.category,
+        sortOrder: (last?.sortOrder ?? 0) + 1,
+        active: true,
+      },
+    });
+  }
+
+  revalidatePath("/cost-setup");
+}
+
+export async function deleteSupplier(id: number) {
+  await requireAccess();
+
+  const usage = await prisma.supplierPurchase.count({
+    where: { supplierId: id },
+  });
+  if (usage === 0) {
+    await prisma.supplier.delete({ where: { id } });
+  } else {
+    await prisma.supplier.update({
+      where: { id },
+      data: { active: false },
+    });
+  }
+
+  revalidatePath("/cost-setup");
+}
