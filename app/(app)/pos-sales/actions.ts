@@ -174,3 +174,47 @@ function baseError(message: string): ImportResult {
     message,
   };
 }
+
+// ───── DELETE BATCH (password-gated) ─────
+
+export type DeleteBatchResult = {
+  ok: boolean;
+  message?: string;
+  deletedBills?: number;
+};
+
+/** Password for deleting POS import batches. Override via env DELETE_PASSWORD. */
+const DELETE_PASSWORD = process.env.DELETE_PASSWORD || "Owner123";
+
+export async function deletePosBatch(input: {
+  id: number;
+  password: string;
+}): Promise<DeleteBatchResult> {
+  const session = await auth();
+  if (!session) {
+    return { ok: false, message: "ต้อง login ก่อน" };
+  }
+  if (session.user.role !== "OWNER" && session.user.role !== "ACCOUNTANT") {
+    return { ok: false, message: "ไม่มีสิทธิ์ลบ" };
+  }
+  if (input.password !== DELETE_PASSWORD) {
+    return { ok: false, message: "รหัสผ่านไม่ถูกต้อง" };
+  }
+
+  const batch = await prisma.posImportBatch.findUnique({
+    where: { id: input.id },
+  });
+  if (!batch) {
+    return { ok: false, message: "ไม่พบ batch นี้" };
+  }
+
+  // Delete all bills linked to this batch, then the batch itself
+  const result = await prisma.$transaction([
+    prisma.posBill.deleteMany({ where: { importBatchId: input.id } }),
+    prisma.posImportBatch.delete({ where: { id: input.id } }),
+  ]);
+
+  revalidatePath("/pos-sales");
+
+  return { ok: true, deletedBills: result[0].count };
+}

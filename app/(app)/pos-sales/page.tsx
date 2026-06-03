@@ -11,6 +11,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { fmtTHB } from "@/lib/fiscal";
 import { UploadForm } from "./_components/upload-form";
+import { DeleteBatchButton } from "./_components/delete-batch-button";
 import { PageHeader } from "@/components/page-header";
 import type { LucideIcon } from "lucide-react";
 
@@ -89,6 +90,8 @@ export default async function PosSalesPage({
     session.user.role === "OWNER" ||
     session.user.role === "ACCOUNTANT" ||
     session.user.role === "STAFF";
+  const canDelete =
+    session.user.role === "OWNER" || session.user.role === "ACCOUNTANT";
 
   const totalPages = Math.max(1, Math.ceil(totalBills / PAGE_SIZE));
 
@@ -147,6 +150,7 @@ export default async function PosSalesPage({
                   <th className="px-4 py-2 font-medium text-right">เพิ่ม</th>
                   <th className="px-4 py-2 font-medium text-right">อัปเดต</th>
                   <th className="px-4 py-2 font-medium text-right">Error</th>
+                  {canDelete && <th className="px-4 py-2 w-10"></th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline-soft">
@@ -173,6 +177,15 @@ export default async function PosSalesPage({
                     <td className="px-4 py-2 text-right tabular-nums text-red-700">
                       {b.rowsErrored || "-"}
                     </td>
+                    {canDelete && (
+                      <td className="px-4 py-2 text-center">
+                        <DeleteBatchButton
+                          batchId={b.id}
+                          fileName={b.fileName}
+                          rowCount={b.rowsInserted + b.rowsUpdated}
+                        />
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
