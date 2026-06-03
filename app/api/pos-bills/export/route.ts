@@ -16,14 +16,14 @@ export async function GET(req: Request) {
   const payment = url.searchParams.get("payment") ?? undefined;
 
   const where: {
-    paymentDate?: { gte?: string; lte?: string };
+    businessDate?: { gte?: string; lte?: string };
     channel?: string;
     paymentType?: string;
   } = {};
   if (from || to) {
-    where.paymentDate = {};
-    if (from) where.paymentDate.gte = from;
-    if (to) where.paymentDate.lte = to;
+    where.businessDate = {};
+    if (from) where.businessDate.gte = from;
+    if (to) where.businessDate.lte = to;
   }
   if (channel) where.channel = channel;
   if (payment) where.paymentType = payment;

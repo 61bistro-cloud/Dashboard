@@ -4,7 +4,8 @@ import * as XLSX from "xlsx";
 export type ParsedBill = {
   id: string;
   paidAt: Date;
-  paymentDate: string; // YYYY-MM-DD
+  paymentDate: string; // YYYY-MM-DD — actual calendar payment date
+  businessDate: string; // YYYY-MM-DD — business day (cutoff 04:00)
   posId: string | null;
   invoiceNo: string | null;
 
@@ -132,6 +133,19 @@ function parseTimeOnto(d: Date, timeCell: unknown): Date {
 
 function toIsoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
+}
+
+/** Business day = calendar day of paidAt, EXCEPT if paid before 04:00 then
+ *  it counts as the previous day (matches Foodstory dashboard).
+ *  paidAt is stored as UTC encoding Thai local time, so getUTCHours()
+ *  returns the actual Thai hour.
+ */
+function toBusinessDate(d: Date): string {
+  if (d.getUTCHours() < 4) {
+    const shifted = new Date(d.getTime() - 24 * 60 * 60 * 1000);
+    return toIsoDate(shifted);
+  }
+  return toIsoDate(d);
 }
 
 /** Exact header → field key map. NO substring fallback — Foodstory headers like
@@ -317,6 +331,7 @@ export function parseFoodstoryBuffer(buf: ArrayBuffer): ParseResult {
       id,
       paidAt,
       paymentDate: toIsoDate(paidAt),
+      businessDate: toBusinessDate(paidAt),
       posId: str(get("posId")),
       invoiceNo: str(get("invoiceNo")),
       grossAmount: num(get("grossAmount")),

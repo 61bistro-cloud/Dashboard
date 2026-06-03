@@ -88,10 +88,10 @@ export async function getYearlyPL(yearBE: number): Promise<{
   const lastMonth = year.months[11];
   const yearEnd = `${lastMonth.calendarYear}-${String(lastMonth.calendarMonth).padStart(2, "0")}-${String(lastMonth.daysInMonth).padStart(2, "0")}`;
 
-  // Batch query: aggregate POS sales by paymentDate for the whole year
+  // Batch query: aggregate POS sales by businessDate for the whole year
   const billRows = await prisma.posBill.groupBy({
-    by: ["paymentDate"],
-    where: { paymentDate: { gte: yearStart, lte: yearEnd } },
+    by: ["businessDate"],
+    where: { businessDate: { gte: yearStart, lte: yearEnd } },
     _sum: { netAmount: true },
     _count: { id: true },
   });
@@ -102,8 +102,8 @@ export async function getYearlyPL(yearBE: number): Promise<{
     posByMonth.set(m.id, { net: 0, count: 0 });
   }
   for (const row of billRows) {
-    // row.paymentDate is "YYYY-MM-DD"
-    const [yStr, mStr] = row.paymentDate.split("-");
+    // row.businessDate is "YYYY-MM-DD"
+    const [yStr, mStr] = row.businessDate.split("-");
     const calY = Number(yStr);
     const calM = Number(mStr);
     const month = year.months.find(
@@ -307,8 +307,8 @@ export async function getDailyPL(fiscalMonthId: number): Promise<{
 
   // Per-day POS aggregates
   const billRows = await prisma.posBill.groupBy({
-    by: ["paymentDate"],
-    where: { paymentDate: { gte: monthStart, lte: monthEnd } },
+    by: ["businessDate"],
+    where: { businessDate: { gte: monthStart, lte: monthEnd } },
     _sum: {
       netAmount: true,
       grossAmount: true,
@@ -317,7 +317,7 @@ export async function getDailyPL(fiscalMonthId: number): Promise<{
     },
     _count: { id: true },
   });
-  const byDate = new Map(billRows.map((r) => [r.paymentDate, r]));
+  const byDate = new Map(billRows.map((r) => [r.businessDate, r]));
 
   // Allocations: per-day = monthly total / daysInMonth
   const foodPerDay = monthTotals.cogs / days; // COGS distributed (per Excel)
@@ -450,15 +450,15 @@ export async function getDataQuality(yearBE: number): Promise<{
   const yearEnd = `${lastMonth.calendarYear}-${String(lastMonth.calendarMonth).padStart(2, "0")}-${String(lastMonth.daysInMonth).padStart(2, "0")}`;
 
   const distinctDates = await prisma.posBill.findMany({
-    where: { paymentDate: { gte: yearStart, lte: yearEnd } },
-    distinct: ["paymentDate"],
-    select: { paymentDate: true },
+    where: { businessDate: { gte: yearStart, lte: yearEnd } },
+    distinct: ["businessDate"],
+    select: { businessDate: true },
   });
 
   const daysByMonth = new Map<number, number>();
   for (const m of year.months) daysByMonth.set(m.id, 0);
   for (const d of distinctDates) {
-    const [yStr, mStr] = d.paymentDate.split("-");
+    const [yStr, mStr] = d.businessDate.split("-");
     const month = year.months.find(
       (m) => m.calendarYear === Number(yStr) && m.calendarMonth === Number(mStr)
     );

@@ -169,7 +169,7 @@ export async function getReconciliation(
 
   const [bills, bankTxs] = await Promise.all([
     prisma.posBill.findMany({
-      where: { paymentDate: { gte: monthStart, lte: monthEnd } },
+      where: { businessDate: { gte: monthStart, lte: monthEnd } },
       select: { netAmount: true, paymentType: true, channel: true },
     }),
     prisma.bankTransaction.findMany({

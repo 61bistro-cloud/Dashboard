@@ -175,9 +175,13 @@ model MonthlyRevenueOverride {
 model PosBill {
   id          String   @id // หมายเลขใบเสร็จ (Foodstory receipt ID)
   paidAt      DateTime // วันที่+เวลาที่ชำระเงิน
-  paymentDate String // "YYYY-MM-DD" สำหรับ group/dedupe
-  posId       String?
-  invoiceNo   String?
+  paymentDate String // "YYYY-MM-DD" — actual payment date (calendar)
+  /// "YYYY-MM-DD" — business day (cutoff 04:00). A bill paid 2026-05-01 02:30
+  /// counts as the 2026-04-30 business day. Use this for revenue grouping
+  /// to match Foodstory dashboard.
+  businessDate String @default("")
+  posId        String?
+  invoiceNo    String?
 
   // financials
   grossAmount     Float // ยอดก่อนลด
@@ -224,6 +228,7 @@ model PosBill {
   importBatch   PosImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
 
   @@index([paymentDate])
+  @@index([businessDate])
   @@index([paidAt])
   @@index([paymentType])
   @@index([channel])

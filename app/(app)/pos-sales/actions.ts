@@ -121,6 +121,7 @@ function upsertOp(r: ParsedBill, batchId: number) {
   const data = {
     paidAt: r.paidAt,
     paymentDate: r.paymentDate,
+    businessDate: r.businessDate,
     posId: r.posId,
     invoiceNo: r.invoiceNo,
     grossAmount: r.grossAmount,

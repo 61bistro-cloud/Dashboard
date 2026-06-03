@@ -38,14 +38,14 @@ export default async function PosSalesPage({
   const page = Math.max(1, Number(sp.page ?? "1"));
 
   const where: {
-    paymentDate?: { gte?: string; lte?: string };
+    businessDate?: { gte?: string; lte?: string };
     channel?: string;
     paymentType?: string;
   } = {};
   if (sp.from || sp.to) {
-    where.paymentDate = {};
-    if (sp.from) where.paymentDate.gte = sp.from;
-    if (sp.to) where.paymentDate.lte = sp.to;
+    where.businessDate = {};
+    if (sp.from) where.businessDate.gte = sp.from;
+    if (sp.to) where.businessDate.lte = sp.to;
   }
   if (sp.channel) where.channel = sp.channel;
   if (sp.payment) where.paymentType = sp.payment;
