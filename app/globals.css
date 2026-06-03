@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  /* ─── Typography ─── */
+  --font-sans:
+    var(--font-inter), var(--font-thai), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono:
+    ui-monospace, "Geist Mono", "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* ─── Mono chrome (Figma-style) ─── */
+  --color-ink: #000000;
+  --color-ink-2: #1f1d3d; /* navy used for dark blocks */
+  --color-canvas: #ffffff;
+  --color-surface: #f7f7f5; /* off-white tiles */
+  --color-hairline: #e6e6e6;
+  --color-hairline-soft: #f1f1f1;
+
+  /* Mid grays (rare — for muted captions only) */
+  --color-muted: #6b6b6b;
+  --color-muted-soft: #9a9a9a;
+
+  /* ─── Pastel story blocks ─── */
+  --color-lime: #dceeb1;
+  --color-lilac: #c5b0f4;
+  --color-cream: #f4ecd6;
+  --color-mint: #c8e6cd;
+  --color-pink: #efd4d4;
+  --color-coral: #f3c9b6;
+
+  /* ─── Semantic ─── */
+  --color-success: #1ea64a;
+  --color-danger: #d4382b;
+  --color-warning: #c08a18;
+  --color-accent: #ff3d8b; /* magenta — promo only */
+
+  /* ─── Spacing extensions ─── */
+  --spacing-section: 6rem; /* 96px between major sections */
+
+  /* ─── Radius ─── */
+  --radius-pill: 9999px;
+  --radius-block: 24px;
+  --radius-card: 16px;
+  --radius-input: 8px;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html,
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: 350;
+    font-feature-settings: "ss01", "cv11";
+  }
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-canvas);
+  }
+  /* Numeric tabular alignment for money */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  /* Tighten large headings — Figma editorial style */
+  h1 {
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    letter-spacing: -0.015em;
+  }
+}

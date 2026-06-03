@@ -1,0 +1,8 @@
+node_modules/
+.next/
+prisma/dev.db
+prisma/migrations/
+*.lockb
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
