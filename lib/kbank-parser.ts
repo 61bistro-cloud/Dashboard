@@ -75,15 +75,11 @@ export async function parseKbankPdf(
   buf: ArrayBuffer,
   password: string | undefined
 ): Promise<ParseResult> {
-  // Lazy-load pdfjs so that any module-load failure (worker, font, ESM
-  // resolution) is caught here instead of crashing the whole server action.
-  let pdfjs: typeof import("pdfjs-dist/legacy/build/pdf.mjs");
+  // unpdf wraps pdfjs-dist with the DOMMatrix/Path2D/ImageData polyfills that
+  // serverless Node lacks. API is otherwise identical to pdfjs's getDocument.
+  let getDocumentProxy: typeof import("unpdf").getDocumentProxy;
   try {
-    pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    // Force-disable workers in Node — serverless has no worker threads.
-    if (pdfjs.GlobalWorkerOptions) {
-      pdfjs.GlobalWorkerOptions.workerSrc = "";
-    }
+    ({ getDocumentProxy } = await import("unpdf"));
   } catch (e) {
     return {
       ok: false,
@@ -93,15 +89,14 @@ export async function parseKbankPdf(
     };
   }
 
-  let doc;
+  let doc: Awaited<ReturnType<typeof getDocumentProxy>>;
   try {
-    doc = await pdfjs.getDocument({
-      data: new Uint8Array(buf),
+    doc = await getDocumentProxy(new Uint8Array(buf), {
       password: password ?? "",
       useSystemFonts: true,
       disableFontFace: true,
       verbosity: 0,
-    }).promise;
+    } as Parameters<typeof getDocumentProxy>[1]);
   } catch (e) {
     const err = e as { name?: string; message?: string };
     if (err?.name === "PasswordException") {
