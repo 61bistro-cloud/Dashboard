@@ -77,7 +77,7 @@ export default async function SignInPage({
           </div>
 
           {error && (
-            <div className="rounded-input bg-pink/40 px-3.5 py-2.5 text-sm text-ink">
+            <div className="rounded-input bg-pink px-3.5 py-2.5 text-sm text-black">
               อีเมลหรือรหัสผ่านไม่ถูกต้อง
             </div>
           )}

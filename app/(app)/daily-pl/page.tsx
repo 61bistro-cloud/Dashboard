@@ -311,16 +311,24 @@ function SummaryCard({
     cream: "bg-cream",
     neutral: "bg-surface",
   }[finalTone];
+  // Pastel cards always use dark text (pastels stay light even in dark mode)
+  const onPastel = finalTone !== "neutral";
+  const txtMain = onPastel ? "text-black" : "text-ink";
+  const txtIcon = onPastel ? "text-black/70" : "text-muted";
+  const txtLabel = onPastel ? "text-black/65" : "text-muted";
+  const txtSub = onPastel ? "text-black/60" : "text-muted";
   return (
-    <div className={`rounded-card p-5 ${bg} text-ink`}>
-      <Icon className="h-5 w-5 text-ink/70" strokeWidth={1.6} />
-      <div className="mt-3 text-[11px] uppercase tracking-[0.06em] text-ink/65 font-medium">
+    <div className={`rounded-card p-5 ${bg} ${txtMain}`}>
+      <Icon className={`h-5 w-5 ${txtIcon}`} strokeWidth={1.6} />
+      <div
+        className={`mt-3 text-[11px] uppercase tracking-[0.06em] font-medium ${txtLabel}`}
+      >
         {label}
       </div>
       <div className="mt-1 text-[22px] font-semibold tabular-nums tracking-tight leading-none">
         {value}
       </div>
-      {sub && <div className="mt-2 text-xs text-ink/60">{sub}</div>}
+      {sub && <div className={`mt-2 text-xs ${txtSub}`}>{sub}</div>}
     </div>
   );
 }

@@ -8,11 +8,11 @@
   --font-mono:
     ui-monospace, "Geist Mono", "JetBrains Mono", "SF Mono", Menlo, monospace;
 
-  /* ─── Mono chrome (Figma-style) ─── */
+  /* ─── Mono chrome (Figma-style, light) ─── */
   --color-ink: #000000;
-  --color-ink-2: #1f1d3d; /* navy used for dark blocks */
+  --color-ink-2: #1f1d3d;
   --color-canvas: #ffffff;
-  --color-surface: #f7f7f5; /* off-white tiles */
+  --color-surface: #f7f7f5;
   --color-hairline: #e6e6e6;
   --color-hairline-soft: #f1f1f1;
 
@@ -20,7 +20,7 @@
   --color-muted: #6b6b6b;
   --color-muted-soft: #9a9a9a;
 
-  /* ─── Pastel story blocks ─── */
+  /* ─── Pastel story blocks (constant across themes) ─── */
   --color-lime: #dceeb1;
   --color-lilac: #c5b0f4;
   --color-cream: #f4ecd6;
@@ -32,16 +32,31 @@
   --color-success: #1ea64a;
   --color-danger: #d4382b;
   --color-warning: #c08a18;
-  --color-accent: #ff3d8b; /* magenta — promo only */
+  --color-accent: #ff3d8b;
+
+  /* Always-dark text (for use on pastel cards regardless of theme) */
+  --color-on-pastel: #000000;
 
   /* ─── Spacing extensions ─── */
-  --spacing-section: 6rem; /* 96px between major sections */
+  --spacing-section: 6rem;
 
   /* ─── Radius ─── */
   --radius-pill: 9999px;
   --radius-block: 24px;
   --radius-card: 16px;
   --radius-input: 8px;
+}
+
+/* ─── Dark theme: override tokens only — components auto-flip ─── */
+[data-theme="dark"] {
+  --color-ink: #f5f5f5;
+  --color-ink-2: #d4d4d4;
+  --color-canvas: #0a0a0a;
+  --color-surface: #161616;
+  --color-hairline: #2a2a2a;
+  --color-hairline-soft: #1f1f1f;
+  --color-muted: #a3a3a3;
+  --color-muted-soft: #737373;
 }
 
 @layer base {
@@ -61,16 +76,22 @@
     background: var(--color-ink);
     color: var(--color-canvas);
   }
-  /* Numeric tabular alignment for money */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
   }
-  /* Tighten large headings — Figma editorial style */
   h1 {
     letter-spacing: -0.02em;
   }
   h2 {
     letter-spacing: -0.015em;
+  }
+  /* Smooth theme transitions */
+  body,
+  body * {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
   }
 }
