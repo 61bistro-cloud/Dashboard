@@ -27,6 +27,7 @@ import { AccountTabs } from "./_components/account-tabs";
 import { AddTransactionForm } from "./_components/add-transaction-form";
 import { OpeningBalanceForm } from "./_components/opening-balance-form";
 import { DeleteButton } from "./_components/delete-button";
+import { StatementUpload } from "./_components/statement-upload";
 import { PageHeader } from "@/components/page-header";
 import { BankLogo } from "@/components/bank-logo";
 import { StatusDot } from "@/lib/icons";
@@ -333,6 +334,17 @@ export default async function BankPage({
             initial={selectedData.opening}
           />
         </header>
+
+        <StatementUpload
+          fiscalMonthId={currentMonth.id}
+          accountId={currentAccount.id}
+          accountName={currentAccount.name}
+          categories={categories.map((c) => ({
+            id: c.id,
+            name: c.name,
+            kind: c.kind,
+          }))}
+        />
 
         <AddTransactionForm
           fiscalMonthId={currentMonth.id}

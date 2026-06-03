@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { parseKbankPdf, suggestCategoryName } from "@/lib/kbank-parser";
 
 async function requireAccess() {
   const session = await auth();
@@ -99,4 +100,156 @@ export async function setOpeningBalance(input: z.input<typeof openingSchema>) {
     });
   }
   revalidatePath("/bank");
+}
+
+// ───── PDF STATEMENT IMPORT (KBANK) ─────
+
+export type PreviewTx = {
+  /** Index in the parse — used as React key + select identity */
+  idx: number;
+  date: string; // YYYY-MM-DD
+  description: string;
+  deposit: number;
+  withdraw: number;
+  balance: number | null;
+  channel: string | null;
+  suggestedCategoryId: number | null;
+  suggestedCategoryName: string | null;
+};
+
+export type ParseStatementResult = {
+  ok: boolean;
+  message?: string;
+  needPassword?: boolean;
+  wrongPassword?: boolean;
+  preview: PreviewTx[];
+  rawText?: string;
+};
+
+export async function parseStatementPdf(
+  formData: FormData
+): Promise<ParseStatementResult> {
+  await requireAccess();
+
+  const file = formData.get("file");
+  const password = String(formData.get("password") ?? "");
+
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, message: "กรุณาเลือกไฟล์ PDF ก่อน", preview: [] };
+  }
+  if (file.size > 20 * 1024 * 1024) {
+    return { ok: false, message: "ไฟล์ใหญ่เกิน 20MB", preview: [] };
+  }
+
+  let buf: ArrayBuffer;
+  try {
+    buf = await file.arrayBuffer();
+  } catch (e) {
+    return {
+      ok: false,
+      message: `อ่านไฟล์ไม่ได้: ${(e as Error).message}`,
+      preview: [],
+    };
+  }
+
+  const parsed = await parseKbankPdf(buf, password);
+
+  if (!parsed.ok) {
+    return {
+      ok: false,
+      message: parsed.message,
+      needPassword: parsed.password === "missing",
+      wrongPassword: parsed.password === "wrong",
+      preview: [],
+      rawText: parsed.rawText.join("\n\n"),
+    };
+  }
+
+  // Resolve suggested category name → id
+  const categories = await prisma.transactionCategory.findMany({
+    where: { active: true },
+    select: { id: true, name: true },
+  });
+  const byName = new Map(categories.map((c) => [c.name, c.id]));
+
+  const preview: PreviewTx[] = parsed.rows.map((r, idx) => {
+    const suggestedName = suggestCategoryName(
+      r.description,
+      r.deposit,
+      r.withdraw
+    );
+    return {
+      idx,
+      date: r.date,
+      description: r.description,
+      deposit: r.deposit,
+      withdraw: r.withdraw,
+      balance: r.balance,
+      channel: r.channel,
+      suggestedCategoryId: suggestedName
+        ? (byName.get(suggestedName) ?? null)
+        : null,
+      suggestedCategoryName: suggestedName,
+    };
+  });
+
+  return {
+    ok: true,
+    preview,
+    rawText: parsed.rawText.join("\n\n"),
+  };
+}
+
+const importStatementSchema = z.object({
+  fiscalMonthId: z.coerce.number().int().positive(),
+  accountId: z.coerce.number().int().positive(),
+  rows: z.array(
+    z.object({
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      description: z.string().min(1).max(300),
+      deposit: moneyField,
+      withdraw: moneyField,
+      channel: z.string().max(60).optional().default(""),
+      note: z.string().max(200).optional().default(""),
+      categoryId: z.union([z.string(), z.number(), z.null()]).transform((v) => {
+        if (v == null || v === "" || v === "0") return null;
+        return Number(v);
+      }),
+    })
+  ),
+});
+
+export type ImportStatementResult = {
+  ok: boolean;
+  inserted: number;
+  message?: string;
+};
+
+export async function importStatementRows(
+  input: z.input<typeof importStatementSchema>
+): Promise<ImportStatementResult> {
+  const session = await requireAccess();
+  const data = importStatementSchema.parse(input);
+
+  if (data.rows.length === 0) {
+    return { ok: false, inserted: 0, message: "ไม่มีรายการให้บันทึก" };
+  }
+
+  const result = await prisma.bankTransaction.createMany({
+    data: data.rows.map((r) => ({
+      fiscalMonthId: data.fiscalMonthId,
+      accountId: data.accountId,
+      categoryId: r.categoryId,
+      date: new Date(r.date + "T00:00:00Z"),
+      description: r.description,
+      deposit: r.deposit,
+      withdraw: r.withdraw,
+      channel: r.channel || null,
+      note: r.note || null,
+      createdById: session.user.id,
+    })),
+  });
+
+  revalidatePath("/bank");
+  return { ok: true, inserted: result.count };
 }
