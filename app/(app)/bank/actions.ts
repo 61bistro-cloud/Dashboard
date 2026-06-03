@@ -129,75 +129,86 @@ export type ParseStatementResult = {
 export async function parseStatementPdf(
   formData: FormData
 ): Promise<ParseStatementResult> {
-  await requireAccess();
-
-  const file = formData.get("file");
-  const password = String(formData.get("password") ?? "");
-
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "กรุณาเลือกไฟล์ PDF ก่อน", preview: [] };
-  }
-  if (file.size > 20 * 1024 * 1024) {
-    return { ok: false, message: "ไฟล์ใหญ่เกิน 20MB", preview: [] };
-  }
-
-  let buf: ArrayBuffer;
   try {
-    buf = await file.arrayBuffer();
-  } catch (e) {
-    return {
-      ok: false,
-      message: `อ่านไฟล์ไม่ได้: ${(e as Error).message}`,
-      preview: [],
-    };
-  }
+    await requireAccess();
 
-  const parsed = await parseKbankPdf(buf, password);
+    const file = formData.get("file");
+    const password = String(formData.get("password") ?? "");
 
-  if (!parsed.ok) {
+    if (!(file instanceof File) || file.size === 0) {
+      return { ok: false, message: "กรุณาเลือกไฟล์ PDF ก่อน", preview: [] };
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      return { ok: false, message: "ไฟล์ใหญ่เกิน 20MB", preview: [] };
+    }
+
+    let buf: ArrayBuffer;
+    try {
+      buf = await file.arrayBuffer();
+    } catch (e) {
+      return {
+        ok: false,
+        message: `อ่านไฟล์ไม่ได้: ${(e as Error).message}`,
+        preview: [],
+      };
+    }
+
+    const parsed = await parseKbankPdf(buf, password);
+
+    if (!parsed.ok) {
+      return {
+        ok: false,
+        message: parsed.message,
+        needPassword: parsed.password === "missing",
+        wrongPassword: parsed.password === "wrong",
+        preview: [],
+        rawText: parsed.rawText.join("\n\n"),
+      };
+    }
+
+    // Resolve suggested category name → id
+    const categories = await prisma.transactionCategory.findMany({
+      where: { active: true },
+      select: { id: true, name: true },
+    });
+    const byName = new Map(categories.map((c) => [c.name, c.id]));
+
+    const preview: PreviewTx[] = parsed.rows.map((r, idx) => {
+      const suggestedName = suggestCategoryName(
+        r.description,
+        r.deposit,
+        r.withdraw
+      );
+      return {
+        idx,
+        date: r.date,
+        description: r.description,
+        deposit: r.deposit,
+        withdraw: r.withdraw,
+        balance: r.balance,
+        channel: r.channel,
+        suggestedCategoryId: suggestedName
+          ? (byName.get(suggestedName) ?? null)
+          : null,
+        suggestedCategoryName: suggestedName,
+      };
+    });
+
     return {
-      ok: false,
-      message: parsed.message,
-      needPassword: parsed.password === "missing",
-      wrongPassword: parsed.password === "wrong",
-      preview: [],
+      ok: true,
+      preview,
       rawText: parsed.rawText.join("\n\n"),
     };
-  }
-
-  // Resolve suggested category name → id
-  const categories = await prisma.transactionCategory.findMany({
-    where: { active: true },
-    select: { id: true, name: true },
-  });
-  const byName = new Map(categories.map((c) => [c.name, c.id]));
-
-  const preview: PreviewTx[] = parsed.rows.map((r, idx) => {
-    const suggestedName = suggestCategoryName(
-      r.description,
-      r.deposit,
-      r.withdraw
-    );
+  } catch (e) {
+    // Log the real error to Vercel logs, but return a friendly string so the
+    // client never hits the generic "Server Components render" mask.
+    console.error("[parseStatementPdf] unexpected error:", e);
     return {
-      idx,
-      date: r.date,
-      description: r.description,
-      deposit: r.deposit,
-      withdraw: r.withdraw,
-      balance: r.balance,
-      channel: r.channel,
-      suggestedCategoryId: suggestedName
-        ? (byName.get(suggestedName) ?? null)
-        : null,
-      suggestedCategoryName: suggestedName,
+      ok: false,
+      message: `เกิดข้อผิดพลาดในการประมวลผล: ${(e as Error).message ?? String(e)}`,
+      preview: [],
     };
-  });
-
-  return {
-    ok: true,
-    preview,
-    rawText: parsed.rawText.join("\n\n"),
-  };
+  }
 }
 
 const importStatementSchema = z.object({

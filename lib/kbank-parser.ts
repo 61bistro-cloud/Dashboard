@@ -13,8 +13,9 @@
  * "raw" row so the user can verify or edit in the preview UI.
  */
 
-// pdfjs needs the legacy build for Node serverless environments
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+// pdfjs needs the legacy build for Node serverless environments.
+// We import it lazily inside parseKbankPdf so a module-load failure surfaces
+// as a normal error string instead of a Server Components render crash.
 
 export type ParsedTx = {
   /** Row date in YYYY-MM-DD (Thai BE years converted to CE) */
@@ -74,6 +75,24 @@ export async function parseKbankPdf(
   buf: ArrayBuffer,
   password: string | undefined
 ): Promise<ParseResult> {
+  // Lazy-load pdfjs so that any module-load failure (worker, font, ESM
+  // resolution) is caught here instead of crashing the whole server action.
+  let pdfjs: typeof import("pdfjs-dist/legacy/build/pdf.mjs");
+  try {
+    pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    // Force-disable workers in Node — serverless has no worker threads.
+    if (pdfjs.GlobalWorkerOptions) {
+      pdfjs.GlobalWorkerOptions.workerSrc = "";
+    }
+  } catch (e) {
+    return {
+      ok: false,
+      message: `โหลดตัวอ่าน PDF ไม่ได้: ${(e as Error).message}`,
+      rows: [],
+      rawText: [],
+    };
+  }
+
   let doc;
   try {
     doc = await pdfjs.getDocument({
@@ -81,6 +100,7 @@ export async function parseKbankPdf(
       password: password ?? "",
       useSystemFonts: true,
       disableFontFace: true,
+      verbosity: 0,
     }).promise;
   } catch (e) {
     const err = e as { name?: string; message?: string };
