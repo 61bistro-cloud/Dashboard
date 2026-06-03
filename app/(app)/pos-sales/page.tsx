@@ -50,8 +50,14 @@ export default async function PosSalesPage({
   if (sp.channel) where.channel = sp.channel;
   if (sp.payment) where.paymentType = sp.payment;
 
+  // Active bills = customer actually paid (matches Foodstory's "บิลที่ปิดไปแล้ว").
+  // Cancelled / voided bills have grandTotal == 0 (full discount or refund).
+  const activeWhere = { ...where, grandTotal: { gt: 0 } };
+  const cancelledWhere = { ...where, grandTotal: { lte: 0 } };
+
   const [
     stats,
+    cancelledStats,
     recentBatches,
     bills,
     totalBills,
@@ -60,8 +66,13 @@ export default async function PosSalesPage({
   ] = await Promise.all([
     prisma.posBill.aggregate({
       _count: { id: true },
-      _sum: { netAmount: true, totalDiscount: true, vatAmount: true },
-      where,
+      _sum: { grandTotal: true, totalDiscount: true, vatAmount: true },
+      where: activeWhere,
+    }),
+    prisma.posBill.aggregate({
+      _count: { id: true },
+      _sum: { totalDiscount: true, refund: true },
+      where: cancelledWhere,
     }),
     prisma.posImportBatch.findMany({
       orderBy: { createdAt: "desc" },
@@ -110,16 +121,25 @@ export default async function PosSalesPage({
           icon={Receipt}
           label="จำนวนบิล"
           value={stats._count.id.toLocaleString("th-TH")}
+          sub={
+            cancelledStats._count.id > 0
+              ? `+ ${cancelledStats._count.id} ยกเลิก`
+              : "active เท่านั้น"
+          }
         />
         <Stat
           icon={Wallet}
-          label="รวม Net"
-          value={fmtTHB(stats._sum.netAmount ?? 0)}
+          label="ยอดขายสุทธิ"
+          value={fmtTHB(stats._sum.grandTotal ?? 0)}
+          sub="ตรงกับ Foodstory dashboard"
         />
         <Stat
           icon={Tag}
           label="ส่วนลดรวม"
-          value={fmtTHB(stats._sum.totalDiscount ?? 0)}
+          value={fmtTHB(
+            (stats._sum.totalDiscount ?? 0) +
+              (cancelledStats._sum.totalDiscount ?? 0)
+          )}
         />
         <Stat
           icon={Percent}
@@ -477,16 +497,19 @@ function Stat({
   icon: Icon,
   label,
   value,
+  sub,
 }: {
   icon: LucideIcon;
   label: string;
   value: string;
+  sub?: string;
 }) {
   return (
     <div className="rounded-card border border-hairline bg-canvas p-4">
       <Icon className="h-5 w-5 text-muted-soft" strokeWidth={1.75} />
       <div className="mt-2 text-xs text-muted">{label}</div>
       <div className="mt-0.5 text-lg font-semibold tabular-nums">{value}</div>
+      {sub && <div className="mt-1 text-[11px] text-muted-soft">{sub}</div>}
     </div>
   );
 }
