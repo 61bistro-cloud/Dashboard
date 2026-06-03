@@ -237,8 +237,29 @@ export function parseFoodstoryBuffer(buf: ArrayBuffer): ParseResult {
   const paidTimeColIndex = headers.findIndex((h) =>
     h.includes("เวลาที่ชำระเงิน")
   );
+
+  // Canonical keys sorted by length DESC so longer/more specific names win first.
+  // Foodstory sometimes appends formula descriptions to headers like:
+  //   "รวมสุทธิ (ยอดก่อนภาษี + ภาษี + ยอดปัดเศษ) - ยอดขายสินค้าไม่มีภาษี"
+  // We match these via prefix lookup. Sorting by length avoids collisions where
+  // "ยอดสินค้ามีภาษี" / "ยอดก่อนภาษี" would otherwise be eclipsed by "ยอดรวม".
+  const SORTED_KEYS = Object.keys(HEADER_MAP).sort(
+    (a, b) => b.length - a.length
+  );
+
   for (let i = 0; i < headers.length; i++) {
-    const field = HEADER_MAP[headers[i]];
+    const h = headers[i];
+    // 1) Exact match first
+    let field = HEADER_MAP[h];
+    if (!field) {
+      // 2) Longest-prefix match — "ยอดรวม ยอดก่อนลด - ..." → "ยอดรวม"
+      for (const key of SORTED_KEYS) {
+        if (h === key || h.startsWith(key + " ") || h.startsWith(key + "(")) {
+          field = HEADER_MAP[key];
+          break;
+        }
+      }
+    }
     if (field) colToField.set(i, field);
   }
 

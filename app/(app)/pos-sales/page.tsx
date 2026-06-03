@@ -6,6 +6,7 @@ import {
   Tag,
   Percent,
   History,
+  FileSpreadsheet,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -200,59 +201,77 @@ export default async function PosSalesPage({
           <h2 className="text-sm font-semibold">
             บิลทั้งหมด ({totalBills.toLocaleString("th-TH")})
           </h2>
-          <form className="flex items-center gap-2 flex-wrap text-sm">
-            <input
-              type="date"
-              name="from"
-              defaultValue={sp.from}
-              className="rounded-input border border-hairline px-2 py-1"
-              aria-label="จากวันที่"
-            />
-            <span className="text-muted-soft">→</span>
-            <input
-              type="date"
-              name="to"
-              defaultValue={sp.to}
-              className="rounded-input border border-hairline px-2 py-1"
-              aria-label="ถึงวันที่"
-            />
-            <select
-              name="channel"
-              defaultValue={sp.channel ?? ""}
-              className="rounded-input border border-hairline px-2 py-1"
-              aria-label="ช่องทาง"
+          <div className="flex items-center gap-2 flex-wrap">
+            <form className="flex items-center gap-2 flex-wrap text-sm">
+              <input
+                type="date"
+                name="from"
+                defaultValue={sp.from}
+                className="rounded-input border border-hairline px-2 py-1"
+                aria-label="จากวันที่"
+              />
+              <span className="text-muted-soft">→</span>
+              <input
+                type="date"
+                name="to"
+                defaultValue={sp.to}
+                className="rounded-input border border-hairline px-2 py-1"
+                aria-label="ถึงวันที่"
+              />
+              <select
+                name="channel"
+                defaultValue={sp.channel ?? ""}
+                className="rounded-input border border-hairline px-2 py-1"
+                aria-label="ช่องทาง"
+              >
+                <option value="">ทุกช่องทาง</option>
+                {distinctChannels.map((c) =>
+                  c.channel ? (
+                    <option key={c.channel} value={c.channel}>
+                      {c.channel}
+                    </option>
+                  ) : null
+                )}
+              </select>
+              <select
+                name="payment"
+                defaultValue={sp.payment ?? ""}
+                className="rounded-input border border-hairline px-2 py-1"
+                aria-label="วิธีจ่าย"
+              >
+                <option value="">ทุกวิธีจ่าย</option>
+                {distinctPayments.map((c) =>
+                  c.paymentType ? (
+                    <option key={c.paymentType} value={c.paymentType}>
+                      {c.paymentType}
+                    </option>
+                  ) : null
+                )}
+              </select>
+              <button
+                type="submit"
+                className="rounded-input bg-ink px-3 py-1 text-white hover:bg-ink-2"
+              >
+                กรอง
+              </button>
+            </form>
+            <a
+              href={(() => {
+                const qs = new URLSearchParams();
+                if (sp.from) qs.set("from", sp.from);
+                if (sp.to) qs.set("to", sp.to);
+                if (sp.channel) qs.set("channel", sp.channel);
+                if (sp.payment) qs.set("payment", sp.payment);
+                const s = qs.toString();
+                return `/api/pos-bills/export${s ? `?${s}` : ""}`;
+              })()}
+              className="inline-flex items-center gap-1.5 rounded-pill bg-surface hover:bg-hairline px-3 py-1.5 text-xs font-medium text-ink transition-colors"
+              title="Export ทุกบิลที่ตรงกับ filter เป็น .xlsx"
             >
-              <option value="">ทุกช่องทาง</option>
-              {distinctChannels.map((c) =>
-                c.channel ? (
-                  <option key={c.channel} value={c.channel}>
-                    {c.channel}
-                  </option>
-                ) : null
-              )}
-            </select>
-            <select
-              name="payment"
-              defaultValue={sp.payment ?? ""}
-              className="rounded-input border border-hairline px-2 py-1"
-              aria-label="วิธีจ่าย"
-            >
-              <option value="">ทุกวิธีจ่าย</option>
-              {distinctPayments.map((c) =>
-                c.paymentType ? (
-                  <option key={c.paymentType} value={c.paymentType}>
-                    {c.paymentType}
-                  </option>
-                ) : null
-              )}
-            </select>
-            <button
-              type="submit"
-              className="rounded-input bg-ink px-3 py-1 text-white hover:bg-ink-2"
-            >
-              กรอง
-            </button>
-          </form>
+              <FileSpreadsheet className="h-3.5 w-3.5" strokeWidth={1.75} />
+              Export Excel
+            </a>
+          </div>
         </header>
 
         {bills.length === 0 ? (
@@ -261,55 +280,127 @@ export default async function PosSalesPage({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-max text-xs">
               <thead className="bg-surface text-left">
                 <tr>
-                  <th className="px-3 py-2 font-medium">วันที่</th>
-                  <th className="px-3 py-2 font-medium">เลขบิล</th>
-                  <th className="px-3 py-2 font-medium">ประเภท</th>
-                  <th className="px-3 py-2 font-medium">วิธีจ่าย</th>
-                  <th className="px-3 py-2 font-medium">ช่องทาง</th>
-                  <th className="px-3 py-2 font-medium">โต๊ะ</th>
-                  <th className="px-3 py-2 font-medium text-right">Gross</th>
-                  <th className="px-3 py-2 font-medium text-right">ส่วนลด</th>
-                  <th className="px-3 py-2 font-medium text-right">Net</th>
-                  <th className="px-3 py-2 font-medium text-right">VAT</th>
-                  <th className="px-3 py-2 font-medium text-right">รวมสุทธิ</th>
+                  <Th sticky>วันที่</Th>
+                  <Th>เวลา</Th>
+                  <Th sticky2>เลขบิล / ID</Th>
+                  <Th>POS ID</Th>
+                  <Th>INV. No</Th>
+                  <Th align="right">ยอดก่อนลด</Th>
+                  <Th align="right">ส่วนลดสินค้า</Th>
+                  <Th align="right">ส่วนลดบิล</Th>
+                  <Th align="right">ยอดรวม</Th>
+                  <Th align="right">ค่าบริการ</Th>
+                  <Th align="right">ภาษี</Th>
+                  <Th align="right">มูลค่า Voucher</Th>
+                  <Th align="right">ส่วนลด Voucher</Th>
+                  <Th align="right">ยอดปัดเศษ</Th>
+                  <Th align="right">ค่าจัดส่ง</Th>
+                  <Th align="right">รวมสุทธิ</Th>
+                  <Th align="right">ทิป</Th>
+                  <Th align="right">คืนเงิน</Th>
+                  <Th>ประเภทการสั่ง</Th>
+                  <Th>ประเภทการชำระ</Th>
+                  <Th>วิธีบันทึก</Th>
+                  <Th>ช่องทาง</Th>
+                  <Th>โต๊ะ</Th>
+                  <Th align="right">จำนวนลูกค้า</Th>
+                  <Th>ชื่อลูกค้า</Th>
+                  <Th>หมายเหตุ</Th>
+                  <Th>LINE MAN วันที่</Th>
+                  <Th align="right">LINE MAN ยอด</Th>
+                  <Th>โปรโมชั่น</Th>
+                  <Th>โค้ด</Th>
+                  <Th>เปิดบิล</Th>
+                  <Th>ปิดบิล</Th>
+                  <Th>สาขา</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline-soft">
-                {bills.map((b) => (
-                  <tr key={b.id} className="hover:bg-surface">
-                    <td className="px-3 py-1.5 text-muted whitespace-nowrap">
-                      {b.paidAt.toLocaleString("th-TH", {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      })}
-                    </td>
-                    <td className="px-3 py-1.5 font-mono text-xs">{b.id}</td>
-                    <td className="px-3 py-1.5">{b.orderType ?? "-"}</td>
-                    <td className="px-3 py-1.5">{b.paymentType ?? "-"}</td>
-                    <td className="px-3 py-1.5">{b.channel ?? "-"}</td>
-                    <td className="px-3 py-1.5 text-muted">
-                      {b.tableNo ?? "-"}
-                    </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">
-                      {fmtTHB(b.grossAmount)}
-                    </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums text-red-700">
-                      {b.totalDiscount > 0 ? fmtTHB(b.totalDiscount) : "-"}
-                    </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums font-medium">
-                      {fmtTHB(b.netAmount)}
-                    </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums text-muted">
-                      {fmtTHB(b.vatAmount)}
-                    </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">
-                      {fmtTHB(b.grandTotal)}
-                    </td>
-                  </tr>
-                ))}
+                {bills.map((b) => {
+                  const dateStr = b.paidAt.toLocaleDateString("th-TH", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  });
+                  const timeStr = b.paidAt.toLocaleTimeString("th-TH", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  return (
+                    <tr key={b.id} className="hover:bg-surface">
+                      <Td sticky muted>
+                        {dateStr}
+                      </Td>
+                      <Td muted>{timeStr}</Td>
+                      <Td sticky2 mono>
+                        {b.id}
+                      </Td>
+                      <Td muted>{b.posId ?? "-"}</Td>
+                      <Td muted>{b.invoiceNo ?? "-"}</Td>
+                      <Td num>{fmtTHB(b.grossAmount)}</Td>
+                      <Td num red>
+                        {b.itemDiscount > 0 ? fmtTHB(b.itemDiscount) : "-"}
+                      </Td>
+                      <Td num red>
+                        {b.billDiscount > 0 ? fmtTHB(b.billDiscount) : "-"}
+                      </Td>
+                      <Td num>{fmtTHB(b.totalAmount)}</Td>
+                      <Td num muted>
+                        {b.serviceCharge > 0 ? fmtTHB(b.serviceCharge) : "-"}
+                      </Td>
+                      <Td num muted>
+                        {fmtTHB(b.vatAmount)}
+                      </Td>
+                      <Td num muted>
+                        {b.voucherAmount > 0 ? fmtTHB(b.voucherAmount) : "-"}
+                      </Td>
+                      <Td num red>
+                        {b.voucherDiscount > 0
+                          ? fmtTHB(b.voucherDiscount)
+                          : "-"}
+                      </Td>
+                      <Td num muted>
+                        {b.roundingAmount !== 0
+                          ? fmtTHB(b.roundingAmount)
+                          : "-"}
+                      </Td>
+                      <Td num muted>
+                        {b.shippingFee > 0 ? fmtTHB(b.shippingFee) : "-"}
+                      </Td>
+                      <Td num bold>
+                        {fmtTHB(b.grandTotal)}
+                      </Td>
+                      <Td num muted>
+                        {b.tip > 0 ? fmtTHB(b.tip) : "-"}
+                      </Td>
+                      <Td num red>
+                        {b.refund > 0 ? fmtTHB(b.refund) : "-"}
+                      </Td>
+                      <Td>{b.orderType ?? "-"}</Td>
+                      <Td>{b.paymentType ?? "-"}</Td>
+                      <Td muted>{b.paymentMethod ?? "-"}</Td>
+                      <Td>{b.channel ?? "-"}</Td>
+                      <Td muted>{b.tableNo ?? "-"}</Td>
+                      <Td num muted>
+                        {b.customerCount ?? "-"}
+                      </Td>
+                      <Td muted>{b.customerName ?? "-"}</Td>
+                      <Td muted>{b.note ?? "-"}</Td>
+                      <Td muted>{b.lineManAdjustDate ?? "-"}</Td>
+                      <Td num muted>
+                        {b.lineManAdjustAmt ? fmtTHB(b.lineManAdjustAmt) : "-"}
+                      </Td>
+                      <Td muted>{b.promotionType ?? "-"}</Td>
+                      <Td muted>{b.promotionCode ?? "-"}</Td>
+                      <Td muted>{b.openedBy ?? "-"}</Td>
+                      <Td muted>{b.closedBy ?? "-"}</Td>
+                      <Td muted>{b.branch ?? "-"}</Td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -321,6 +412,65 @@ export default async function PosSalesPage({
       </section>
     </div>
   );
+}
+
+function Th({
+  children,
+  align = "left",
+  sticky,
+  sticky2,
+}: {
+  children: React.ReactNode;
+  align?: "left" | "right";
+  sticky?: boolean;
+  sticky2?: boolean;
+}) {
+  const stickyCls = sticky
+    ? "sticky left-0 z-10 bg-surface"
+    : sticky2
+      ? "sticky left-[80px] z-10 bg-surface"
+      : "";
+  return (
+    <th
+      className={`px-3 py-2 font-medium whitespace-nowrap ${align === "right" ? "text-right" : ""} ${stickyCls}`}
+    >
+      {children}
+    </th>
+  );
+}
+
+function Td({
+  children,
+  num,
+  red,
+  bold,
+  muted,
+  mono,
+  sticky,
+  sticky2,
+}: {
+  children: React.ReactNode;
+  num?: boolean;
+  red?: boolean;
+  bold?: boolean;
+  muted?: boolean;
+  mono?: boolean;
+  sticky?: boolean;
+  sticky2?: boolean;
+}) {
+  const cls = [
+    "px-3 py-1.5 whitespace-nowrap",
+    num && "text-right tabular-nums",
+    red && "text-red-700",
+    bold && "font-medium",
+    muted && "text-muted",
+    mono && "font-mono text-[11px]",
+    sticky && "sticky left-0 bg-canvas group-hover:bg-surface",
+    sticky2 && "sticky left-[80px] bg-canvas group-hover:bg-surface",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return <td className={cls}>{children}</td>;
 }
 
 function Stat({
