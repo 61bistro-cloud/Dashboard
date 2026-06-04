@@ -41,19 +41,36 @@ export type ParseResult = {
   rawText: string[];
 };
 
-/** Normalize various KBANK date formats into ISO YYYY-MM-DD. */
+/**
+ * Normalize various KBANK date formats into ISO YYYY-MM-DD.
+ *
+ * Handles all four common Thai bank/card date styles:
+ *   DD/MM/YY  with YY = CE last 2 digits  (e.g. credit card: "26/04/26" → 2026)
+ *   DD/MM/YY  with YY = BE last 2 digits  (e.g. savings:    "26/04/69" → 2026)
+ *   DD/MM/YYYY with full CE year (e.g. "26/04/2026")
+ *   DD/MM/YYYY with full BE year (e.g. "26/04/2569" → 2026)
+ *
+ * 2-digit-year heuristic: years 00–50 → 20YY (CE), 51–99 → 25YY (BE).
+ * This works because no statement in the wild has both YY=26 meaning 1926
+ * AND YY=26 meaning 2526 — banks emit one style or the other.
+ */
 function normalizeDate(s: string): string | null {
   const t = s.trim();
-  // DD-MM-YY (Thai BE) or DD-MM-YYYY
-  let m = t.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/);
+  const m = t.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/);
   if (!m) return null;
   const d = parseInt(m[1], 10);
   const mo = parseInt(m[2], 10);
   let y = parseInt(m[3], 10);
-  if (m[3].length === 2) y += 2500; // BE 2-digit → 25xx
-  if (y > 2400 && y < 2700) y -= 543; // BE → CE
-  if (y < 100) y += 2000; // 24 → 2024
+
+  if (m[3].length === 2) {
+    // 2-digit year: low range = CE, high range = BE last-two
+    y = y <= 50 ? y + 2000 : y + 2500;
+  }
+  // Full BE year → CE
+  if (y >= 2400 && y < 2700) y -= 543;
+
   if (d < 1 || d > 31 || mo < 1 || mo > 12) return null;
+  if (y < 1900 || y > 2200) return null;
   return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
