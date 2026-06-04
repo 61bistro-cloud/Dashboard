@@ -12,6 +12,8 @@ type EmpRow = {
   name: string;
   shortName: string | null;
   amount: number;
+  /** Per-month name override (null = use global name) */
+  nameOverride: string | null;
 };
 type ExtraRow = { type: keyof typeof PAYROLL_EXTRA_LABELS; amount: number };
 
@@ -76,7 +78,11 @@ export function PayrollSection({
       onSave={() =>
         savePayroll({
           fiscalMonthId,
-          payroll: emps.map((e) => ({ employeeId: e.id, amount: e.amount })),
+          payroll: emps.map((e) => ({
+            employeeId: e.id,
+            amount: e.amount,
+            nameOverride: e.nameOverride,
+          })),
           extras: exts.map((e) => ({ type: e.type, amount: e.amount })),
         })
       }
@@ -88,38 +94,67 @@ export function PayrollSection({
           <div></div>
         </div>
 
-        {emps.map((e, i) => (
-          <div
-            key={e.id}
-            className="group grid grid-cols-[1fr_180px_28px] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
-          >
-            <div className="text-sm">
-              <span className="text-muted-soft mr-2 tabular-nums">
-                {i + 1}.
-              </span>
-              {e.name}
-            </div>
-            <MoneyInput
-              ariaLabel={`เงินเดือน ${e.shortName ?? e.name}`}
-              value={e.amount}
-              onChange={(n) =>
-                setEmps((prev) =>
-                  prev.map((p) => (p.id === e.id ? { ...p, amount: n } : p))
-                )
-              }
-            />
-            <button
-              type="button"
-              onClick={() => handleDelete(e.id, e.name)}
-              disabled={pendingDelete}
-              className="text-muted-soft hover:text-red-600 opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-30 transition-opacity"
-              aria-label={`ลบพนักงาน ${e.name}`}
-              title={`ลบพนักงาน ${e.name}`}
+        {emps.map((e, i) => {
+          const displayName = e.nameOverride ?? e.name;
+          const hasOverride = e.nameOverride != null;
+          return (
+            <div
+              key={e.id}
+              className="group grid grid-cols-[1fr_180px_28px] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
             >
-              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-            </button>
-          </div>
-        ))}
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-soft tabular-nums">{i + 1}.</span>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(ev) => {
+                    const next = ev.target.value;
+                    setEmps((prev) =>
+                      prev.map((p) =>
+                        p.id === e.id
+                          ? {
+                              ...p,
+                              // Empty input → revert to global name on next save
+                              nameOverride: next === e.name ? null : next,
+                            }
+                          : p
+                      )
+                    );
+                  }}
+                  aria-label={`ชื่อพนักงาน ${e.shortName ?? e.name}`}
+                  className="flex-1 rounded-input border border-transparent bg-transparent px-1.5 py-0.5 text-sm hover:border-hairline focus:border-ink focus:bg-canvas focus:outline-none transition-colors"
+                />
+                {hasOverride && (
+                  <span
+                    className="text-xs text-amber-600 cursor-help"
+                    title="แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
+                  >
+                    เฉพาะเดือนนี้
+                  </span>
+                )}
+              </div>
+              <MoneyInput
+                ariaLabel={`เงินเดือน ${e.shortName ?? e.name}`}
+                value={e.amount}
+                onChange={(n) =>
+                  setEmps((prev) =>
+                    prev.map((p) => (p.id === e.id ? { ...p, amount: n } : p))
+                  )
+                }
+              />
+              <button
+                type="button"
+                onClick={() => handleDelete(e.id, displayName)}
+                disabled={pendingDelete}
+                className="text-muted-soft hover:text-red-600 opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-30 transition-opacity"
+                aria-label={`ลบพนักงาน ${displayName}`}
+                title={`ลบพนักงาน ${displayName}`}
+              >
+                <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+              </button>
+            </div>
+          );
+        })}
 
         {/* Add new employee */}
         {addMode ? (

@@ -79,6 +79,9 @@ model EmployeePayroll {
   employeeId    Int
   fiscalMonthId Int
   amount        Float
+  // Per-month override of the displayed name. Lets the user change shift /
+  // role for THIS month without affecting other months or the global Employee.
+  nameOverride  String?
 
   employee    Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   fiscalMonth FiscalMonth @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
@@ -129,6 +132,9 @@ model SupplierPurchase {
   supplierId    Int
   fiscalMonthId Int
   amount        Float
+  // Per-month override of the displayed supplier name. Same semantics as
+  // EmployeePayroll.nameOverride.
+  nameOverride  String?
 
   supplier    Supplier    @relation(fields: [supplierId], references: [id], onDelete: Cascade)
   fiscalMonth FiscalMonth @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)

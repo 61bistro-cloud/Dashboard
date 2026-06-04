@@ -93,11 +93,17 @@ export default async function CostSetupPage({
   const statementExpenses = await getStatementExpenses(currentMonth.id);
 
   const payrollByEmp = new Map(
-    payrollRows.map((p) => [p.employeeId, p.amount])
+    payrollRows.map((p) => [
+      p.employeeId,
+      { amount: p.amount, nameOverride: p.nameOverride },
+    ])
   );
   const extraByType = new Map(extras.map((e) => [e.type, e.amount]));
   const purchaseBySupplier = new Map(
-    purchases.map((p) => [p.supplierId, p.amount])
+    purchases.map((p) => [
+      p.supplierId,
+      { amount: p.amount, nameOverride: p.nameOverride },
+    ])
   );
   const fixedByCat = new Map(fixedCosts.map((f) => [f.categoryId, f.amount]));
 
@@ -130,12 +136,16 @@ export default async function CostSetupPage({
 
       <PayrollSection
         fiscalMonthId={currentMonth.id}
-        employees={employees.map((e) => ({
-          id: e.id,
-          name: e.name,
-          shortName: e.shortName,
-          amount: payrollByEmp.get(e.id) ?? 0,
-        }))}
+        employees={employees.map((e) => {
+          const row = payrollByEmp.get(e.id);
+          return {
+            id: e.id,
+            name: e.name,
+            shortName: e.shortName,
+            amount: row?.amount ?? 0,
+            nameOverride: row?.nameOverride ?? null,
+          };
+        })}
         extras={(["OT", "BONUS", "EXTRA", "SERVICE_CHARGE"] as const).map(
           (t) => ({ type: t, amount: extraByType.get(t) ?? 0 })
         )}
@@ -143,12 +153,16 @@ export default async function CostSetupPage({
 
       <SupplierSection
         fiscalMonthId={currentMonth.id}
-        suppliers={suppliers.map((s) => ({
-          id: s.id,
-          name: s.name,
-          category: s.category,
-          amount: purchaseBySupplier.get(s.id) ?? 0,
-        }))}
+        suppliers={suppliers.map((s) => {
+          const row = purchaseBySupplier.get(s.id);
+          return {
+            id: s.id,
+            name: s.name,
+            category: s.category,
+            amount: row?.amount ?? 0,
+            nameOverride: row?.nameOverride ?? null,
+          };
+        })}
       />
 
       <FixedCostSection

@@ -14,6 +14,8 @@ type SupRow = {
   name: string;
   category: Cat;
   amount: number;
+  /** Per-month name override (null = use global supplier name) */
+  nameOverride: string | null;
 };
 
 export function SupplierSection({
@@ -43,7 +45,11 @@ export function SupplierSection({
       onSave={() =>
         saveSuppliers({
           fiscalMonthId,
-          purchases: rows.map((r) => ({ supplierId: r.id, amount: r.amount })),
+          purchases: rows.map((r) => ({
+            supplierId: r.id,
+            amount: r.amount,
+            nameOverride: r.nameOverride,
+          })),
         })
       }
     >
@@ -66,6 +72,18 @@ export function SupplierSection({
                   prev.map((p) => (p.id === id ? { ...p, amount: n } : p))
                 )
               }
+              onNameChange={(id, name, globalName) =>
+                setRows((prev) =>
+                  prev.map((p) =>
+                    p.id === id
+                      ? {
+                          ...p,
+                          nameOverride: name === globalName ? null : name,
+                        }
+                      : p
+                  )
+                )
+              }
             />
           );
         })}
@@ -81,6 +99,7 @@ function CategoryGroup({
   rows,
   subtotal,
   onAmountChange,
+  onNameChange,
 }: {
   category: Cat;
   title: string;
@@ -88,6 +107,7 @@ function CategoryGroup({
   rows: SupRow[];
   subtotal: number;
   onAmountChange: (id: number, amount: number) => void;
+  onNameChange: (id: number, name: string, globalName: string) => void;
 }) {
   const [pendingDelete, startDelete] = useTransition();
   const [pendingAdd, startAdd] = useTransition();
@@ -135,34 +155,50 @@ function CategoryGroup({
         </div>
       </div>
       <div className="space-y-1">
-        {rows.map((r, i) => (
-          <div
-            key={r.id}
-            className="group grid grid-cols-[1fr_180px_28px] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
-          >
-            <div className="text-sm">
-              <span className="text-muted-soft mr-2 tabular-nums">
-                {i + 1}.
-              </span>
-              {r.name}
-            </div>
-            <MoneyInput
-              ariaLabel={r.name}
-              value={r.amount}
-              onChange={(n) => onAmountChange(r.id, n)}
-            />
-            <button
-              type="button"
-              onClick={() => handleDelete(r.id, r.name)}
-              disabled={pendingDelete}
-              className="text-muted-soft hover:text-red-600 opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-30 transition-opacity"
-              aria-label={`ลบ supplier ${r.name}`}
-              title={`ลบ supplier ${r.name}`}
+        {rows.map((r, i) => {
+          const displayName = r.nameOverride ?? r.name;
+          const hasOverride = r.nameOverride != null;
+          return (
+            <div
+              key={r.id}
+              className="group grid grid-cols-[1fr_180px_28px] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
             >
-              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-            </button>
-          </div>
-        ))}
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-soft tabular-nums">{i + 1}.</span>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(ev) => onNameChange(r.id, ev.target.value, r.name)}
+                  aria-label={`ชื่อ supplier ${r.name}`}
+                  className="flex-1 rounded-input border border-transparent bg-transparent px-1.5 py-0.5 text-sm hover:border-hairline focus:border-ink focus:bg-canvas focus:outline-none transition-colors"
+                />
+                {hasOverride && (
+                  <span
+                    className="text-xs text-amber-600 cursor-help"
+                    title="แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
+                  >
+                    เฉพาะเดือนนี้
+                  </span>
+                )}
+              </div>
+              <MoneyInput
+                ariaLabel={displayName}
+                value={r.amount}
+                onChange={(n) => onAmountChange(r.id, n)}
+              />
+              <button
+                type="button"
+                onClick={() => handleDelete(r.id, displayName)}
+                disabled={pendingDelete}
+                className="text-muted-soft hover:text-red-600 opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-30 transition-opacity"
+                aria-label={`ลบ supplier ${displayName}`}
+                title={`ลบ supplier ${displayName}`}
+              >
+                <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+              </button>
+            </div>
+          );
+        })}
 
         {addMode ? (
           <form

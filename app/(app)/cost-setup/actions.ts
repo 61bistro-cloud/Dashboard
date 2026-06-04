@@ -33,6 +33,8 @@ const savePayrollSchema = z.object({
     z.object({
       employeeId: z.coerce.number().int().positive(),
       amount: moneyField,
+      // Per-month custom name. Empty/null means "use the global Employee.name".
+      nameOverride: z.string().trim().max(200).optional().nullable(),
     })
   ),
   extras: z.array(
@@ -49,7 +51,11 @@ export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
 
   await prisma.$transaction(async (tx) => {
     for (const p of data.payroll) {
-      if (p.amount === 0) {
+      const override =
+        p.nameOverride && p.nameOverride.length > 0 ? p.nameOverride : null;
+      // Delete the row only when there's NOTHING worth saving — amount is 0
+      // AND there's no per-month name override the user wants to keep.
+      if (p.amount === 0 && override == null) {
         await tx.employeePayroll.deleteMany({
           where: {
             employeeId: p.employeeId,
@@ -64,11 +70,12 @@ export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
               fiscalMonthId: data.fiscalMonthId,
             },
           },
-          update: { amount: p.amount },
+          update: { amount: p.amount, nameOverride: override },
           create: {
             employeeId: p.employeeId,
             fiscalMonthId: data.fiscalMonthId,
             amount: p.amount,
+            nameOverride: override,
           },
         });
       }
@@ -108,6 +115,7 @@ const saveSuppliersSchema = z.object({
     z.object({
       supplierId: z.coerce.number().int().positive(),
       amount: moneyField,
+      nameOverride: z.string().trim().max(200).optional().nullable(),
     })
   ),
 });
@@ -119,8 +127,10 @@ export async function saveSuppliers(
   const data = saveSuppliersSchema.parse(input);
 
   await prisma.$transaction(
-    data.purchases.map((p) =>
-      p.amount === 0
+    data.purchases.map((p) => {
+      const override =
+        p.nameOverride && p.nameOverride.length > 0 ? p.nameOverride : null;
+      return p.amount === 0 && override == null
         ? prisma.supplierPurchase.deleteMany({
             where: {
               supplierId: p.supplierId,
@@ -134,14 +144,15 @@ export async function saveSuppliers(
                 fiscalMonthId: data.fiscalMonthId,
               },
             },
-            update: { amount: p.amount },
+            update: { amount: p.amount, nameOverride: override },
             create: {
               supplierId: p.supplierId,
               fiscalMonthId: data.fiscalMonthId,
               amount: p.amount,
+              nameOverride: override,
             },
-          })
-    )
+          });
+    })
   );
 
   revalidatePath("/cost-setup");
