@@ -75,6 +75,83 @@ export type CategorySummaryRow = {
   count: number;
 };
 
+/**
+ * Expense breakdown for the month — useful for cross-checking Cost Setup
+ * against actual bank/card statement spending. Returns per-category sums
+ * with the account type split so credit-card vs bank can be shown
+ * side-by-side without auto-mirroring into Cost Setup.
+ */
+export type StatementExpenseRow = {
+  categoryId: number | null;
+  name: string;
+  bankAmount: number; // sum from BANK accounts
+  cardAmount: number; // sum from CREDIT_CARD accounts
+  total: number;
+  count: number;
+};
+
+export type StatementExpenseSummary = {
+  rows: StatementExpenseRow[];
+  bankTotal: number;
+  cardTotal: number;
+  grandTotal: number;
+};
+
+export async function getStatementExpenses(
+  fiscalMonthId: number
+): Promise<StatementExpenseSummary> {
+  const txs = await prisma.bankTransaction.findMany({
+    where: {
+      fiscalMonthId,
+      withdraw: { gt: 0 }, // expenses only
+    },
+    include: {
+      category: { select: { id: true, name: true, kind: true } },
+      account: { select: { accountType: true } },
+    },
+  });
+
+  const map = new Map<string, StatementExpenseRow>();
+  let bankTotal = 0;
+  let cardTotal = 0;
+
+  for (const t of txs) {
+    // Skip transfers from the P&L picture (eg. credit-card payment from bank)
+    if (t.category?.kind === "TRANSFER") continue;
+
+    const key = t.categoryId == null ? "_uncat" : String(t.categoryId);
+    const isCard = t.account.accountType === "CREDIT_CARD";
+
+    if (isCard) cardTotal += t.withdraw;
+    else bankTotal += t.withdraw;
+
+    const existing = map.get(key);
+    if (existing) {
+      if (isCard) existing.cardAmount += t.withdraw;
+      else existing.bankAmount += t.withdraw;
+      existing.total += t.withdraw;
+      existing.count += 1;
+    } else {
+      map.set(key, {
+        categoryId: t.categoryId,
+        name: t.category?.name ?? "ไม่ระบุหมวด",
+        bankAmount: isCard ? 0 : t.withdraw,
+        cardAmount: isCard ? t.withdraw : 0,
+        total: t.withdraw,
+        count: 1,
+      });
+    }
+  }
+
+  const rows = Array.from(map.values()).sort((a, b) => b.total - a.total);
+  return {
+    rows,
+    bankTotal,
+    cardTotal,
+    grandTotal: bankTotal + cardTotal,
+  };
+}
+
 export async function getCategorySummary(
   fiscalMonthId: number,
   accountId?: number

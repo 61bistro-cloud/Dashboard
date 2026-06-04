@@ -9,6 +9,7 @@ const FALLBACK: Record<string, { letter: string; bg: string; text: string }> = {
   KBANK: { letter: "ก", bg: "bg-emerald-500", text: "text-canvas" },
   SCB: { letter: "S", bg: "bg-purple-700", text: "text-canvas" },
   CASH: { letter: "฿", bg: "bg-surface", text: "text-ink" },
+  KBANK_CREDIT: { letter: "💳", bg: "bg-amber-100", text: "text-amber-900" },
 };
 
 /** Returns the first existing logo file for this bank code, or null. */

@@ -366,9 +366,34 @@ async function seedHistoricalData(employeeIds: number[]) {
 }
 
 const BANK_ACCOUNTS = [
-  { code: "KBANK", name: "ธนาคารกสิกรไทย", icon: "🟢", color: "emerald" },
-  { code: "SCB", name: "ไทยพาณิชย์", icon: "🟣", color: "purple" },
-  { code: "CASH", name: "เงินสด", icon: "💵", color: "slate" },
+  {
+    code: "KBANK",
+    name: "ธนาคารกสิกรไทย",
+    icon: "🟢",
+    color: "emerald",
+    accountType: "BANK",
+  },
+  {
+    code: "SCB",
+    name: "ไทยพาณิชย์",
+    icon: "🟣",
+    color: "purple",
+    accountType: "BANK",
+  },
+  {
+    code: "CASH",
+    name: "เงินสด",
+    icon: "💵",
+    color: "slate",
+    accountType: "BANK",
+  },
+  {
+    code: "KBANK_CREDIT",
+    name: "KBANK Master Card",
+    icon: "💳",
+    color: "amber",
+    accountType: "CREDIT_CARD",
+  },
 ];
 
 const TX_CATEGORIES: Array<{
@@ -418,7 +443,13 @@ async function seedBank() {
     const a = BANK_ACCOUNTS[i];
     await prisma.bankAccount.upsert({
       where: { code: a.code },
-      update: { name: a.name, icon: a.icon, color: a.color, sortOrder: i },
+      update: {
+        name: a.name,
+        icon: a.icon,
+        color: a.color,
+        accountType: a.accountType,
+        sortOrder: i,
+      },
       create: { ...a, sortOrder: i, active: true },
     });
   }

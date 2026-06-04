@@ -3,11 +3,13 @@ import { Settings } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentFiscalMonth } from "@/lib/fiscal";
+import { getStatementExpenses } from "@/lib/bank-calc";
 import { MonthPicker } from "./_components/month-picker";
 import { PayrollSection } from "./_components/payroll-section";
 import { SupplierSection } from "./_components/supplier-section";
 import { FixedCostSection } from "./_components/fixed-section";
 import { RevenueOverrideSection } from "./_components/override-section";
+import { StatementExpensesPanel } from "./_components/statement-expenses-panel";
 import { PageHeader } from "@/components/page-header";
 
 type SearchParams = Promise<{ month?: string }>;
@@ -88,6 +90,8 @@ export default async function CostSetupPage({
     }),
   ]);
 
+  const statementExpenses = await getStatementExpenses(currentMonth.id);
+
   const payrollByEmp = new Map(
     payrollRows.map((p) => [p.employeeId, p.amount])
   );
@@ -160,6 +164,11 @@ export default async function CostSetupPage({
         fiscalMonthId={currentMonth.id}
         amount={override?.amount ?? 0}
         note={override?.note ?? ""}
+      />
+
+      <StatementExpensesPanel
+        summary={statementExpenses}
+        manualFixed={Array.from(fixedByCat.values()).reduce((s, v) => s + v, 0)}
       />
     </div>
   );

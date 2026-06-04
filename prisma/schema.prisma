@@ -255,13 +255,16 @@ model PosImportBatch {
 // ───────── Bank & Reconciliation ─────────
 
 model BankAccount {
-  id        Int     @id @default(autoincrement())
-  code      String  @unique // "KBANK", "SCB", "CASH"
-  name      String
-  icon      String?
-  color     String?
-  sortOrder Int     @default(0)
-  active    Boolean @default(true)
+  id   Int    @id @default(autoincrement())
+  code String @unique // "KBANK", "SCB", "CASH", "KBANK_CREDIT"
+  name String
+  // "BANK" = checking/savings, "CREDIT_CARD" = card (closing balance shown as
+  // outstanding debt rather than asset).
+  accountType String  @default("BANK")
+  icon        String?
+  color       String?
+  sortOrder   Int     @default(0)
+  active      Boolean @default(true)
 
   openings     AccountOpening[]
   transactions BankTransaction[]

@@ -150,6 +150,9 @@ export default async function BankPage({
       {/* Account summary cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {allAccountData.map((a) => {
+          const isCard = a.account.accountType === "CREDIT_CARD";
+          // For credit cards: outstanding = -closing (positive number = debt)
+          const outstanding = isCard ? -a.closing : null;
           return (
             <div
               key={a.account.id}
@@ -167,20 +170,30 @@ export default async function BankPage({
                     name={a.account.name}
                     size={32}
                   />
-                  {a.account.name}
+                  <span>
+                    {a.account.name}
+                    {isCard && (
+                      <span className="ml-2 inline-flex items-center rounded-pill bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-900">
+                        บัตรเครดิต
+                      </span>
+                    )}
+                  </span>
                 </div>
                 <div className="text-xs text-muted">{a.txCount} รายการ</div>
               </div>
               <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
                 <div>
-                  <div className="text-muted">ยกมา</div>
+                  <div className="text-muted">
+                    {isCard ? "ยกมาค้างชำระ" : "ยกมา"}
+                  </div>
                   <div className="font-medium tabular-nums">
-                    {fmtTHB(a.opening)}
+                    {fmtTHB(isCard ? -a.opening : a.opening)}
                   </div>
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-emerald-600">
-                    <ArrowUpRight className="h-3 w-3" strokeWidth={2.5} /> IN
+                    <ArrowUpRight className="h-3 w-3" strokeWidth={2.5} />{" "}
+                    {isCard ? "ชำระคืน" : "IN"}
                   </div>
                   <div className="font-medium tabular-nums text-emerald-700">
                     {fmtTHB(a.inflow)}
@@ -188,7 +201,8 @@ export default async function BankPage({
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-red-600">
-                    <ArrowDownRight className="h-3 w-3" strokeWidth={2.5} /> OUT
+                    <ArrowDownRight className="h-3 w-3" strokeWidth={2.5} />{" "}
+                    {isCard ? "ใช้จ่าย" : "OUT"}
                   </div>
                   <div className="font-medium tabular-nums text-red-700">
                     {fmtTHB(a.outflow)}
@@ -196,14 +210,22 @@ export default async function BankPage({
                 </div>
               </div>
               <div className="mt-2 pt-2 border-t border-hairline flex items-center justify-between">
-                <div className="text-xs text-muted">คงเหลือ</div>
+                <div className="text-xs text-muted">
+                  {isCard ? "ยอดค้างชำระ" : "คงเหลือ"}
+                </div>
                 <div
                   className={
                     "text-lg font-semibold tabular-nums " +
-                    (a.closing < 0 ? "text-red-700" : "")
+                    (isCard
+                      ? (outstanding ?? 0) > 0
+                        ? "text-amber-700"
+                        : "text-emerald-700"
+                      : a.closing < 0
+                        ? "text-red-700"
+                        : "")
                   }
                 >
-                  {fmtTHB(a.closing)}
+                  {fmtTHB(isCard ? (outstanding ?? 0) : a.closing)}
                 </div>
               </div>
             </div>
@@ -312,20 +334,42 @@ export default async function BankPage({
       <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
         <header className="border-b border-hairline-soft px-5 py-3 flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h2 className="text-sm font-semibold">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
               {currentAccount.name} — {currentMonth.fullLabel}
+              {currentAccount.accountType === "CREDIT_CARD" && (
+                <span className="inline-flex items-center rounded-pill bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-900">
+                  บัตรเครดิต
+                </span>
+              )}
             </h2>
             <p className="text-xs text-muted mt-0.5">
-              ยกมา {fmtTHB(selectedData.opening)} • {selectedData.txCount}{" "}
-              รายการ • คงเหลือ{" "}
-              <span
-                className={
-                  "font-medium " +
-                  (selectedData.closing < 0 ? "text-red-700" : "")
-                }
-              >
-                {fmtTHB(selectedData.closing)}
-              </span>
+              {currentAccount.accountType === "CREDIT_CARD" ? (
+                <>
+                  ยกมาค้างชำระ {fmtTHB(-selectedData.opening)} •{" "}
+                  {selectedData.txCount} รายการ • ยอดค้างชำระ{" "}
+                  <span
+                    className={
+                      "font-medium " +
+                      (-selectedData.closing > 0 ? "text-amber-700" : "")
+                    }
+                  >
+                    {fmtTHB(-selectedData.closing)}
+                  </span>
+                </>
+              ) : (
+                <>
+                  ยกมา {fmtTHB(selectedData.opening)} • {selectedData.txCount}{" "}
+                  รายการ • คงเหลือ{" "}
+                  <span
+                    className={
+                      "font-medium " +
+                      (selectedData.closing < 0 ? "text-red-700" : "")
+                    }
+                  >
+                    {fmtTHB(selectedData.closing)}
+                  </span>
+                </>
+              )}
             </p>
           </div>
           <OpeningBalanceForm
@@ -370,9 +414,21 @@ export default async function BankPage({
                 <tr>
                   <th className="px-3 py-2 font-medium">วันที่</th>
                   <th className="px-3 py-2 font-medium">รายการ</th>
-                  <th className="px-3 py-2 font-medium text-right">ฝาก</th>
-                  <th className="px-3 py-2 font-medium text-right">ถอน</th>
-                  <th className="px-3 py-2 font-medium text-right">คงเหลือ</th>
+                  <th className="px-3 py-2 font-medium text-right">
+                    {currentAccount.accountType === "CREDIT_CARD"
+                      ? "ชำระคืน"
+                      : "ฝาก"}
+                  </th>
+                  <th className="px-3 py-2 font-medium text-right">
+                    {currentAccount.accountType === "CREDIT_CARD"
+                      ? "ใช้จ่าย"
+                      : "ถอน"}
+                  </th>
+                  <th className="px-3 py-2 font-medium text-right">
+                    {currentAccount.accountType === "CREDIT_CARD"
+                      ? "ค้างชำระสะสม"
+                      : "คงเหลือ"}
+                  </th>
                   <th className="px-3 py-2 font-medium">ช่องทาง</th>
                   <th className="px-3 py-2 font-medium">หมวด</th>
                   <th className="px-3 py-2 font-medium"></th>
