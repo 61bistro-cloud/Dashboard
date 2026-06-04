@@ -18,7 +18,8 @@ model User {
   id           String   @id @default(cuid())
   email        String   @unique
   name         String?
-  passwordHash String
+  // Optional — Google-OAuth users have no password.
+  passwordHash String?
   role         Role     @default(STAFF)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
