@@ -111,7 +111,7 @@ export function StatementUpload({
         <summary className="cursor-pointer px-5 py-3 flex items-center justify-between hover:bg-surface">
           <div className="flex items-center gap-2 text-sm font-medium">
             <FileUp className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
-            นำเข้า PDF Statement (KBANK) — {accountName}
+            นำเข้า PDF Statement (KBANK / SCB) — {accountName}
           </div>
           <span className="text-xs text-muted group-open:hidden">เปิด ▾</span>
           <span className="text-xs text-muted hidden group-open:inline">

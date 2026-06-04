@@ -1,16 +1,18 @@
 /**
- * KBANK statement PDF parser.
+ * Bank statement PDF parser (KBANK + SCB).
  *
  * Approach:
- *   1. Use pdfjs-dist to open the (often password-protected) PDF and pull
- *      every text item with its (x, y) coordinates.
- *   2. Bucket items into rows by y-coordinate (same line).
- *   3. Inside each row, sort by x-coordinate to recover column order.
- *   4. Parse the row into a transaction if the leading cell looks like a date.
+ *   1. Use unpdf (pdfjs) to open the password-protected PDF and pull every
+ *      text item with its (x, y) coordinates.
+ *   2. Bucket items into rows by y-coordinate; sort each row's cells by x.
+ *   3. Detect the issuing bank from the page text.
+ *   4. Dispatch to a bank-specific row parser:
+ *      - KBANK: per-row, direction inferred from Thai/English keywords.
+ *      - SCB:   direction inferred from the running-balance delta (robust),
+ *               with DESC/NOTE descriptions stitched from adjacent lines.
  *
- * Tested against the standard KBANK Internet Banking statement layout. The
- * extractor is forgiving — anything that can't be parsed is returned as a
- * "raw" row so the user can verify or edit in the preview UI.
+ * Anything unparseable is simply skipped; the user verifies/edits the rest in
+ * the preview UI before importing.
  */
 
 // pdfjs needs the legacy build for Node serverless environments.
@@ -88,12 +90,27 @@ const NUMERIC_RE = /^-?\d{1,3}(,\d{3})*(\.\d+)?$/;
 /** Distance threshold (in PDF units) for considering two items the "same row" */
 const Y_TOL = 2.5;
 
-export async function parseKbankPdf(
+type Cell = { x: number; text: string };
+type Row = { cells: Cell[] };
+
+function isNumeric(s: string): boolean {
+  return NUMERIC_RE.test(s.trim());
+}
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+/**
+ * Open a (possibly password-protected) statement PDF and return its text
+ * laid out as rows of (x, text) cells, in reading order across all pages.
+ */
+async function extractRows(
   buf: ArrayBuffer,
   password: string | undefined
-): Promise<ParseResult> {
-  // unpdf wraps pdfjs-dist with the DOMMatrix/Path2D/ImageData polyfills that
-  // serverless Node lacks. API is otherwise identical to pdfjs's getDocument.
+): Promise<
+  | { ok: true; rows: Row[]; rawText: string[] }
+  | { ok: false; password?: "missing" | "wrong"; message: string }
+> {
   let getDocumentProxy: typeof import("unpdf").getDocumentProxy;
   try {
     ({ getDocumentProxy } = await import("unpdf"));
@@ -101,8 +118,6 @@ export async function parseKbankPdf(
     return {
       ok: false,
       message: `โหลดตัวอ่าน PDF ไม่ได้: ${(e as Error).message}`,
-      rows: [],
-      rawText: [],
     };
   }
 
@@ -123,67 +138,224 @@ export async function parseKbankPdf(
         password: need,
         message:
           need === "wrong"
-            ? "รหัสผ่านไม่ถูกต้อง — KBANK statement ใช้วันเกิด 8 หลัก (ddmmyyyy)"
+            ? "รหัสผ่านไม่ถูกต้อง — statement ใช้วันเกิด 8 หลัก (ddmmyyyy)"
             : "ไฟล์ PDF มีรหัสผ่าน กรุณาใส่รหัส",
-        rows: [],
-        rawText: [],
       };
     }
     return {
       ok: false,
       message: `อ่าน PDF ไม่ได้: ${err?.message ?? String(e)}`,
+    };
+  }
+
+  const rawText: string[] = [];
+  const rows: Row[] = [];
+
+  for (let p = 1; p <= doc.numPages; p++) {
+    const page = await doc.getPage(p);
+    const content = await page.getTextContent();
+    const items = content.items as Array<{ str: string; transform: number[] }>;
+
+    const tuples = items
+      .filter((it) => it.str.trim() !== "")
+      .map((it) => ({ x: it.transform[4], y: it.transform[5], text: it.str }));
+
+    const sortedForText = [...tuples].sort((a, b) => b.y - a.y || a.x - b.x);
+    rawText.push(sortedForText.map((t) => t.text).join(" "));
+
+    // Bucket by y → rows
+    const lines = new Map<number, typeof tuples>();
+    for (const t of tuples) {
+      const key = Math.round(t.y / Y_TOL) * Y_TOL;
+      const bucket = lines.get(key);
+      if (bucket) bucket.push(t);
+      else lines.set(key, [t]);
+    }
+
+    // Top-down, each row's cells left-to-right
+    const sortedKeys = [...lines.keys()].sort((a, b) => b - a);
+    for (const k of sortedKeys) {
+      const cells = lines
+        .get(k)!
+        .sort((a, b) => a.x - b.x)
+        .map((c) => ({ x: c.x, text: c.text }));
+      rows.push({ cells });
+    }
+  }
+
+  return { ok: true, rows, rawText };
+}
+
+/** Detect which bank issued the statement from its text. */
+function detectBank(rawText: string[]): "SCB" | "KBANK" {
+  const all = rawText.join(" ");
+  if (/ไทยพาณิชย์|SIAM COMMERCIAL/i.test(all)) return "SCB";
+  return "KBANK"; // default
+}
+
+/**
+ * Entry point — open the statement, detect the bank, and parse its rows.
+ * Kept the historical name `parseKbankPdf` for callers; now multi-bank.
+ */
+export async function parseKbankPdf(
+  buf: ArrayBuffer,
+  password: string | undefined
+): Promise<ParseResult> {
+  const ex = await extractRows(buf, password);
+  if (!ex.ok) {
+    return {
+      ok: false,
+      password: ex.password,
+      message: ex.message,
       rows: [],
       rawText: [],
     };
   }
 
-  const rawText: string[] = [];
-  const rows: ParsedTx[] = [];
+  const bank = detectBank(ex.rawText);
+  const rows =
+    bank === "SCB"
+      ? parseScbRows(ex.rows)
+      : ex.rows
+          .map((r) => parseRow(r.cells.map((c) => c.text)))
+          .filter((x): x is ParsedTx => x !== null);
 
-  for (let p = 1; p <= doc.numPages; p++) {
-    const page = await doc.getPage(p);
-    const content = await page.getTextContent();
-    const items = content.items as Array<{
-      str: string;
-      transform: number[];
-    }>;
+  return { ok: true, rows, rawText: ex.rawText };
+}
 
-    // Build (x, y, text) tuples; in PDF y grows upward.
-    const tuples = items
-      .filter((it) => it.str.trim() !== "")
-      .map((it) => ({
-        x: it.transform[4],
-        y: it.transform[5],
-        text: it.str,
-      }));
+/** Alias with a clearer name for new call sites. */
+export const parseBankStatement = parseKbankPdf;
 
-    // Page raw text — join in reading order (top-down, left-right)
-    const sortedForText = [...tuples].sort((a, b) => b.y - a.y || a.x - b.x);
-    rawText.push(sortedForText.map((t) => t.text).join(" "));
+// ─────────────────────── SCB savings-account parser ───────────────────────
 
-    // Bucket by y (rows)
-    const lines = new Map<number, typeof tuples>();
-    for (const t of tuples) {
-      // Snap y to nearest tolerance bucket
-      const key = Math.round(t.y / Y_TOL) * Y_TOL;
-      let bucket = lines.get(key);
-      if (!bucket) {
-        bucket = [];
-        lines.set(key, bucket);
-      }
-      bucket.push(t);
+// "01/04/26 05:11" — date + time in a single leading cell
+const SCB_DT_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+\d{1,2}:\d{2}/;
+
+/** Pull DESC:/NOTE: labelled text out of a set of cells (single row). */
+function splitDescNote(cells: Cell[]): { desc: string; note: string } {
+  let mode: "desc" | "note" | null = null;
+  const desc: string[] = [];
+  const note: string[] = [];
+  for (const c of cells.filter((c) => c.x >= 388).sort((a, b) => a.x - b.x)) {
+    const t = c.text.trim();
+    if (/^DESC\s*:?$/i.test(t)) {
+      mode = "desc";
+      continue;
     }
+    if (/^NOTE\s*:?$/i.test(t)) {
+      mode = "note";
+      continue;
+    }
+    if (!t || t === "-") continue;
+    if (mode === "note") note.push(t);
+    else if (mode === "desc") desc.push(t);
+  }
+  return { desc: desc.join(" "), note: note.join(" ") };
+}
 
-    // Sort each bucket by x; iterate from top of page downward
-    const sortedKeys = [...lines.keys()].sort((a, b) => b - a);
-    for (const k of sortedKeys) {
-      const cells = lines.get(k)!.sort((a, b) => a.x - b.x);
-      const parsed = parseRow(cells.map((c) => c.text));
-      if (parsed) rows.push(parsed);
+/** Collect only the text under a given label across several rows. */
+function labelledText(rows: Row[], want: "desc" | "note"): string {
+  let mode: "desc" | "note" | null = null;
+  const acc: string[] = [];
+  for (const r of rows) {
+    for (const c of r.cells
+      .filter((c) => c.x >= 388)
+      .sort((a, b) => a.x - b.x)) {
+      const t = c.text.trim();
+      if (/^DESC\s*:?$/i.test(t)) {
+        mode = "desc";
+        continue;
+      }
+      if (/^NOTE\s*:?$/i.test(t)) {
+        mode = "note";
+        continue;
+      }
+      if (!t || t === "-") continue;
+      if (mode === want) acc.push(t);
+    }
+  }
+  return acc.join(" ").replace(/\s+/g, " ").trim();
+}
+
+function parseScbRows(rows: Row[]): ParsedTx[] {
+  // Opening balance = "ยอดเงินคงเหลือยกมา (BALANCE BROUGHT FORWARD)"
+  let prevBalance: number | null = null;
+  for (const r of rows) {
+    const joined = r.cells.map((c) => c.text).join(" ");
+    if (/BALANCE BROUGHT FORWARD|ยอดเงินคงเหลือยกมา/i.test(joined)) {
+      const nums = r.cells.filter((c) => isNumeric(c.text));
+      if (nums.length) prevBalance = num(nums[nums.length - 1].text);
+      break;
     }
   }
 
-  return { ok: true, rows, rawText };
+  const isDateRow = (r: Row) =>
+    r.cells.some((c) => c.x < 70 && SCB_DT_RE.test(c.text.trim()));
+  const dateIdxs: number[] = [];
+  rows.forEach((r, i) => {
+    if (isDateRow(r)) dateIdxs.push(i);
+  });
+
+  const out: ParsedTx[] = [];
+  for (let j = 0; j < dateIdxs.length; j++) {
+    const di = dateIdxs[j];
+    const r = rows[di];
+
+    const dateCell = r.cells.find(
+      (c) => c.x < 70 && SCB_DT_RE.test(c.text.trim())
+    )!;
+    const m = dateCell.text.trim().match(SCB_DT_RE)!;
+    const date = normalizeDate(`${m[1]}/${m[2]}/${m[3]}`);
+    if (!date) continue;
+
+    // Numerics to the right of the code column = [amount, balance]
+    const nums = r.cells
+      .filter((c) => c.x > 150 && isNumeric(c.text))
+      .sort((a, b) => a.x - b.x);
+    const balance = nums.length ? num(nums[nums.length - 1].text) : null;
+    const printedAmount =
+      nums.length >= 2 ? num(nums[nums.length - 2].text) : 0;
+    const amountCell = nums.length >= 2 ? nums[nums.length - 2] : null;
+
+    let deposit = 0;
+    let withdraw = 0;
+    if (prevBalance !== null && balance !== null) {
+      // Running-balance delta is the most reliable direction signal
+      const delta = round2(balance - prevBalance);
+      if (delta >= 0) deposit = delta;
+      else withdraw = -delta;
+    } else if (amountCell) {
+      // Fallback: SCB prints debits in the left sub-column, credits on the right
+      if (amountCell.x < 240) withdraw = printedAmount;
+      else deposit = printedAmount;
+    }
+    if (balance !== null) prevBalance = balance;
+
+    // Channel code (MEWT / ENET / ATM …) sits just after the X1/X2 code
+    const chCell = r.cells.find(
+      (c) => c.x >= 108 && c.x < 185 && /[A-Za-z]/.test(c.text)
+    );
+    const channel = chCell ? chCell.text.trim() : null;
+
+    // Description: DESC on the same line + DESC that rendered just above this
+    // row (gap from the previous transaction); NOTE that rendered just below.
+    const gapAbove = rows.slice((dateIdxs[j - 1] ?? -1) + 1, di);
+    const gapBelow = rows.slice(di + 1, dateIdxs[j + 1] ?? rows.length);
+    const sameLine = splitDescNote(r.cells);
+    const descAbove = labelledText(gapAbove, "desc");
+    const noteBelow = labelledText(gapBelow, "note");
+
+    const descParts = [descAbove, sameLine.desc].filter(Boolean);
+    const noteParts = [sameLine.note, noteBelow].filter((s) => s && s !== "-");
+    let description = descParts.join(" ").replace(/\s+/g, " ").trim();
+    const note = noteParts.join(" ").replace(/\s+/g, " ").trim();
+    if (note) description = description ? `${description} — ${note}` : note;
+    if (!description) description = channel ?? "(ไม่มีรายละเอียด)";
+
+    out.push({ date, description, deposit, withdraw, balance, channel });
+  }
+
+  return out;
 }
 
 /**
@@ -316,7 +488,12 @@ export function suggestCategoryName(
   const isCredit = deposit > 0;
   const isDebit = withdraw > 0;
 
-  // Common KBANK patterns. Tune to match the seeded TransactionCategory names.
+  // SCB QR sales (แม่มณี / MaeManee) — money received via store QR = POS income
+  if (/maemanee|mae ?manee|แม่มณี/i.test(d) && isCredit) {
+    return "💳 Platform - EDC/MYQR";
+  }
+
+  // Common patterns. Tune to match the seeded TransactionCategory names.
   if (
     /makro|แม็คโคร|big ?c|lotus|โลตัส|ร้านอาหาร|วัตถุดิบ|seafood|ซีฟู้ด/i.test(
       d
