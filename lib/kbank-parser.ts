@@ -186,6 +186,45 @@ export async function parseKbankPdf(
   return { ok: true, rows, rawText };
 }
 
+/**
+ * Decide whether a transaction is money IN (deposit) or money OUT (withdraw)
+ * by reading Thai/English keywords in the description + channel text.
+ *
+ * Order matters: deposit patterns are checked first because "รับโอนเงิน"
+ * contains the substring "โอนเงิน" (which would otherwise match as withdraw).
+ */
+function classifyDirection(text: string): "deposit" | "withdraw" | "unknown" {
+  const t = text;
+
+  // ── DEPOSIT — money received ──
+  if (
+    /รับโอน|รับเงิน|รับเข้า|รับฝาก/i.test(t) || // KBANK savings
+    /ฝากเข้า|ฝากเงินสด|ฝากเช็ค|cdm/i.test(t) ||
+    /ดอกเบี้ย|\binterest\b/i.test(t) ||
+    /refund|reverse|cash ?back|chargeback/i.test(t) ||
+    /payment\s*-?\s*thank\s*you/i.test(t) || // KBANK CC: "PAYMENT - THANK YOU"
+    /รับเงินจากการขาย|รับโอนจากการขาย/i.test(t) ||
+    /credit\s+(adjustment|memo)/i.test(t)
+  ) {
+    return "deposit";
+  }
+
+  // ── WITHDRAW — money sent / paid ──
+  if (
+    /โอนเงิน|โอนไป|ส่งโอน|โอนออก/i.test(t) ||
+    /ชำระเงิน|ชำระค่า|ชำระบัตร|ชำระสินค้า/i.test(t) ||
+    /ถอนเงิน|ถอนสด|กดเงิน/i.test(t) ||
+    /หักค่า|หักบัญชี|หักบัตร/i.test(t) ||
+    /ค่าธรรมเนียม|ค่าบริการ/i.test(t) ||
+    /\batm\b|\bedc\b|\bpos\b/i.test(t) ||
+    /\bwithdraw|\bdebit|\bpurchase|\bcharge\b/i.test(t)
+  ) {
+    return "withdraw";
+  }
+
+  return "unknown";
+}
+
 /** Try to parse a single statement row. Returns null if it isn't a transaction. */
 function parseRow(cells: string[]): ParsedTx | null {
   if (cells.length < 2) return null;
@@ -195,35 +234,53 @@ function parseRow(cells: string[]): ParsedTx | null {
   if (!date) return null;
 
   // Collect numeric cells from the right side (deposit/withdraw/balance)
-  // Typical KBANK row tail: [..., deposit-or-blank, withdraw-or-blank, balance, channel]
   const numericIdx: number[] = [];
   for (let i = 0; i < cells.length; i++) {
     if (NUMERIC_RE.test(cells[i].trim())) numericIdx.push(i);
   }
   if (numericIdx.length === 0) return null;
 
-  // Heuristic: balance is the LAST numeric cell; the one(s) before are
-  // deposit/withdraw. Channel is anything after the last numeric.
+  // Balance is always the LAST numeric cell in KBANK statements.
   const lastNumIdx = numericIdx[numericIdx.length - 1];
   const balance = num(cells[lastNumIdx]);
 
+  // Everything between date and last-numeric describes the transaction.
+  // Use the full description + channel text for direction classification.
+  const firstNumIdx = numericIdx[0];
+  const directionText = [
+    ...cells.slice(1, firstNumIdx),
+    ...cells.slice(lastNumIdx + 1),
+  ].join(" ");
+  const direction = classifyDirection(directionText);
+
   let deposit = 0;
   let withdraw = 0;
-  // If there are 3+ numeric cells, the second-to-last is the active one
+
   if (numericIdx.length >= 2) {
-    const prev = num(cells[numericIdx[numericIdx.length - 2]]);
-    // Position heuristic: deposit usually appears in a slightly more-left column
-    // than withdraw, but absolute x isn't tracked here. Default to withdraw —
-    // user can flip in the preview if needed.
-    withdraw = prev;
+    // The cell just before balance is the active amount.
+    const amount = num(cells[numericIdx[numericIdx.length - 2]]);
+    if (direction === "deposit") {
+      deposit = amount;
+    } else {
+      // "withdraw" or "unknown" → default to withdraw (charges/fees are
+      // more common than receipts; user can flip in the preview).
+      withdraw = amount;
+    }
   }
-  // If there are 4+ numeric cells, both deposit and withdraw may be present
+  // If the row has BOTH a deposit and a withdraw column populated
+  // (rare but possible — e.g. fee + transfer in one entry), the cell
+  // two-before-balance is the other half.
   if (numericIdx.length >= 3) {
-    deposit = num(cells[numericIdx[numericIdx.length - 3]]);
+    const other = num(cells[numericIdx[numericIdx.length - 3]]);
+    if (direction === "deposit") {
+      withdraw = other;
+    } else {
+      deposit = other;
+    }
   }
 
-  // Description = text BETWEEN the date and the first numeric cell
-  const firstNumIdx = numericIdx[0];
+  // Description = text BETWEEN the date and the first numeric cell.
+  // (firstNumIdx was already computed above for direction classification.)
   const description = cells
     .slice(1, firstNumIdx)
     .join(" ")
