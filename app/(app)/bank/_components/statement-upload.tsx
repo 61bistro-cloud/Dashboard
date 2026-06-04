@@ -77,10 +77,10 @@ export function StatementUpload({
           accountId,
           rows: selectedRows.map((r) => ({
             date: r.date,
-            description: r.description.slice(0, 300) || "(ไม่มีรายละเอียด)",
+            description: r.description.slice(0, 1000) || "(ไม่มีรายละเอียด)",
             deposit: r.deposit,
             withdraw: r.withdraw,
-            channel: r.channel ?? "",
+            channel: (r.channel ?? "").slice(0, 500),
             note: "",
             categoryId: r.categoryId,
           })),

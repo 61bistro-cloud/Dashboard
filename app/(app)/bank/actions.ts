@@ -217,11 +217,13 @@ const importStatementSchema = z.object({
   rows: z.array(
     z.object({
       date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-      description: z.string().min(1).max(300),
+      // Real statement rows can be quite long once channel text is included —
+      // bumped to 1000 so we never reject a parsed row for length alone.
+      description: z.string().min(1).max(1000),
       deposit: moneyField,
       withdraw: moneyField,
-      channel: z.string().max(60).optional().default(""),
-      note: z.string().max(200).optional().default(""),
+      channel: z.string().max(500).optional().nullable().default(""),
+      note: z.string().max(500).optional().nullable().default(""),
       categoryId: z.union([z.string(), z.number(), z.null()]).transform((v) => {
         if (v == null || v === "" || v === "0") return null;
         return Number(v);
@@ -239,28 +241,54 @@ export type ImportStatementResult = {
 export async function importStatementRows(
   input: z.input<typeof importStatementSchema>
 ): Promise<ImportStatementResult> {
-  const session = await requireAccess();
-  const data = importStatementSchema.parse(input);
+  try {
+    const session = await requireAccess();
 
-  if (data.rows.length === 0) {
-    return { ok: false, inserted: 0, message: "ไม่มีรายการให้บันทึก" };
+    // safeParse instead of parse — we want the real Zod error message to
+    // surface to the client, not the generic Server Components mask.
+    const parsed = importStatementSchema.safeParse(input);
+    if (!parsed.success) {
+      console.error(
+        "[importStatementRows] validation failed:",
+        parsed.error.issues
+      );
+      const first = parsed.error.issues[0];
+      const path = first?.path?.join(".") || "input";
+      return {
+        ok: false,
+        inserted: 0,
+        message: `ข้อมูลบางช่องไม่ถูกต้อง (${path}): ${first?.message ?? "unknown"}`,
+      };
+    }
+    const data = parsed.data;
+
+    if (data.rows.length === 0) {
+      return { ok: false, inserted: 0, message: "ไม่มีรายการให้บันทึก" };
+    }
+
+    const result = await prisma.bankTransaction.createMany({
+      data: data.rows.map((r) => ({
+        fiscalMonthId: data.fiscalMonthId,
+        accountId: data.accountId,
+        categoryId: r.categoryId,
+        date: new Date(r.date + "T00:00:00Z"),
+        description: r.description,
+        deposit: r.deposit,
+        withdraw: r.withdraw,
+        channel: r.channel || null,
+        note: r.note || null,
+        createdById: session.user.id,
+      })),
+    });
+
+    revalidatePath("/bank");
+    return { ok: true, inserted: result.count };
+  } catch (e) {
+    console.error("[importStatementRows] unexpected error:", e);
+    return {
+      ok: false,
+      inserted: 0,
+      message: `บันทึกไม่สำเร็จ: ${(e as Error).message ?? String(e)}`,
+    };
   }
-
-  const result = await prisma.bankTransaction.createMany({
-    data: data.rows.map((r) => ({
-      fiscalMonthId: data.fiscalMonthId,
-      accountId: data.accountId,
-      categoryId: r.categoryId,
-      date: new Date(r.date + "T00:00:00Z"),
-      description: r.description,
-      deposit: r.deposit,
-      withdraw: r.withdraw,
-      channel: r.channel || null,
-      note: r.note || null,
-      createdById: session.user.id,
-    })),
-  });
-
-  revalidatePath("/bank");
-  return { ok: true, inserted: result.count };
 }
