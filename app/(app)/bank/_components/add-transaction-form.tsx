@@ -64,8 +64,8 @@ export function AddTransactionForm({
       }}
       className="border-b border-hairline-soft px-5 py-3 bg-surface/50"
     >
-      <div className="grid grid-cols-12 gap-2 items-end text-xs">
-        <Field label="วันที่" cols="col-span-2">
+      <div className="grid grid-cols-2 md:grid-cols-12 gap-2 items-end text-xs">
+        <Field label="วันที่" cols="col-span-2 md:col-span-2">
           <input
             type="date"
             value={date}
@@ -74,7 +74,7 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5"
           />
         </Field>
-        <Field label="รายการ" cols="col-span-3">
+        <Field label="รายการ" cols="col-span-2 md:col-span-3">
           <input
             type="text"
             value={desc}
@@ -84,7 +84,7 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5"
           />
         </Field>
-        <Field label="ฝาก" cols="col-span-1">
+        <Field label="ฝาก" cols="col-span-1 md:col-span-1">
           <input
             type="text"
             inputMode="decimal"
@@ -97,7 +97,7 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5 text-right tabular-nums"
           />
         </Field>
-        <Field label="ถอน" cols="col-span-1">
+        <Field label="ถอน" cols="col-span-1 md:col-span-1">
           <input
             type="text"
             inputMode="decimal"
@@ -110,7 +110,7 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5 text-right tabular-nums"
           />
         </Field>
-        <Field label="ช่องทาง" cols="col-span-2">
+        <Field label="ช่องทาง" cols="col-span-2 md:col-span-2">
           <input
             type="text"
             value={channel}
@@ -119,7 +119,7 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5"
           />
         </Field>
-        <Field label="หมวด" cols="col-span-2">
+        <Field label="หมวด" cols="col-span-2 md:col-span-2">
           <select
             value={catId}
             onChange={(e) => setCatId(e.target.value)}
@@ -155,11 +155,11 @@ export function AddTransactionForm({
             </optgroup>
           </select>
         </Field>
-        <div className="col-span-1">
+        <div className="col-span-2 md:col-span-1">
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex w-full items-center justify-center gap-1 rounded-input bg-ink px-3 py-1.5 text-white text-xs font-medium hover:bg-ink-2 disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center gap-1 rounded-input bg-ink px-3 py-2 md:py-1.5 text-white text-xs font-medium hover:bg-ink-2 disabled:opacity-50"
           >
             <Plus className="h-3 w-3" strokeWidth={2.5} />
             {pending ? "..." : "เพิ่ม"}

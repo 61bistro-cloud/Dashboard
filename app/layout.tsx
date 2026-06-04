@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 
@@ -20,6 +20,19 @@ export const metadata: Metadata = {
   title: "61 Bistro — ระบบบัญชี 2569",
   description:
     "ระบบบัญชี + P&L ของร้าน 61 Bistro — Dashboard, Daily/Monthly P&L, Cost Setup, POS Sales, Bank Reconciliation",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "61 Bistro" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Let content extend under the iPhone notch / home indicator; we pad with
+  // env(safe-area-inset-*) where needed.
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 // Runs before React hydrates → sets data-theme from localStorage or system preference.

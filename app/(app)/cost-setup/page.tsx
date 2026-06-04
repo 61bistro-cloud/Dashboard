@@ -129,7 +129,7 @@ export default async function CostSetupPage({
   const fixedByCat = new Map(fixedCosts.map((f) => [f.categoryId, f.amount]));
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       <PageHeader
         icon={Settings}
         title="Cost Setup"

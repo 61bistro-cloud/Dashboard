@@ -63,6 +63,8 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Stop iOS from auto-resizing text on orientation change */
+    -webkit-text-size-adjust: 100%;
   }
   html,
   body {
@@ -71,6 +73,21 @@
     font-family: var(--font-sans);
     font-weight: 350;
     font-feature-settings: "ss01", "cv11";
+    /* Stray-wide content (tables) scrolls inside its own container, never the page */
+    overflow-x: hidden;
+  }
+  /* iOS zooms the viewport when a focused input has font-size < 16px.
+     Keep form controls at 16px on phones to prevent the jarring zoom. */
+  @media (max-width: 767px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+  /* Momentum scrolling for horizontal table containers on touch devices */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
   }
   ::selection {
     background: var(--color-ink);
@@ -93,5 +110,18 @@
       background-color 150ms ease,
       border-color 150ms ease,
       color 150ms ease;
+  }
+}
+
+@layer utilities {
+  /* iPhone safe-area padding helpers */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pl-safe {
+    padding-left: env(safe-area-inset-left);
   }
 }

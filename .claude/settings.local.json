@@ -81,7 +81,8 @@
       "Bash(git rm *)",
       "Bash(node _check_dupes.js \"C:\\\\Users\\\\Sixty\\\\Downloads\\\\รายงานสรุปยอดขายแยกตามบิล \\(มย69\\).xlsx\")",
       "Bash(npx tsc *)",
-      "Bash(npm ls *)"
+      "Bash(npm ls *)",
+      "Bash(node /tmp/verify_mt.mjs)"
     ]
   }
 }

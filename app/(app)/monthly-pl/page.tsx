@@ -73,7 +73,7 @@ export default async function MonthlyPLPage({
   const { months, total } = data;
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
       <PageHeader
         icon={TrendingUp}
         title="Monthly P&L"
