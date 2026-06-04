@@ -22,7 +22,8 @@ export type BankMonthData = {
 
 export async function getBankMonth(
   fiscalMonthId: number,
-  accountId: number
+  accountId: number,
+  businessId: number
 ): Promise<BankMonthData> {
   const [opening, txs] = await Promise.all([
     prisma.accountOpening.findUnique({
@@ -31,7 +32,7 @@ export async function getBankMonth(
       },
     }),
     prisma.bankTransaction.findMany({
-      where: { fiscalMonthId, accountId },
+      where: { businessId, fiscalMonthId, accountId },
       include: { category: { select: { id: true, name: true } } },
       orderBy: [{ date: "asc" }, { id: "asc" }],
     }),
@@ -98,10 +99,12 @@ export type StatementExpenseSummary = {
 };
 
 export async function getStatementExpenses(
-  fiscalMonthId: number
+  fiscalMonthId: number,
+  businessId: number
 ): Promise<StatementExpenseSummary> {
   const txs = await prisma.bankTransaction.findMany({
     where: {
+      businessId,
       fiscalMonthId,
       withdraw: { gt: 0 }, // expenses only
     },
@@ -154,9 +157,15 @@ export async function getStatementExpenses(
 
 export async function getCategorySummary(
   fiscalMonthId: number,
+  businessId: number,
   accountId?: number
 ): Promise<CategorySummaryRow[]> {
-  const where: { fiscalMonthId: number; accountId?: number } = {
+  const where: {
+    businessId: number;
+    fiscalMonthId: number;
+    accountId?: number;
+  } = {
+    businessId,
     fiscalMonthId,
   };
   if (accountId != null) where.accountId = accountId;
@@ -234,7 +243,8 @@ const CHANNEL_LABELS: Record<string, { label: string }> = {
 };
 
 export async function getReconciliation(
-  fiscalMonthId: number
+  fiscalMonthId: number,
+  businessId: number
 ): Promise<ReconRow[]> {
   const month = await prisma.fiscalMonth.findUnique({
     where: { id: fiscalMonthId },
@@ -246,11 +256,11 @@ export async function getReconciliation(
 
   const [bills, bankTxs] = await Promise.all([
     prisma.posBill.findMany({
-      where: { businessDate: { gte: monthStart, lte: monthEnd } },
+      where: { businessId, businessDate: { gte: monthStart, lte: monthEnd } },
       select: { netAmount: true, paymentType: true, channel: true },
     }),
     prisma.bankTransaction.findMany({
-      where: { fiscalMonthId },
+      where: { businessId, fiscalMonthId },
       include: { category: { select: { posChannel: true } } },
     }),
   ]);

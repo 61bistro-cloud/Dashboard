@@ -2,7 +2,8 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { UserMenu } from "@/components/user-menu";
-import { UtensilsCrossed } from "lucide-react";
+import { BusinessSwitcher } from "@/components/business-switcher";
+import { getAccessibleBusinesses, getCurrentBusiness } from "@/lib/business";
 
 export default async function AppLayout({
   children,
@@ -12,19 +13,19 @@ export default async function AppLayout({
   const session = await auth();
   if (!session) redirect("/sign-in");
 
+  const [businesses, current] = await Promise.all([
+    getAccessibleBusinesses(),
+    getCurrentBusiness(),
+  ]);
+
   return (
     <div className="flex min-h-screen bg-canvas">
       <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-hairline bg-canvas">
-        <div className="px-5 py-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-card bg-ink text-canvas">
-            <UtensilsCrossed className="h-5 w-5" strokeWidth={1.75} />
-          </div>
-          <div>
-            <div className="text-[15px] font-semibold leading-tight tracking-tight">
-              61 Bistro
-            </div>
-            <div className="text-xs text-muted">ระบบบัญชี 2569</div>
-          </div>
+        <div className="px-4 py-5">
+          <BusinessSwitcher
+            businesses={businesses}
+            currentId={current?.id ?? 0}
+          />
         </div>
         <div className="flex-1 overflow-y-auto">
           <SidebarNav role={session.user.role} />

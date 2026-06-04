@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireBusiness } from "@/lib/business";
 
 async function requireAccess() {
   const session = await auth();
@@ -47,6 +48,7 @@ const savePayrollSchema = z.object({
 
 export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
   await requireAccess();
+  const biz = await requireBusiness();
   const data = savePayrollSchema.parse(input);
 
   await prisma.$transaction(async (tx) => {
@@ -58,6 +60,7 @@ export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
       if (p.amount === 0 && override == null) {
         await tx.employeePayroll.deleteMany({
           where: {
+            businessId: biz.id,
             employeeId: p.employeeId,
             fiscalMonthId: data.fiscalMonthId,
           },
@@ -72,6 +75,7 @@ export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
           },
           update: { amount: p.amount, nameOverride: override },
           create: {
+            businessId: biz.id,
             employeeId: p.employeeId,
             fiscalMonthId: data.fiscalMonthId,
             amount: p.amount,
@@ -83,18 +87,24 @@ export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
     for (const e of data.extras) {
       if (e.amount === 0) {
         await tx.payrollExtra.deleteMany({
-          where: { fiscalMonthId: data.fiscalMonthId, type: e.type },
+          where: {
+            businessId: biz.id,
+            fiscalMonthId: data.fiscalMonthId,
+            type: e.type,
+          },
         });
       } else {
         await tx.payrollExtra.upsert({
           where: {
-            fiscalMonthId_type: {
+            businessId_fiscalMonthId_type: {
+              businessId: biz.id,
               fiscalMonthId: data.fiscalMonthId,
               type: e.type,
             },
           },
           update: { amount: e.amount },
           create: {
+            businessId: biz.id,
             fiscalMonthId: data.fiscalMonthId,
             type: e.type,
             amount: e.amount,
@@ -124,6 +134,7 @@ export async function saveSuppliers(
   input: z.input<typeof saveSuppliersSchema>
 ) {
   await requireAccess();
+  const biz = await requireBusiness();
   const data = saveSuppliersSchema.parse(input);
 
   await prisma.$transaction(
@@ -133,6 +144,7 @@ export async function saveSuppliers(
       return p.amount === 0 && override == null
         ? prisma.supplierPurchase.deleteMany({
             where: {
+              businessId: biz.id,
               supplierId: p.supplierId,
               fiscalMonthId: data.fiscalMonthId,
             },
@@ -146,6 +158,7 @@ export async function saveSuppliers(
             },
             update: { amount: p.amount, nameOverride: override },
             create: {
+              businessId: biz.id,
               supplierId: p.supplierId,
               fiscalMonthId: data.fiscalMonthId,
               amount: p.amount,
@@ -172,6 +185,7 @@ const saveFixedSchema = z.object({
 
 export async function saveFixed(input: z.input<typeof saveFixedSchema>) {
   await requireAccess();
+  const biz = await requireBusiness();
   const data = saveFixedSchema.parse(input);
 
   await prisma.$transaction(
@@ -179,6 +193,7 @@ export async function saveFixed(input: z.input<typeof saveFixedSchema>) {
       c.amount === 0
         ? prisma.fixedCost.deleteMany({
             where: {
+              businessId: biz.id,
               categoryId: c.categoryId,
               fiscalMonthId: data.fiscalMonthId,
             },
@@ -192,6 +207,7 @@ export async function saveFixed(input: z.input<typeof saveFixedSchema>) {
             },
             update: { amount: c.amount },
             create: {
+              businessId: biz.id,
               categoryId: c.categoryId,
               fiscalMonthId: data.fiscalMonthId,
               amount: c.amount,
@@ -215,17 +231,24 @@ export async function saveRevenueOverride(
   input: z.input<typeof saveOverrideSchema>
 ) {
   await requireAccess();
+  const biz = await requireBusiness();
   const data = saveOverrideSchema.parse(input);
 
   if (data.amount === 0) {
     await prisma.monthlyRevenueOverride.deleteMany({
-      where: { fiscalMonthId: data.fiscalMonthId },
+      where: { businessId: biz.id, fiscalMonthId: data.fiscalMonthId },
     });
   } else {
     await prisma.monthlyRevenueOverride.upsert({
-      where: { fiscalMonthId: data.fiscalMonthId },
+      where: {
+        businessId_fiscalMonthId: {
+          businessId: biz.id,
+          fiscalMonthId: data.fiscalMonthId,
+        },
+      },
       update: { amount: data.amount, note: data.note || null },
       create: {
+        businessId: biz.id,
         fiscalMonthId: data.fiscalMonthId,
         amount: data.amount,
         note: data.note || null,
@@ -246,11 +269,12 @@ export async function addFixedCategory(
   input: z.input<typeof addFixedCategorySchema>
 ) {
   await requireAccess();
+  const biz = await requireBusiness();
   const data = addFixedCategorySchema.parse(input);
 
-  // Reactivate if a soft-deleted category with same name exists
+  // Reactivate if a soft-deleted category with same name exists in THIS business
   const existing = await prisma.fixedCostCategory.findUnique({
-    where: { name: data.name },
+    where: { businessId_name: { businessId: biz.id, name: data.name } },
   });
   if (existing) {
     if (existing.active) {
@@ -262,11 +286,13 @@ export async function addFixedCategory(
     });
   } else {
     const last = await prisma.fixedCostCategory.findFirst({
+      where: { businessId: biz.id },
       orderBy: { sortOrder: "desc" },
       select: { sortOrder: true },
     });
     await prisma.fixedCostCategory.create({
       data: {
+        businessId: biz.id,
         name: data.name,
         sortOrder: (last?.sortOrder ?? 0) + 1,
         active: true,
@@ -279,6 +305,14 @@ export async function addFixedCategory(
 
 export async function deleteFixedCategory(id: number) {
   await requireAccess();
+  const biz = await requireBusiness();
+
+  // Guard: the category must belong to the current business
+  const cat = await prisma.fixedCostCategory.findFirst({
+    where: { id, businessId: biz.id },
+    select: { id: true },
+  });
+  if (!cat) throw new Error("ไม่พบหมวดนี้ในธุรกิจปัจจุบัน");
 
   // Hard delete if no costs ever recorded; otherwise soft-delete (preserve history)
   const usage = await prisma.fixedCost.count({ where: { categoryId: id } });
@@ -302,11 +336,12 @@ const addEmployeeSchema = z.object({
 
 export async function addEmployee(input: z.input<typeof addEmployeeSchema>) {
   await requireAccess();
+  const biz = await requireBusiness();
   const data = addEmployeeSchema.parse(input);
 
-  // Reactivate inactive employee with same name if exists
+  // Reactivate inactive employee with same name if exists in THIS business
   const existing = await prisma.employee.findFirst({
-    where: { name: data.name },
+    where: { businessId: biz.id, name: data.name },
   });
   if (existing) {
     if (existing.active) {
@@ -318,11 +353,13 @@ export async function addEmployee(input: z.input<typeof addEmployeeSchema>) {
     });
   } else {
     const last = await prisma.employee.findFirst({
+      where: { businessId: biz.id },
       orderBy: { sortOrder: "desc" },
       select: { sortOrder: true },
     });
     await prisma.employee.create({
       data: {
+        businessId: biz.id,
         name: data.name,
         sortOrder: (last?.sortOrder ?? 0) + 1,
         active: true,
@@ -335,6 +372,13 @@ export async function addEmployee(input: z.input<typeof addEmployeeSchema>) {
 
 export async function deleteEmployee(id: number) {
   await requireAccess();
+  const biz = await requireBusiness();
+
+  const emp = await prisma.employee.findFirst({
+    where: { id, businessId: biz.id },
+    select: { id: true },
+  });
+  if (!emp) throw new Error("ไม่พบพนักงานในธุรกิจปัจจุบัน");
 
   const usage = await prisma.employeePayroll.count({
     where: { employeeId: id },
@@ -360,10 +404,17 @@ const addSupplierSchema = z.object({
 
 export async function addSupplier(input: z.input<typeof addSupplierSchema>) {
   await requireAccess();
+  const biz = await requireBusiness();
   const data = addSupplierSchema.parse(input);
 
   const existing = await prisma.supplier.findUnique({
-    where: { category_name: { category: data.category, name: data.name } },
+    where: {
+      businessId_category_name: {
+        businessId: biz.id,
+        category: data.category,
+        name: data.name,
+      },
+    },
   });
   if (existing) {
     if (existing.active) {
@@ -375,12 +426,13 @@ export async function addSupplier(input: z.input<typeof addSupplierSchema>) {
     });
   } else {
     const last = await prisma.supplier.findFirst({
-      where: { category: data.category },
+      where: { businessId: biz.id, category: data.category },
       orderBy: { sortOrder: "desc" },
       select: { sortOrder: true },
     });
     await prisma.supplier.create({
       data: {
+        businessId: biz.id,
         name: data.name,
         category: data.category,
         sortOrder: (last?.sortOrder ?? 0) + 1,
@@ -394,6 +446,13 @@ export async function addSupplier(input: z.input<typeof addSupplierSchema>) {
 
 export async function deleteSupplier(id: number) {
   await requireAccess();
+  const biz = await requireBusiness();
+
+  const sup = await prisma.supplier.findFirst({
+    where: { id, businessId: biz.id },
+    select: { id: true },
+  });
+  if (!sup) throw new Error("ไม่พบ supplier ในธุรกิจปัจจุบัน");
 
   const usage = await prisma.supplierPurchase.count({
     where: { supplierId: id },

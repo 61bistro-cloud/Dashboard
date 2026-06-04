@@ -3,6 +3,7 @@ import { TrendingUp, ChefHat, Users, Zap, Home, Percent } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { fmtTHB } from "@/lib/fiscal";
+import { getCurrentBusiness } from "@/lib/business";
 import {
   getYearlyPL,
   type MonthlyTotals,
@@ -28,6 +29,18 @@ export default async function MonthlyPLPage({
     redirect("/");
   }
 
+  const business = await getCurrentBusiness();
+  if (!business) {
+    return (
+      <div className="p-8">
+        <PageHeader icon={TrendingUp} title="Monthly P&L" />
+        <p className="mt-4 text-red-600">
+          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+        </p>
+      </div>
+    );
+  }
+
   const sp = await searchParams;
   const years = await prisma.fiscalYear.findMany({
     orderBy: { yearBE: "desc" },
@@ -47,7 +60,7 @@ export default async function MonthlyPLPage({
       ? years.find((y) => y.yearBE === requestedYearBE)
       : null) ?? years[0];
 
-  const data = await getYearlyPL(currentYear.yearBE);
+  const data = await getYearlyPL(currentYear.yearBE, business.id);
   if (!data) {
     return (
       <div className="p-8">

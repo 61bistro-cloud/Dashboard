@@ -14,6 +14,46 @@ enum Role {
   STAFF
 }
 
+// ───────── Multi-tenant: Business + per-user access ─────────
+
+model Business {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique // url/cookie-safe, e.g. "61-bistro"
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  users               UserBusiness[]
+  employees           Employee[]
+  suppliers           Supplier[]
+  fixedCostCategories FixedCostCategory[]
+  bankAccounts        BankAccount[]
+  txCategories        TransactionCategory[]
+  payrolls            EmployeePayroll[]
+  payrollExtras       PayrollExtra[]
+  purchases           SupplierPurchase[]
+  fixedCosts          FixedCost[]
+  revenueOverrides    MonthlyRevenueOverride[]
+  posBills            PosBill[]
+  posBatches          PosImportBatch[]
+  accountOpenings     AccountOpening[]
+  bankTransactions    BankTransaction[]
+}
+
+// Which businesses a non-OWNER user can access. OWNER sees all businesses
+// implicitly (no rows needed).
+model UserBusiness {
+  id         Int    @id @default(autoincrement())
+  userId     String
+  businessId Int
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, businessId])
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -26,9 +66,10 @@ model User {
 
   posBatches       PosImportBatch[]
   bankTransactions BankTransaction[]
+  businesses       UserBusiness[]
 }
 
-// ───────── Fiscal calendar (ปีงบ Apr-Mar) ─────────
+// ───────── Fiscal calendar (ปีงบ Apr-Mar) — SHARED across businesses ─────────
 
 model FiscalYear {
   id        Int           @id @default(autoincrement())
@@ -48,12 +89,12 @@ model FiscalMonth {
   fullLabel     String // "เมษายน 2569"
   daysInMonth   Int
 
-  year             FiscalYear              @relation(fields: [yearId], references: [id], onDelete: Cascade)
+  year             FiscalYear               @relation(fields: [yearId], references: [id], onDelete: Cascade)
   payrolls         EmployeePayroll[]
   payrollExtras    PayrollExtra[]
   purchases        SupplierPurchase[]
   fixedCosts       FixedCost[]
-  revenueOverride  MonthlyRevenueOverride?
+  revenueOverrides MonthlyRevenueOverride[]
   bankTransactions BankTransaction[]
   accountOpenings  AccountOpening[]
 
@@ -64,18 +105,23 @@ model FiscalMonth {
 // ───────── Payroll (พนักงาน + ค่าจ้างพิเศษ) ─────────
 
 model Employee {
-  id        Int     @id @default(autoincrement())
-  name      String // "Max (System Operator) 12:00-21:00"
-  shortName String? // "Max"
-  shift     String? // "12:00-21:00"
-  active    Boolean @default(true)
-  sortOrder Int     @default(0)
+  id         Int     @id @default(autoincrement())
+  businessId Int
+  name       String // "Max (System Operator) 12:00-21:00"
+  shortName  String? // "Max"
+  shift      String? // "12:00-21:00"
+  active     Boolean @default(true)
+  sortOrder  Int     @default(0)
 
+  business Business          @relation(fields: [businessId], references: [id])
   payrolls EmployeePayroll[]
+
+  @@index([businessId])
 }
 
 model EmployeePayroll {
   id            Int   @id @default(autoincrement())
+  businessId    Int
   employeeId    Int
   fiscalMonthId Int
   amount        Float
@@ -83,10 +129,12 @@ model EmployeePayroll {
   // role for THIS month without affecting other months or the global Employee.
   nameOverride  String?
 
+  business    Business    @relation(fields: [businessId], references: [id])
   employee    Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   fiscalMonth FiscalMonth @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
 
   @@unique([employeeId, fiscalMonthId])
+  @@index([businessId, fiscalMonthId])
 }
 
 enum PayrollExtraType {
@@ -98,13 +146,16 @@ enum PayrollExtraType {
 
 model PayrollExtra {
   id            Int              @id @default(autoincrement())
+  businessId    Int
   fiscalMonthId Int
   type          PayrollExtraType
   amount        Float
 
+  business    Business    @relation(fields: [businessId], references: [id])
   fiscalMonth FiscalMonth @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
 
-  @@unique([fiscalMonthId, type])
+  @@unique([businessId, fiscalMonthId, type])
+  @@index([businessId, fiscalMonthId])
 }
 
 // ───────── Suppliers (Food/Bev/Pack) ─────────
@@ -116,19 +167,23 @@ enum SupplierCategory {
 }
 
 model Supplier {
-  id        Int              @id @default(autoincrement())
-  name      String
-  category  SupplierCategory
-  sortOrder Int              @default(0)
-  active    Boolean          @default(true)
+  id         Int              @id @default(autoincrement())
+  businessId Int
+  name       String
+  category   SupplierCategory
+  sortOrder  Int              @default(0)
+  active     Boolean          @default(true)
 
+  business  Business           @relation(fields: [businessId], references: [id])
   purchases SupplierPurchase[]
 
-  @@unique([category, name])
+  @@unique([businessId, category, name])
+  @@index([businessId])
 }
 
 model SupplierPurchase {
   id            Int   @id @default(autoincrement())
+  businessId    Int
   supplierId    Int
   fiscalMonthId Int
   amount        Float
@@ -136,51 +191,66 @@ model SupplierPurchase {
   // EmployeePayroll.nameOverride.
   nameOverride  String?
 
+  business    Business    @relation(fields: [businessId], references: [id])
   supplier    Supplier    @relation(fields: [supplierId], references: [id], onDelete: Cascade)
   fiscalMonth FiscalMonth @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
 
   @@unique([supplierId, fiscalMonthId])
+  @@index([businessId, fiscalMonthId])
 }
 
 // ───────── Fixed Cost (เช่า/ไฟน้ำ/Sub/...) ─────────
 
 model FixedCostCategory {
-  id        Int     @id @default(autoincrement())
-  name      String  @unique
-  icon      String?
-  sortOrder Int     @default(0)
-  active    Boolean @default(true)
+  id         Int     @id @default(autoincrement())
+  businessId Int
+  name       String
+  icon       String?
+  sortOrder  Int     @default(0)
+  active     Boolean @default(true)
 
-  costs FixedCost[]
+  business Business    @relation(fields: [businessId], references: [id])
+  costs    FixedCost[]
+
+  @@unique([businessId, name])
+  @@index([businessId])
 }
 
 model FixedCost {
   id            Int   @id @default(autoincrement())
+  businessId    Int
   categoryId    Int
   fiscalMonthId Int
   amount        Float
 
+  business    Business          @relation(fields: [businessId], references: [id])
   category    FixedCostCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   fiscalMonth FiscalMonth       @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, fiscalMonthId])
+  @@index([businessId, fiscalMonthId])
 }
 
 // ───────── Revenue Override (เมื่อ POS ยังไม่ครบ) ─────────
 
 model MonthlyRevenueOverride {
   id            Int     @id @default(autoincrement())
-  fiscalMonthId Int     @unique
+  businessId    Int
+  fiscalMonthId Int
   amount        Float
   note          String?
 
+  business    Business    @relation(fields: [businessId], references: [id])
   fiscalMonth FiscalMonth @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, fiscalMonthId])
 }
 
 // ───────── POS Bills (จาก Foodstory) ─────────
 
 model PosBill {
-  id          String   @id // หมายเลขใบเสร็จ (Foodstory receipt ID)
+  id          String // หมายเลขใบเสร็จ (Foodstory receipt ID) — unique per business
+  businessId  Int
   paidAt      DateTime // วันที่+เวลาที่ชำระเงิน
   paymentDate String // "YYYY-MM-DD" — actual payment date (calendar)
   /// "YYYY-MM-DD" — business day (cutoff 04:00). A bill paid 2026-05-01 02:30
@@ -233,9 +303,13 @@ model PosBill {
   importedAt    DateTime        @default(now())
   importBatchId Int?
   importBatch   PosImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  business      Business        @relation(fields: [businessId], references: [id])
 
-  @@index([paymentDate])
-  @@index([businessDate])
+  // Composite PK: receipt id is only unique WITHIN a business — two Foodstory
+  // accounts can emit the same receipt number.
+  @@id([businessId, id])
+  @@index([businessId, businessDate])
+  @@index([businessId, paymentDate])
   @@index([paidAt])
   @@index([paymentType])
   @@index([channel])
@@ -243,6 +317,7 @@ model PosBill {
 
 model PosImportBatch {
   id           Int      @id @default(autoincrement())
+  businessId   Int
   fileName     String
   rowsTotal    Int      @default(0)
   rowsInserted Int      @default(0)
@@ -253,17 +328,21 @@ model PosImportBatch {
   createdAt    DateTime @default(now())
 
   uploadedById String
-  uploadedBy   User   @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  business     Business @relation(fields: [businessId], references: [id])
 
   bills PosBill[]
+
+  @@index([businessId])
 }
 
 // ───────── Bank & Reconciliation ─────────
 
 model BankAccount {
-  id   Int    @id @default(autoincrement())
-  code String @unique // "KBANK", "SCB", "CASH", "KBANK_CREDIT"
-  name String
+  id         Int    @id @default(autoincrement())
+  businessId Int
+  code       String // "KBANK", "SCB", "CASH", "KBANK_CREDIT" — unique per business
+  name       String
   // "BANK" = checking/savings, "CREDIT_CARD" = card (closing balance shown as
   // outstanding debt rather than asset).
   accountType String  @default("BANK")
@@ -272,20 +351,27 @@ model BankAccount {
   sortOrder   Int     @default(0)
   active      Boolean @default(true)
 
+  business     Business          @relation(fields: [businessId], references: [id])
   openings     AccountOpening[]
   transactions BankTransaction[]
+
+  @@unique([businessId, code])
+  @@index([businessId])
 }
 
 model AccountOpening {
   id            Int   @id @default(autoincrement())
+  businessId    Int
   accountId     Int
   fiscalMonthId Int
   amount        Float
 
+  business    Business    @relation(fields: [businessId], references: [id])
   account     BankAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
   fiscalMonth FiscalMonth @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
 
   @@unique([accountId, fiscalMonthId])
+  @@index([businessId, fiscalMonthId])
 }
 
 enum CategoryKind {
@@ -296,18 +382,24 @@ enum CategoryKind {
 
 model TransactionCategory {
   id         Int          @id @default(autoincrement())
-  name       String       @unique
+  businessId Int
+  name       String
   kind       CategoryKind
   sortOrder  Int          @default(0)
   active     Boolean      @default(true)
   // map to POS payment channel for reconciliation (e.g. "EDC" / "PROMPTPAY" / "CASH" / "GRAB" / "LINEMAN")
   posChannel String?
 
+  business     Business          @relation(fields: [businessId], references: [id])
   transactions BankTransaction[]
+
+  @@unique([businessId, name])
+  @@index([businessId])
 }
 
 model BankTransaction {
   id            Int  @id @default(autoincrement())
+  businessId    Int
   fiscalMonthId Int
   accountId     Int
   categoryId    Int?
@@ -322,11 +414,12 @@ model BankTransaction {
   createdAt   DateTime @default(now())
   createdById String?
 
+  business    Business             @relation(fields: [businessId], references: [id])
   account     BankAccount          @relation(fields: [accountId], references: [id], onDelete: Cascade)
   fiscalMonth FiscalMonth          @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
   category    TransactionCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   createdBy   User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
-  @@index([fiscalMonthId, accountId, date])
+  @@index([businessId, fiscalMonthId, accountId, date])
   @@index([categoryId])
 }

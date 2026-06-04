@@ -12,6 +12,7 @@ import {
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentFiscalMonth, fmtTHB } from "@/lib/fiscal";
+import { getCurrentBusiness } from "@/lib/business";
 import { getDailyPL } from "@/lib/pl-calc";
 import { MonthPicker } from "../cost-setup/_components/month-picker";
 import { PageHeader } from "@/components/page-header";
@@ -26,6 +27,18 @@ export default async function DailyPLPage({
 }) {
   const session = await auth();
   if (!session) redirect("/sign-in");
+
+  const business = await getCurrentBusiness();
+  if (!business) {
+    return (
+      <div className="p-8">
+        <PageHeader icon={Calendar} title="Daily P&L" />
+        <p className="mt-4 text-red-600">
+          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+        </p>
+      </div>
+    );
+  }
 
   const sp = await searchParams;
   const requested = sp.month ? Number(sp.month) : null;
@@ -49,7 +62,7 @@ export default async function DailyPLPage({
     );
   }
 
-  const data = await getDailyPL(currentMonth.id);
+  const data = await getDailyPL(currentMonth.id, business.id);
   if (!data) {
     return (
       <div className="p-8">

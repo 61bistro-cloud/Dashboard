@@ -17,6 +17,7 @@ import {
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentFiscalMonth, fmtTHB } from "@/lib/fiscal";
+import { getCurrentBusiness } from "@/lib/business";
 import {
   getBankMonth,
   getCategorySummary,
@@ -81,6 +82,18 @@ export default async function BankPage({
     redirect("/");
   }
 
+  const business = await getCurrentBusiness();
+  if (!business) {
+    return (
+      <div className="p-8">
+        <PageHeader icon={Landmark} title="Bank & Reconciliation" />
+        <p className="mt-4 text-red-600">
+          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+        </p>
+      </div>
+    );
+  }
+
   const sp = await searchParams;
 
   const [allMonths, accounts, categories] = await Promise.all([
@@ -89,11 +102,11 @@ export default async function BankPage({
       include: { year: true },
     }),
     prisma.bankAccount.findMany({
-      where: { active: true },
+      where: { active: true, businessId: business.id },
       orderBy: { sortOrder: "asc" },
     }),
     prisma.transactionCategory.findMany({
-      where: { active: true },
+      where: { active: true, businessId: business.id },
       orderBy: [{ kind: "asc" }, { sortOrder: "asc" }],
     }),
   ]);
@@ -123,12 +136,15 @@ export default async function BankPage({
   const [allAccountData, selectedData, catSummary, recon] = await Promise.all([
     Promise.all(
       accounts.map((a) =>
-        getBankMonth(currentMonth.id, a.id).then((d) => ({ account: a, ...d }))
+        getBankMonth(currentMonth.id, a.id, business.id).then((d) => ({
+          account: a,
+          ...d,
+        }))
       )
     ),
-    getBankMonth(currentMonth.id, currentAccount.id),
-    getCategorySummary(currentMonth.id),
-    getReconciliation(currentMonth.id),
+    getBankMonth(currentMonth.id, currentAccount.id, business.id),
+    getCategorySummary(currentMonth.id, business.id),
+    getReconciliation(currentMonth.id, business.id),
   ]);
 
   return (

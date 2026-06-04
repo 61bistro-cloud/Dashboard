@@ -21,6 +21,7 @@ import {
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentFiscalMonth, fmtTHB } from "@/lib/fiscal";
+import { getCurrentBusiness } from "@/lib/business";
 import {
   getYearlyPL,
   getDataQuality,
@@ -39,6 +40,18 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session) redirect("/sign-in");
 
+  const business = await getCurrentBusiness();
+  if (!business) {
+    return (
+      <div className="p-8">
+        <PageHeader icon={LayoutDashboard} title="Dashboard" />
+        <p className="mt-4 text-red-600">
+          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้านเพื่อขอสิทธิ์
+        </p>
+      </div>
+    );
+  }
+
   const latestYear = await prisma.fiscalYear.findFirst({
     orderBy: { yearBE: "desc" },
   });
@@ -53,8 +66,8 @@ export default async function DashboardPage() {
   }
 
   const [data, dq, currentMonth] = await Promise.all([
-    getYearlyPL(latestYear.yearBE),
-    getDataQuality(latestYear.yearBE),
+    getYearlyPL(latestYear.yearBE, business.id),
+    getDataQuality(latestYear.yearBE, business.id),
     getCurrentFiscalMonth(),
   ]);
 
@@ -78,7 +91,7 @@ export default async function DashboardPage() {
       <PageHeader
         icon={LayoutDashboard}
         title="Dashboard"
-        description={`61 Bistro — ปีงบ ${latestYear.label}`}
+        description={`${business.name} — ปีงบ ${latestYear.label}`}
       />
 
       <SectionTitle

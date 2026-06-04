@@ -3,6 +3,7 @@ import { Settings } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentFiscalMonth } from "@/lib/fiscal";
+import { getCurrentBusiness } from "@/lib/business";
 import { getStatementExpenses } from "@/lib/bank-calc";
 import { MonthPicker } from "./_components/month-picker";
 import { PayrollSection } from "./_components/payroll-section";
@@ -23,6 +24,18 @@ export default async function CostSetupPage({
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER" && session.user.role !== "ACCOUNTANT") {
     redirect("/");
+  }
+
+  const business = await getCurrentBusiness();
+  if (!business) {
+    return (
+      <div className="p-8">
+        <PageHeader icon={Settings} title="Cost Setup" />
+        <p className="mt-4 text-red-600">
+          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+        </p>
+      </div>
+    );
   }
 
   const sp = await searchParams;
@@ -62,35 +75,43 @@ export default async function CostSetupPage({
     override,
   ] = await Promise.all([
     prisma.employee.findMany({
-      where: { active: true },
+      where: { active: true, businessId: business.id },
       orderBy: { sortOrder: "asc" },
     }),
     prisma.employeePayroll.findMany({
-      where: { fiscalMonthId: currentMonth.id },
+      where: { businessId: business.id, fiscalMonthId: currentMonth.id },
     }),
     prisma.payrollExtra.findMany({
-      where: { fiscalMonthId: currentMonth.id },
+      where: { businessId: business.id, fiscalMonthId: currentMonth.id },
     }),
     prisma.supplier.findMany({
-      where: { active: true },
+      where: { active: true, businessId: business.id },
       orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
     }),
     prisma.supplierPurchase.findMany({
-      where: { fiscalMonthId: currentMonth.id },
+      where: { businessId: business.id, fiscalMonthId: currentMonth.id },
     }),
     prisma.fixedCostCategory.findMany({
-      where: { active: true },
+      where: { active: true, businessId: business.id },
       orderBy: { sortOrder: "asc" },
     }),
     prisma.fixedCost.findMany({
-      where: { fiscalMonthId: currentMonth.id },
+      where: { businessId: business.id, fiscalMonthId: currentMonth.id },
     }),
     prisma.monthlyRevenueOverride.findUnique({
-      where: { fiscalMonthId: currentMonth.id },
+      where: {
+        businessId_fiscalMonthId: {
+          businessId: business.id,
+          fiscalMonthId: currentMonth.id,
+        },
+      },
     }),
   ]);
 
-  const statementExpenses = await getStatementExpenses(currentMonth.id);
+  const statementExpenses = await getStatementExpenses(
+    currentMonth.id,
+    business.id
+  );
 
   const payrollByEmp = new Map(
     payrollRows.map((p) => [

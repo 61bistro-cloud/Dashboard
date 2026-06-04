@@ -3,6 +3,18 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+// All seeded data belongs to business #1 (61 Bistro).
+const BIZ = 1;
+
+async function seedBusiness() {
+  await prisma.business.upsert({
+    where: { id: BIZ },
+    update: { name: "61 Bistro", slug: "61-bistro" },
+    create: { id: BIZ, name: "61 Bistro", slug: "61-bistro", sortOrder: 0 },
+  });
+  console.log(`✓ Business #${BIZ} (61 Bistro)`);
+}
+
 const THAI_MONTH_LABELS = [
   "เม.ย.",
   "พ.ค.",
@@ -152,6 +164,7 @@ async function seedEmployees() {
       },
       create: {
         id: i + 1,
+        businessId: BIZ,
         name: emp.name,
         shortName: emp.shortName,
         shift: emp.shift,
@@ -184,9 +197,16 @@ async function seedSuppliers() {
   for (let i = 0; i < SUPPLIERS.length; i++) {
     const s = SUPPLIERS[i];
     await prisma.supplier.upsert({
-      where: { category_name: { category: s.category, name: s.name } },
+      where: {
+        businessId_category_name: {
+          businessId: BIZ,
+          category: s.category,
+          name: s.name,
+        },
+      },
       update: { sortOrder: i },
       create: {
+        businessId: BIZ,
         name: s.name,
         category: s.category,
         sortOrder: i,
@@ -213,9 +233,15 @@ async function seedFixedCategories() {
   for (let i = 0; i < FIXED_CATS.length; i++) {
     const c = FIXED_CATS[i];
     await prisma.fixedCostCategory.upsert({
-      where: { name: c.name },
+      where: { businessId_name: { businessId: BIZ, name: c.name } },
       update: { icon: c.icon, sortOrder: i },
-      create: { name: c.name, icon: c.icon, sortOrder: i, active: true },
+      create: {
+        businessId: BIZ,
+        name: c.name,
+        icon: c.icon,
+        sortOrder: i,
+        active: true,
+      },
     });
   }
   console.log(`✓ FixedCostCategories: ${FIXED_CATS.length}`);
@@ -259,7 +285,7 @@ async function seedHistoricalData(employeeIds: number[]) {
       await prisma.employeePayroll.upsert({
         where: { employeeId_fiscalMonthId: { employeeId, fiscalMonthId } },
         update: { amount },
-        create: { employeeId, fiscalMonthId, amount },
+        create: { businessId: BIZ, employeeId, fiscalMonthId, amount },
       });
     }
   }
@@ -272,9 +298,15 @@ async function seedHistoricalData(employeeIds: number[]) {
   ];
   for (const [fiscalMonthId, type, amount] of extras) {
     await prisma.payrollExtra.upsert({
-      where: { fiscalMonthId_type: { fiscalMonthId, type } },
+      where: {
+        businessId_fiscalMonthId_type: {
+          businessId: BIZ,
+          fiscalMonthId,
+          type,
+        },
+      },
       update: { amount },
-      create: { fiscalMonthId, type, amount },
+      create: { businessId: BIZ, fiscalMonthId, type, amount },
     });
   }
 
@@ -300,7 +332,13 @@ async function seedHistoricalData(employeeIds: number[]) {
   ];
   for (const s of supplierAmounts) {
     const supp = await prisma.supplier.findUniqueOrThrow({
-      where: { category_name: { category: s.category, name: s.name } },
+      where: {
+        businessId_category_name: {
+          businessId: BIZ,
+          category: s.category,
+          name: s.name,
+        },
+      },
     });
     for (const [fiscalMonthId, amount] of [
       [apr, s.apr],
@@ -312,7 +350,7 @@ async function seedHistoricalData(employeeIds: number[]) {
           supplierId_fiscalMonthId: { supplierId: supp.id, fiscalMonthId },
         },
         update: { amount },
-        create: { supplierId: supp.id, fiscalMonthId, amount },
+        create: { businessId: BIZ, supplierId: supp.id, fiscalMonthId, amount },
       });
     }
   }
@@ -329,7 +367,7 @@ async function seedHistoricalData(employeeIds: number[]) {
   ];
   for (const f of fixedAmounts) {
     const cat = await prisma.fixedCostCategory.findUniqueOrThrow({
-      where: { name: f.name },
+      where: { businessId_name: { businessId: BIZ, name: f.name } },
     });
     for (const [fiscalMonthId, amount] of [
       [apr, f.apr],
@@ -341,19 +379,22 @@ async function seedHistoricalData(employeeIds: number[]) {
           categoryId_fiscalMonthId: { categoryId: cat.id, fiscalMonthId },
         },
         update: { amount },
-        create: { categoryId: cat.id, fiscalMonthId, amount },
+        create: { businessId: BIZ, categoryId: cat.id, fiscalMonthId, amount },
       });
     }
   }
 
   // Revenue override: เม.ย. = 149,441 (no POS yet for April)
   await prisma.monthlyRevenueOverride.upsert({
-    where: { fiscalMonthId: apr },
+    where: {
+      businessId_fiscalMonthId: { businessId: BIZ, fiscalMonthId: apr },
+    },
     update: {
       amount: 149441,
       note: "Manual จาก Excel เดิม (ยังไม่มี POS เมษายน)",
     },
     create: {
+      businessId: BIZ,
       fiscalMonthId: apr,
       amount: 149441,
       note: "Manual จาก Excel เดิม (ยังไม่มี POS เมษายน)",
@@ -442,7 +483,7 @@ async function seedBank() {
   for (let i = 0; i < BANK_ACCOUNTS.length; i++) {
     const a = BANK_ACCOUNTS[i];
     await prisma.bankAccount.upsert({
-      where: { code: a.code },
+      where: { businessId_code: { businessId: BIZ, code: a.code } },
       update: {
         name: a.name,
         icon: a.icon,
@@ -450,7 +491,7 @@ async function seedBank() {
         accountType: a.accountType,
         sortOrder: i,
       },
-      create: { ...a, sortOrder: i, active: true },
+      create: { ...a, businessId: BIZ, sortOrder: i, active: true },
     });
   }
   console.log(`✓ BankAccounts: ${BANK_ACCOUNTS.length}`);
@@ -458,9 +499,10 @@ async function seedBank() {
   for (let i = 0; i < TX_CATEGORIES.length; i++) {
     const c = TX_CATEGORIES[i];
     await prisma.transactionCategory.upsert({
-      where: { name: c.name },
+      where: { businessId_name: { businessId: BIZ, name: c.name } },
       update: { kind: c.kind, sortOrder: i, posChannel: c.posChannel ?? null },
       create: {
+        businessId: BIZ,
         name: c.name,
         kind: c.kind,
         sortOrder: i,
@@ -498,7 +540,12 @@ async function seedBank() {
         accountId_fiscalMonthId: { accountId: acc.id, fiscalMonthId: month.id },
       },
       update: { amount },
-      create: { accountId: acc.id, fiscalMonthId: month.id, amount },
+      create: {
+        businessId: BIZ,
+        accountId: acc.id,
+        fiscalMonthId: month.id,
+        amount,
+      },
     });
   }
   console.log(`✓ Account openings: ${openings.length}`);
@@ -563,7 +610,7 @@ async function seedBank() {
 
   // delete existing samples first (idempotent seed)
   await prisma.bankTransaction.deleteMany({
-    where: { fiscalMonthId: apr.id, accountId: kbank.id },
+    where: { businessId: BIZ, fiscalMonthId: apr.id, accountId: kbank.id },
   });
 
   const owner = await prisma.user.findFirst({ where: { role: "OWNER" } });
@@ -571,6 +618,7 @@ async function seedBank() {
     const cat = catByName.get(t.catName);
     await prisma.bankTransaction.create({
       data: {
+        businessId: BIZ,
         fiscalMonthId: apr.id,
         accountId: kbank.id,
         categoryId: cat?.id,
@@ -586,8 +634,27 @@ async function seedBank() {
   console.log(`✓ Sample transactions: ${sampleTx.length}`);
 }
 
+async function linkNonOwnersToBusiness() {
+  // OWNER sees all businesses implicitly. Give the dev ACCOUNTANT/STAFF users
+  // explicit access to business #1 so local logins work.
+  const users = await prisma.user.findMany({
+    where: { role: { in: ["ACCOUNTANT", "STAFF"] } },
+    select: { id: true },
+  });
+  for (const u of users) {
+    await prisma.userBusiness.upsert({
+      where: { userId_businessId: { userId: u.id, businessId: BIZ } },
+      update: {},
+      create: { userId: u.id, businessId: BIZ },
+    });
+  }
+  console.log(`✓ Linked ${users.length} non-owner users to business #${BIZ}`);
+}
+
 async function main() {
   await seedUsers();
+  await seedBusiness();
+  await linkNonOwnersToBusiness();
   await seedFiscalYear();
   const employeeIds = await seedEmployees();
   await seedSuppliers();

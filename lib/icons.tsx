@@ -62,6 +62,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/pos-sales": ReceiptText,
   "/bank": Landmark,
   "/admin/users": Users,
+  "/admin/businesses": Building2,
 };
 
 /** Fixed cost category icons (matches FixedCostCategory.name) */

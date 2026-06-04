@@ -2,11 +2,17 @@ import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentBusiness } from "@/lib/business";
 
 export async function GET(req: Request) {
   const session = await auth();
   if (!session) {
     return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  const business = await getCurrentBusiness();
+  if (!business) {
+    return new NextResponse("No business access", { status: 403 });
   }
 
   const url = new URL(req.url);
@@ -16,10 +22,11 @@ export async function GET(req: Request) {
   const payment = url.searchParams.get("payment") ?? undefined;
 
   const where: {
+    businessId: number;
     businessDate?: { gte?: string; lte?: string };
     channel?: string;
     paymentType?: string;
-  } = {};
+  } = { businessId: business.id };
   if (from || to) {
     where.businessDate = {};
     if (from) where.businessDate.gte = from;

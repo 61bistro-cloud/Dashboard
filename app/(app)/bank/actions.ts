@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { parseKbankPdf, suggestCategoryName } from "@/lib/kbank-parser";
+import { requireBusiness } from "@/lib/business";
 
 async function requireAccess() {
   const session = await auth();
@@ -41,6 +42,7 @@ const addTxSchema = z.object({
 
 export async function addTransaction(input: z.input<typeof addTxSchema>) {
   const session = await requireAccess();
+  const biz = await requireBusiness();
   const data = addTxSchema.parse(input);
 
   if (data.deposit === 0 && data.withdraw === 0) {
@@ -52,6 +54,7 @@ export async function addTransaction(input: z.input<typeof addTxSchema>) {
 
   await prisma.bankTransaction.create({
     data: {
+      businessId: biz.id,
       fiscalMonthId: data.fiscalMonthId,
       accountId: data.accountId,
       categoryId: data.categoryId,
@@ -70,7 +73,11 @@ export async function addTransaction(input: z.input<typeof addTxSchema>) {
 
 export async function deleteTransaction(id: number) {
   await requireAccess();
-  await prisma.bankTransaction.delete({ where: { id } });
+  const biz = await requireBusiness();
+  // Scope the delete to the current business so a stray id can't cross tenants
+  await prisma.bankTransaction.deleteMany({
+    where: { id, businessId: biz.id },
+  });
   revalidatePath("/bank");
 }
 
@@ -82,10 +89,15 @@ const openingSchema = z.object({
 
 export async function setOpeningBalance(input: z.input<typeof openingSchema>) {
   await requireAccess();
+  const biz = await requireBusiness();
   const data = openingSchema.parse(input);
   if (data.amount === 0) {
     await prisma.accountOpening.deleteMany({
-      where: { accountId: data.accountId, fiscalMonthId: data.fiscalMonthId },
+      where: {
+        businessId: biz.id,
+        accountId: data.accountId,
+        fiscalMonthId: data.fiscalMonthId,
+      },
     });
   } else {
     await prisma.accountOpening.upsert({
@@ -96,7 +108,7 @@ export async function setOpeningBalance(input: z.input<typeof openingSchema>) {
         },
       },
       update: { amount: data.amount },
-      create: data,
+      create: { ...data, businessId: biz.id },
     });
   }
   revalidatePath("/bank");
@@ -131,6 +143,7 @@ export async function parseStatementPdf(
 ): Promise<ParseStatementResult> {
   try {
     await requireAccess();
+    const biz = await requireBusiness();
 
     const file = formData.get("file");
     const password = String(formData.get("password") ?? "");
@@ -166,9 +179,9 @@ export async function parseStatementPdf(
       };
     }
 
-    // Resolve suggested category name → id
+    // Resolve suggested category name → id (within the current business)
     const categories = await prisma.transactionCategory.findMany({
-      where: { active: true },
+      where: { active: true, businessId: biz.id },
       select: { id: true, name: true },
     });
     const byName = new Map(categories.map((c) => [c.name, c.id]));
@@ -243,6 +256,7 @@ export async function importStatementRows(
 ): Promise<ImportStatementResult> {
   try {
     const session = await requireAccess();
+    const biz = await requireBusiness();
 
     // safeParse instead of parse — we want the real Zod error message to
     // surface to the client, not the generic Server Components mask.
@@ -268,6 +282,7 @@ export async function importStatementRows(
 
     const result = await prisma.bankTransaction.createMany({
       data: data.rows.map((r) => ({
+        businessId: biz.id,
         fiscalMonthId: data.fiscalMonthId,
         accountId: data.accountId,
         categoryId: r.categoryId,

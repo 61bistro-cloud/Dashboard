@@ -11,6 +11,7 @@ import {
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { fmtTHB } from "@/lib/fiscal";
+import { getCurrentBusiness } from "@/lib/business";
 import { UploadForm } from "./_components/upload-form";
 import { DeleteBatchButton } from "./_components/delete-batch-button";
 import { PageHeader } from "@/components/page-header";
@@ -34,14 +35,27 @@ export default async function PosSalesPage({
   const session = await auth();
   if (!session) redirect("/sign-in");
 
+  const business = await getCurrentBusiness();
+  if (!business) {
+    return (
+      <div className="p-8">
+        <PageHeader icon={ReceiptText} title="POS Sales" />
+        <p className="mt-4 text-red-600">
+          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+        </p>
+      </div>
+    );
+  }
+
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page ?? "1"));
 
   const where: {
+    businessId: number;
     businessDate?: { gte?: string; lte?: string };
     channel?: string;
     paymentType?: string;
-  } = {};
+  } = { businessId: business.id };
   if (sp.from || sp.to) {
     where.businessDate = {};
     if (sp.from) where.businessDate.gte = sp.from;
@@ -83,6 +97,7 @@ export default async function PosSalesPage({
       where: { AND: [where, cancelledFilter] },
     }),
     prisma.posImportBatch.findMany({
+      where: { businessId: business.id },
       orderBy: { createdAt: "desc" },
       take: 5,
       include: { uploadedBy: { select: { name: true, email: true } } },
@@ -97,12 +112,12 @@ export default async function PosSalesPage({
     prisma.posBill.findMany({
       distinct: ["channel"],
       select: { channel: true },
-      where: { channel: { not: null } },
+      where: { businessId: business.id, channel: { not: null } },
     }),
     prisma.posBill.findMany({
       distinct: ["paymentType"],
       select: { paymentType: true },
-      where: { paymentType: { not: null } },
+      where: { businessId: business.id, paymentType: { not: null } },
     }),
   ]);
 

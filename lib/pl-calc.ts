@@ -65,7 +65,10 @@ function safeMax(a: number, b: number): number {
 
 // ─────────────── Yearly P&L (12 months matrix) ───────────────
 
-export async function getYearlyPL(yearBE: number): Promise<{
+export async function getYearlyPL(
+  yearBE: number,
+  businessId: number
+): Promise<{
   year: { id: number; yearBE: number; label: string };
   months: MonthlyTotals[];
   total: MonthlyTotals; // year-to-date summed
@@ -91,7 +94,7 @@ export async function getYearlyPL(yearBE: number): Promise<{
   // Batch query: aggregate POS sales by businessDate for the whole year
   const billRows = await prisma.posBill.groupBy({
     by: ["businessDate"],
-    where: { businessDate: { gte: yearStart, lte: yearEnd } },
+    where: { businessId, businessDate: { gte: yearStart, lte: yearEnd } },
     _sum: { netAmount: true },
     _count: { id: true },
   });
@@ -119,29 +122,30 @@ export async function getYearlyPL(yearBE: number): Promise<{
   const [purchases, suppliers, payrolls, extras, fixedCosts, overrides] =
     await Promise.all([
       prisma.supplierPurchase.findMany({
-        where: { fiscalMonthId: { in: monthIds } },
+        where: { businessId, fiscalMonthId: { in: monthIds } },
         select: { fiscalMonthId: true, amount: true, supplierId: true },
       }),
       prisma.supplier.findMany({
+        where: { businessId },
         select: { id: true, category: true },
       }),
       prisma.employeePayroll.groupBy({
         by: ["fiscalMonthId"],
-        where: { fiscalMonthId: { in: monthIds } },
+        where: { businessId, fiscalMonthId: { in: monthIds } },
         _sum: { amount: true },
       }),
       prisma.payrollExtra.groupBy({
         by: ["fiscalMonthId"],
-        where: { fiscalMonthId: { in: monthIds } },
+        where: { businessId, fiscalMonthId: { in: monthIds } },
         _sum: { amount: true },
       }),
       prisma.fixedCost.groupBy({
         by: ["fiscalMonthId"],
-        where: { fiscalMonthId: { in: monthIds } },
+        where: { businessId, fiscalMonthId: { in: monthIds } },
         _sum: { amount: true },
       }),
       prisma.monthlyRevenueOverride.findMany({
-        where: { fiscalMonthId: { in: monthIds } },
+        where: { businessId, fiscalMonthId: { in: monthIds } },
       }),
     ]);
 
@@ -275,7 +279,10 @@ export async function getYearlyPL(yearBE: number): Promise<{
 
 // ─────────────── Daily P&L for a month ───────────────
 
-export async function getDailyPL(fiscalMonthId: number): Promise<{
+export async function getDailyPL(
+  fiscalMonthId: number,
+  businessId: number
+): Promise<{
   month: {
     id: number;
     label: string;
@@ -294,7 +301,7 @@ export async function getDailyPL(fiscalMonthId: number): Promise<{
   if (!month) return null;
 
   // Get all monthly totals (reuses same costs computation)
-  const yearly = await getYearlyPL(month.year.yearBE);
+  const yearly = await getYearlyPL(month.year.yearBE, businessId);
   if (!yearly) return null;
   const monthTotals = yearly.months.find(
     (m) => m.fiscalMonthId === fiscalMonthId
@@ -308,7 +315,7 @@ export async function getDailyPL(fiscalMonthId: number): Promise<{
   // Per-day POS aggregates
   const billRows = await prisma.posBill.groupBy({
     by: ["businessDate"],
-    where: { businessDate: { gte: monthStart, lte: monthEnd } },
+    where: { businessId, businessDate: { gte: monthStart, lte: monthEnd } },
     _sum: {
       netAmount: true,
       grossAmount: true,
@@ -430,7 +437,10 @@ export const KPI_THRESHOLDS = {
 
 // ─────────────── Data Quality (POS days per month) ───────────────
 
-export async function getDataQuality(yearBE: number): Promise<{
+export async function getDataQuality(
+  yearBE: number,
+  businessId: number
+): Promise<{
   perMonth: {
     fiscalMonthId: number;
     label: string;
@@ -450,7 +460,7 @@ export async function getDataQuality(yearBE: number): Promise<{
   const yearEnd = `${lastMonth.calendarYear}-${String(lastMonth.calendarMonth).padStart(2, "0")}-${String(lastMonth.daysInMonth).padStart(2, "0")}`;
 
   const distinctDates = await prisma.posBill.findMany({
-    where: { businessDate: { gte: yearStart, lte: yearEnd } },
+    where: { businessId, businessDate: { gte: yearStart, lte: yearEnd } },
     distinct: ["businessDate"],
     select: { businessDate: true },
   });

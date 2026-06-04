@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { parseFoodstoryBuffer, type ParsedBill } from "@/lib/foodstory-parser";
 import { revalidatePath } from "next/cache";
+import { requireBusiness } from "@/lib/business";
 
 export type ImportResult = {
   ok: boolean;
@@ -24,6 +25,13 @@ export async function importPosBills(
   const session = await auth();
   if (!session) {
     return baseError("unauthorized");
+  }
+
+  let biz;
+  try {
+    biz = await requireBusiness();
+  } catch (e) {
+    return baseError((e as Error).message);
   }
 
   const file = formData.get("file");
@@ -57,12 +65,12 @@ export async function importPosBills(
     };
   }
 
-  // Check existing IDs in one query
+  // Check existing IDs in one query (scoped to this business)
   const ids = parseResult.rows.map((r) => r.id);
   const existing = new Set(
     (
       await prisma.posBill.findMany({
-        where: { id: { in: ids } },
+        where: { businessId: biz.id, id: { in: ids } },
         select: { id: true },
       })
     ).map((b) => b.id)
@@ -74,6 +82,7 @@ export async function importPosBills(
   // Create batch first so we can FK each bill to it
   const batch = await prisma.posImportBatch.create({
     data: {
+      businessId: biz.id,
       fileName: file.name,
       rowsTotal: parseResult.totalDataRows,
       rowsErrored: parseResult.errors.length,
@@ -90,7 +99,7 @@ export async function importPosBills(
   const CHUNK = 100;
   for (let i = 0; i < parseResult.rows.length; i += CHUNK) {
     const chunk = parseResult.rows.slice(i, i + CHUNK);
-    await prisma.$transaction(chunk.map((r) => upsertOp(r, batch.id)));
+    await prisma.$transaction(chunk.map((r) => upsertOp(r, batch.id, biz.id)));
     for (const r of chunk) {
       if (existing.has(r.id)) updated++;
       else inserted++;
@@ -117,7 +126,7 @@ export async function importPosBills(
   };
 }
 
-function upsertOp(r: ParsedBill, batchId: number) {
+function upsertOp(r: ParsedBill, batchId: number, businessId: number) {
   const data = {
     paidAt: r.paidAt,
     paymentDate: r.paymentDate,
@@ -157,9 +166,9 @@ function upsertOp(r: ParsedBill, batchId: number) {
     importBatchId: batchId,
   };
   return prisma.posBill.upsert({
-    where: { id: r.id },
+    where: { businessId_id: { businessId, id: r.id } },
     update: data,
-    create: { id: r.id, ...data },
+    create: { id: r.id, businessId, ...data },
   });
 }
 
@@ -202,16 +211,26 @@ export async function deletePosBatch(input: {
     return { ok: false, message: "รหัสผ่านไม่ถูกต้อง" };
   }
 
-  const batch = await prisma.posImportBatch.findUnique({
-    where: { id: input.id },
+  let biz;
+  try {
+    biz = await requireBusiness();
+  } catch (e) {
+    return { ok: false, message: (e as Error).message };
+  }
+
+  // Batch must belong to the current business
+  const batch = await prisma.posImportBatch.findFirst({
+    where: { id: input.id, businessId: biz.id },
   });
   if (!batch) {
-    return { ok: false, message: "ไม่พบ batch นี้" };
+    return { ok: false, message: "ไม่พบ batch นี้ในธุรกิจปัจจุบัน" };
   }
 
   // Delete all bills linked to this batch, then the batch itself
   const result = await prisma.$transaction([
-    prisma.posBill.deleteMany({ where: { importBatchId: input.id } }),
+    prisma.posBill.deleteMany({
+      where: { importBatchId: input.id, businessId: biz.id },
+    }),
     prisma.posImportBatch.delete({ where: { id: input.id } }),
   ]);
 

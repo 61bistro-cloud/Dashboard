@@ -79,7 +79,9 @@
       "Bash(node _inspect_foodstory.js \"C:\\\\Users\\\\Sixty\\\\Downloads\\\\รายงานสรุปยอดขายแยกตามบิล \\(5\\).xlsx\")",
       "Bash(node _inspect_apr.js \"C:\\\\Users\\\\Sixty\\\\Downloads\\\\รายงานสรุปยอดขายแยกตามบิล \\(มย69\\).xlsx\")",
       "Bash(git rm *)",
-      "Bash(node _check_dupes.js \"C:\\\\Users\\\\Sixty\\\\Downloads\\\\รายงานสรุปยอดขายแยกตามบิล \\(มย69\\).xlsx\")"
+      "Bash(node _check_dupes.js \"C:\\\\Users\\\\Sixty\\\\Downloads\\\\รายงานสรุปยอดขายแยกตามบิล \\(มย69\\).xlsx\")",
+      "Bash(npx tsc *)",
+      "Bash(npm ls *)"
     ]
   }
 }

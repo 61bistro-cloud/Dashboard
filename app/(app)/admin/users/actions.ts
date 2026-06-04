@@ -69,6 +69,36 @@ export async function updateUserRole(input: z.input<typeof updateRoleSchema>) {
   revalidatePath("/admin/users");
 }
 
+const setUserBusinessesSchema = z.object({
+  userId: z.string().min(1),
+  businessIds: z.array(z.coerce.number().int().positive()),
+});
+
+/**
+ * Replace the set of businesses a non-OWNER user can access. OWNER users see
+ * all businesses implicitly, so their links are irrelevant (we still store
+ * them harmlessly if set).
+ */
+export async function setUserBusinesses(
+  input: z.input<typeof setUserBusinessesSchema>
+) {
+  await requireOwner();
+  const data = setUserBusinessesSchema.parse(input);
+
+  await prisma.$transaction([
+    prisma.userBusiness.deleteMany({ where: { userId: data.userId } }),
+    prisma.userBusiness.createMany({
+      data: data.businessIds.map((businessId) => ({
+        userId: data.userId,
+        businessId,
+      })),
+      skipDuplicates: true,
+    }),
+  ]);
+
+  revalidatePath("/admin/users");
+}
+
 export async function deleteUser(id: string) {
   const session = await requireOwner();
 

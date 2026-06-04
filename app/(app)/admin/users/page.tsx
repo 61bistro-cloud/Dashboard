@@ -5,22 +5,31 @@ import { Users } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { AddUserForm } from "./_components/add-user-form";
 import { RoleSelect, DeleteUserButton } from "./_components/user-row-actions";
+import { UserBusinessAssign } from "./_components/user-businesses";
 
 export default async function UsersAdminPage() {
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER") redirect("/");
 
-  const users = await prisma.user.findMany({
-    orderBy: [{ role: "asc" }, { createdAt: "asc" }],
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      role: true,
-      createdAt: true,
-    },
-  });
+  const [users, businesses] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: [{ role: "asc" }, { createdAt: "asc" }],
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        businesses: { select: { businessId: true } },
+      },
+    }),
+    prisma.business.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
 
   return (
     <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
@@ -39,6 +48,7 @@ export default async function UsersAdminPage() {
               <th className="px-4 py-3 font-medium">ชื่อ</th>
               <th className="px-4 py-3 font-medium">อีเมล</th>
               <th className="px-4 py-3 font-medium">สิทธิ์</th>
+              <th className="px-4 py-3 font-medium">ธุรกิจที่เข้าถึงได้</th>
               <th className="px-4 py-3 font-medium">สร้างเมื่อ</th>
               <th className="px-4 py-3 font-medium text-right">จัดการ</th>
             </tr>
@@ -59,6 +69,14 @@ export default async function UsersAdminPage() {
                   <td className="px-4 py-3 text-ink/75">{u.email}</td>
                   <td className="px-4 py-3">
                     <RoleSelect id={u.id} currentRole={u.role} isMe={isMe} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <UserBusinessAssign
+                      userId={u.id}
+                      allBusinesses={businesses}
+                      assigned={u.businesses.map((b) => b.businessId)}
+                      isOwner={u.role === "OWNER"}
+                    />
                   </td>
                   <td className="px-4 py-3 text-muted">
                     {u.createdAt.toLocaleDateString("th-TH")}
