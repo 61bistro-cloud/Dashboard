@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import {
   Landmark,
   CreditCard,
@@ -147,20 +148,25 @@ export default async function BankPage({
         }
       />
 
-      {/* Account summary cards */}
+      {/* Account summary cards — click to switch active account */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {allAccountData.map((a) => {
           const isCard = a.account.accountType === "CREDIT_CARD";
           // For credit cards: outstanding = -closing (positive number = debt)
           const outstanding = isCard ? -a.closing : null;
+          const isActive = a.account.code === currentAccount.code;
           return (
-            <div
+            <Link
               key={a.account.id}
+              href={`/bank?month=${currentMonth.id}&account=${a.account.code}`}
+              scroll={false}
+              aria-label={`เลือกบัญชี ${a.account.name}`}
+              aria-current={isActive ? "page" : undefined}
               className={
-                "rounded-card border p-4 " +
-                (a.account.code === currentAccount.code
+                "block rounded-card border p-4 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-ink/30 " +
+                (isActive
                   ? "border-ink bg-surface"
-                  : "border-hairline bg-canvas")
+                  : "border-hairline bg-canvas hover:border-ink/40 hover:bg-surface/50")
               }
             >
               <div className="flex items-center justify-between">
@@ -228,7 +234,7 @@ export default async function BankPage({
                   {fmtTHB(isCard ? (outstanding ?? 0) : a.closing)}
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
