@@ -57,6 +57,9 @@
   --color-hairline-soft: #1f1f1f;
   --color-muted: #a3a3a3;
   --color-muted-soft: #737373;
+  /* Make native <select> popups, date pickers & scrollbars render dark too —
+     fixes the "invisible dropdown options" bug in dark mode. */
+  color-scheme: dark;
 }
 
 @layer base {
@@ -65,6 +68,8 @@
     -moz-osx-font-smoothing: grayscale;
     /* Stop iOS from auto-resizing text on orientation change */
     -webkit-text-size-adjust: 100%;
+    /* Default native controls (select popups, date pickers, scrollbars) to light */
+    color-scheme: light;
   }
   html,
   body {
