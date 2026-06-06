@@ -114,6 +114,81 @@ export async function setOpeningBalance(input: z.input<typeof openingSchema>) {
   revalidatePath("/bank");
 }
 
+// ───── BANK ACCOUNT / CHANNEL CRUD ─────
+
+const addAccountSchema = z.object({
+  name: z.string().trim().min(1, "ต้องระบุชื่อบัญชี/ช่องทาง").max(60),
+  accountType: z.enum(["BANK", "CREDIT_CARD"]).default("BANK"),
+});
+
+export async function addBankAccount(input: z.input<typeof addAccountSchema>) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const data = addAccountSchema.parse(input);
+
+  // Generate a URL-safe code, unique within this business.
+  const base =
+    data.name
+      .normalize("NFKD")
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .toUpperCase()
+      .slice(0, 12) || "ACCT";
+  let code = base;
+  let n = 1;
+  while (
+    await prisma.bankAccount.findUnique({
+      where: { businessId_code: { businessId: biz.id, code } },
+    })
+  ) {
+    n += 1;
+    code = `${base}${n}`;
+  }
+
+  const last = await prisma.bankAccount.findFirst({
+    where: { businessId: biz.id },
+    orderBy: { sortOrder: "desc" },
+    select: { sortOrder: true },
+  });
+
+  await prisma.bankAccount.create({
+    data: {
+      businessId: biz.id,
+      code,
+      name: data.name,
+      accountType: data.accountType,
+      sortOrder: (last?.sortOrder ?? 0) + 1,
+      active: true,
+    },
+  });
+
+  revalidatePath("/bank");
+}
+
+export async function deleteBankAccount(id: number) {
+  await requireAccess();
+  const biz = await requireBusiness();
+
+  const acc = await prisma.bankAccount.findFirst({
+    where: { id, businessId: biz.id },
+    select: { id: true },
+  });
+  if (!acc) throw new Error("ไม่พบบัญชีนี้ในธุรกิจปัจจุบัน");
+
+  // Hard-delete only if never used; otherwise soft-hide to preserve history.
+  const [txCount, openCount] = await Promise.all([
+    prisma.bankTransaction.count({ where: { accountId: id } }),
+    prisma.accountOpening.count({ where: { accountId: id } }),
+  ]);
+
+  if (txCount === 0 && openCount === 0) {
+    await prisma.bankAccount.delete({ where: { id } });
+  } else {
+    await prisma.bankAccount.update({ where: { id }, data: { active: false } });
+  }
+
+  revalidatePath("/bank");
+}
+
 // ───── PDF STATEMENT IMPORT (KBANK) ─────
 
 export type PreviewTx = {

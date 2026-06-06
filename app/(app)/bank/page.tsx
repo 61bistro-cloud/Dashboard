@@ -26,6 +26,7 @@ import {
 } from "@/lib/bank-calc";
 import { MonthPicker } from "../cost-setup/_components/month-picker";
 import { AccountTabs } from "./_components/account-tabs";
+import { AccountManager } from "./_components/account-manager";
 import { AddTransactionForm } from "./_components/add-transaction-form";
 import { OpeningBalanceForm } from "./_components/opening-balance-form";
 import { DeleteButton } from "./_components/delete-button";
@@ -111,13 +112,25 @@ export default async function BankPage({
     }),
   ]);
 
-  if (allMonths.length === 0 || accounts.length === 0) {
+  if (allMonths.length === 0) {
     return (
       <div className="p-8">
         <PageHeader icon={Landmark} title="Bank & Reconciliation" />
-        <p className="mt-4 text-red-600">
-          ไม่พบข้อมูลปีงบหรือบัญชี กรุณา seed ก่อน
-        </p>
+        <p className="mt-4 text-red-600">ไม่พบข้อมูลปีงบ กรุณา seed ก่อน</p>
+      </div>
+    );
+  }
+
+  // No accounts yet (e.g. all removed) — let the user add the first one.
+  if (accounts.length === 0) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
+        <PageHeader
+          icon={Landmark}
+          title="Bank & Reconciliation"
+          description={`${business.name} — ยังไม่มีบัญชี เพิ่มบัญชี/ช่องทางแรกได้เลยด้านล่าง`}
+        />
+        <AccountManager accounts={[]} />
       </div>
     );
   }
@@ -341,6 +354,16 @@ export default async function BankPage({
           </table>
         </div>
       </section>
+
+      {/* Add / manage accounts & channels */}
+      <AccountManager
+        accounts={accounts.map((a) => ({
+          id: a.id,
+          code: a.code,
+          name: a.name,
+          accountType: a.accountType,
+        }))}
+      />
 
       {/* Account tabs */}
       <AccountTabs
