@@ -27,6 +27,8 @@ import {
 import { MonthPicker } from "../cost-setup/_components/month-picker";
 import { AccountTabs } from "./_components/account-tabs";
 import { AccountManager } from "./_components/account-manager";
+import { CategoryManager } from "./_components/category-manager";
+import { TxCategorySelect } from "./_components/tx-category-select";
 import { AddTransactionForm } from "./_components/add-transaction-form";
 import { OpeningBalanceForm } from "./_components/opening-balance-form";
 import { DeleteButton } from "./_components/delete-button";
@@ -355,15 +357,24 @@ export default async function BankPage({
         </div>
       </section>
 
-      {/* Add / manage accounts & channels */}
-      <AccountManager
-        accounts={accounts.map((a) => ({
-          id: a.id,
-          code: a.code,
-          name: a.name,
-          accountType: a.accountType,
-        }))}
-      />
+      {/* Add / manage accounts & channels + categories */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <AccountManager
+          accounts={accounts.map((a) => ({
+            id: a.id,
+            code: a.code,
+            name: a.name,
+            accountType: a.accountType,
+          }))}
+        />
+        <CategoryManager
+          categories={categories.map((c) => ({
+            id: c.id,
+            name: c.name,
+            kind: c.kind,
+          }))}
+        />
+      </div>
 
       {/* Account tabs */}
       <AccountTabs
@@ -503,10 +514,16 @@ export default async function BankPage({
                     <td className="px-3 py-1.5 text-muted">
                       {r.channel ?? "-"}
                     </td>
-                    <td className="px-3 py-1.5 text-ink/75">
-                      {r.categoryName ?? (
-                        <span className="text-muted-soft">ไม่ระบุ</span>
-                      )}
+                    <td className="px-3 py-1.5">
+                      <TxCategorySelect
+                        txId={r.id}
+                        categoryId={r.categoryId}
+                        categories={categories.map((c) => ({
+                          id: c.id,
+                          name: c.name,
+                          kind: c.kind,
+                        }))}
+                      />
                     </td>
                     <td className="px-3 py-1.5 text-right">
                       <DeleteButton id={r.id} />

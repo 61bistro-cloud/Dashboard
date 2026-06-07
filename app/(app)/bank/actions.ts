@@ -189,6 +189,170 @@ export async function deleteBankAccount(id: number) {
   revalidatePath("/bank");
 }
 
+// ───── TRANSACTION CATEGORY CRUD + REORDER ─────
+
+const catKind = z.enum(["INCOME", "EXPENSE", "TRANSFER"]);
+
+const addCatSchema = z.object({
+  name: z.string().trim().min(1, "ต้องระบุชื่อหมวด").max(80),
+  kind: catKind.default("EXPENSE"),
+});
+
+export async function addTxCategory(input: z.input<typeof addCatSchema>) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const data = addCatSchema.parse(input);
+
+  const existing = await prisma.transactionCategory.findUnique({
+    where: { businessId_name: { businessId: biz.id, name: data.name } },
+  });
+  if (existing) {
+    if (existing.active) throw new Error("มีหมวดชื่อนี้อยู่แล้ว");
+    await prisma.transactionCategory.update({
+      where: { id: existing.id },
+      data: { active: true, kind: data.kind },
+    });
+  } else {
+    const last = await prisma.transactionCategory.findFirst({
+      where: { businessId: biz.id, kind: data.kind },
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
+    await prisma.transactionCategory.create({
+      data: {
+        businessId: biz.id,
+        name: data.name,
+        kind: data.kind,
+        sortOrder: (last?.sortOrder ?? 0) + 1,
+        active: true,
+      },
+    });
+  }
+  revalidatePath("/bank");
+}
+
+const updateCatSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  name: z.string().trim().min(1, "ต้องระบุชื่อหมวด").max(80),
+  kind: catKind,
+});
+
+export async function updateTxCategory(input: z.input<typeof updateCatSchema>) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const data = updateCatSchema.parse(input);
+
+  const cat = await prisma.transactionCategory.findFirst({
+    where: { id: data.id, businessId: biz.id },
+    select: { id: true },
+  });
+  if (!cat) throw new Error("ไม่พบหมวดนี้ในธุรกิจปัจจุบัน");
+
+  const dupe = await prisma.transactionCategory.findFirst({
+    where: { businessId: biz.id, name: data.name, id: { not: data.id } },
+    select: { id: true },
+  });
+  if (dupe) throw new Error("มีหมวดชื่อนี้อยู่แล้ว");
+
+  await prisma.transactionCategory.update({
+    where: { id: data.id },
+    data: { name: data.name, kind: data.kind },
+  });
+  revalidatePath("/bank");
+}
+
+export async function deleteTxCategory(id: number) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const cat = await prisma.transactionCategory.findFirst({
+    where: { id, businessId: biz.id },
+    select: { id: true },
+  });
+  if (!cat) throw new Error("ไม่พบหมวดนี้ในธุรกิจปัจจุบัน");
+
+  const usage = await prisma.bankTransaction.count({
+    where: { categoryId: id },
+  });
+  if (usage === 0) {
+    await prisma.transactionCategory.delete({ where: { id } });
+  } else {
+    // Keep history: unlink txns from this category, then soft-hide it
+    await prisma.transactionCategory.update({
+      where: { id },
+      data: { active: false },
+    });
+  }
+  revalidatePath("/bank");
+}
+
+export async function moveTxCategory(id: number, dir: "up" | "down") {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const cat = await prisma.transactionCategory.findFirst({
+    where: { id, businessId: biz.id },
+  });
+  if (!cat) throw new Error("ไม่พบหมวดนี้ในธุรกิจปัจจุบัน");
+
+  // Swap sortOrder with the adjacent active category of the SAME kind
+  const siblings = await prisma.transactionCategory.findMany({
+    where: { businessId: biz.id, kind: cat.kind, active: true },
+    orderBy: { sortOrder: "asc" },
+  });
+  const idx = siblings.findIndex((s) => s.id === id);
+  const swapIdx = dir === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= siblings.length) return; // already at edge
+  const other = siblings[swapIdx];
+
+  await prisma.$transaction([
+    prisma.transactionCategory.update({
+      where: { id: cat.id },
+      data: { sortOrder: other.sortOrder },
+    }),
+    prisma.transactionCategory.update({
+      where: { id: other.id },
+      data: { sortOrder: cat.sortOrder },
+    }),
+  ]);
+  revalidatePath("/bank");
+}
+
+const setTxCatSchema = z.object({
+  txId: z.coerce.number().int().positive(),
+  categoryId: z.union([z.string(), z.number(), z.null()]).transform((v) => {
+    if (v == null || v === "" || v === "0") return null;
+    return Number(v);
+  }),
+});
+
+/** Change the category of an already-recorded bank transaction (inline edit). */
+export async function setTransactionCategory(
+  input: z.input<typeof setTxCatSchema>
+) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const data = setTxCatSchema.parse(input);
+
+  const tx = await prisma.bankTransaction.findFirst({
+    where: { id: data.txId, businessId: biz.id },
+    select: { id: true },
+  });
+  if (!tx) throw new Error("ไม่พบรายการนี้ในธุรกิจปัจจุบัน");
+
+  if (data.categoryId != null) {
+    const cat = await prisma.transactionCategory.findFirst({
+      where: { id: data.categoryId, businessId: biz.id },
+      select: { id: true },
+    });
+    if (!cat) throw new Error("ไม่พบหมวดนี้ในธุรกิจปัจจุบัน");
+  }
+
+  await prisma.bankTransaction.update({
+    where: { id: data.txId },
+    data: { categoryId: data.categoryId },
+  });
+  revalidatePath("/bank");
+}
+
 // ───── PDF STATEMENT IMPORT (KBANK) ─────
 
 export type PreviewTx = {

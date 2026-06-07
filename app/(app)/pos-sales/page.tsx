@@ -290,7 +290,7 @@ export default async function PosSalesPage({
               </select>
               <button
                 type="submit"
-                className="rounded-input bg-ink px-3 py-1 text-white hover:bg-ink-2"
+                className="rounded-input bg-ink px-3 py-1 text-canvas hover:bg-ink-2"
               >
                 กรอง
               </button>

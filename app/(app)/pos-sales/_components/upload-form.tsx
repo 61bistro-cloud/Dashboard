@@ -58,7 +58,7 @@ export function UploadForm() {
           <button
             type="submit"
             disabled={pending || !fileName}
-            className="rounded-input bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink-2 disabled:opacity-50 transition-colors"
+            className="rounded-input bg-ink px-4 py-2 text-sm font-medium text-canvas hover:bg-ink-2 disabled:opacity-50 transition-colors"
           >
             {pending ? "กำลังนำเข้า…" : "นำเข้า"}
           </button>

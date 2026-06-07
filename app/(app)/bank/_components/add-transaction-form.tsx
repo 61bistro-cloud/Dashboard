@@ -159,7 +159,7 @@ export function AddTransactionForm({
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex w-full items-center justify-center gap-1 rounded-input bg-ink px-3 py-2 md:py-1.5 text-white text-xs font-medium hover:bg-ink-2 disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center gap-1 rounded-input bg-ink px-3 py-2 md:py-1.5 text-canvas text-xs font-medium hover:bg-ink-2 disabled:opacity-50"
           >
             <Plus className="h-3 w-3" strokeWidth={2.5} />
             {pending ? "..." : "เพิ่ม"}
