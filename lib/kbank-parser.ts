@@ -22,6 +22,8 @@
 export type ParsedTx = {
   /** Row date in YYYY-MM-DD (Thai BE years converted to CE) */
   date: string;
+  /** Transaction time HH:MM (24h) if the statement shows it, else null */
+  time: string | null;
   /** Raw description text — bank shows things like "K PLUS โอนเงิน → ชื่อ" */
   description: string;
   /** Deposit / credit amount (>=0) */
@@ -249,8 +251,8 @@ export const parseBankStatement = parseKbankPdf;
 
 // ─────────────────────── SCB savings-account parser ───────────────────────
 
-// "01/04/26 05:11" — date + time in a single leading cell
-const SCB_DT_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+\d{1,2}:\d{2}/;
+// "01/04/26 05:11" — date + time in a single leading cell (groups 4/5 = time)
+const SCB_DT_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})/;
 
 /** Pull DESC:/NOTE: labelled text out of a set of cells (single row). */
 function splitDescNote(cells: Cell[]): { desc: string; note: string } {
@@ -328,6 +330,7 @@ function parseScbRows(rows: Row[]): ParsedTx[] {
     const m = dateCell.text.trim().match(SCB_DT_RE)!;
     const date = normalizeDate(`${m[1]}/${m[2]}/${m[3]}`);
     if (!date) continue;
+    const time = parseTime(`${m[4]}:${m[5]}`);
 
     // Numerics to the right of the code column = [amount, balance]
     const nums = r.cells
@@ -373,7 +376,7 @@ function parseScbRows(rows: Row[]): ParsedTx[] {
     if (note) description = description ? `${description} — ${note}` : note;
     if (!description) description = channel ?? "(ไม่มีรายละเอียด)";
 
-    out.push({ date, description, deposit, withdraw, balance, channel });
+    out.push({ date, time, description, deposit, withdraw, balance, channel });
   }
 
   return out;
@@ -418,6 +421,17 @@ function classifyDirection(text: string): "deposit" | "withdraw" | "unknown" {
   return "unknown";
 }
 
+/** Normalize a HH:MM token to zero-padded 24h, or null. */
+function parseTime(s: string | undefined): string | null {
+  if (!s) return null;
+  const m = s.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+  const h = parseInt(m[1], 10);
+  const mi = parseInt(m[2], 10);
+  if (h > 23 || mi > 59) return null;
+  return `${String(h).padStart(2, "0")}:${m[2]}`;
+}
+
 /** Try to parse a single statement row. Returns null if it isn't a transaction. */
 function parseRow(cells: string[]): ParsedTx | null {
   if (cells.length < 2) return null;
@@ -425,6 +439,9 @@ function parseRow(cells: string[]): ParsedTx | null {
   // First cell must be a date
   const date = normalizeDate(cells[0]);
   if (!date) return null;
+
+  // KBANK puts the time in its own cell right after the date.
+  const time = parseTime(cells[1]) ?? parseTime(cells[2]);
 
   // Collect numeric cells from the right side (deposit/withdraw/balance)
   const numericIdx: number[] = [];
@@ -488,12 +505,7 @@ function parseRow(cells: string[]): ParsedTx | null {
       .replace(/\s+/g, " ")
       .trim() || null;
 
-  // Skip header/total rows that happen to start with a date-like token
-  if (/^(ยอดยกมา|ยอดยกไป|รวม|Total|Brought|Carried)/i.test(description)) {
-    return { date, description, deposit, withdraw, balance, channel };
-  }
-
-  return { date, description, deposit, withdraw, balance, channel };
+  return { date, time, description, deposit, withdraw, balance, channel };
 }
 
 /**

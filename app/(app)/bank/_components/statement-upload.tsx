@@ -86,6 +86,7 @@ export function StatementUpload({
           openingBalance,
           rows: selectedRows.map((r) => ({
             date: r.date,
+            time: r.time,
             description: r.description.slice(0, 1000) || "(ไม่มีรายละเอียด)",
             deposit: r.deposit,
             withdraw: r.withdraw,

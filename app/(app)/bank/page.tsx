@@ -495,6 +495,11 @@ export default async function BankPage({
                   <tr key={r.id} className="hover:bg-surface">
                     <td className="px-3 py-1.5 whitespace-nowrap">
                       {r.date.toISOString().slice(0, 10)}
+                      {r.date.toISOString().slice(11, 16) !== "00:00" && (
+                        <span className="ml-1.5 text-muted-soft">
+                          {r.date.toISOString().slice(11, 16)}
+                        </span>
+                      )}
                     </td>
                     <td className="px-3 py-1.5">{r.description}</td>
                     <td className="px-3 py-1.5 text-right tabular-nums text-emerald-700">

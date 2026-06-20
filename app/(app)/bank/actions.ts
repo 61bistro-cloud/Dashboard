@@ -359,6 +359,7 @@ export type PreviewTx = {
   /** Index in the parse — used as React key + select identity */
   idx: number;
   date: string; // YYYY-MM-DD
+  time: string | null; // HH:MM
   description: string;
   deposit: number;
   withdraw: number;
@@ -436,6 +437,7 @@ export async function parseStatementPdf(
       return {
         idx,
         date: r.date,
+        time: r.time,
         description: r.description,
         deposit: r.deposit,
         withdraw: r.withdraw,
@@ -475,6 +477,12 @@ const importStatementSchema = z.object({
   rows: z.array(
     z.object({
       date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      // HH:MM from the statement (for chronological sort). Null/absent → midnight.
+      time: z
+        .string()
+        .regex(/^\d{2}:\d{2}$/)
+        .nullable()
+        .optional(),
       // Real statement rows can be quite long once channel text is included —
       // bumped to 1000 so we never reject a parsed row for length alone.
       description: z.string().min(1).max(1000),
@@ -584,7 +592,9 @@ export async function importStatementRows(
           fiscalMonthId: data.fiscalMonthId,
           accountId: data.accountId,
           categoryId: r.categoryId,
-          date: new Date(r.date + "T00:00:00Z"),
+          // Store full timestamp so rows sort by date+time (re-imports interleave
+          // correctly instead of appending at the end of the day).
+          date: new Date(`${r.date}T${r.time ?? "00:00"}:00Z`),
           description: r.description,
           deposit: r.deposit,
           withdraw: r.withdraw,
