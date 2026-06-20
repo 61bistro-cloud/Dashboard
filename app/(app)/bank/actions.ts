@@ -33,6 +33,11 @@ const addTxSchema = z.object({
     return Number(v);
   }),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "วันที่ต้องเป็น YYYY-MM-DD"),
+  time: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/)
+    .nullable()
+    .optional(),
   description: z.string().min(1, "ต้องระบุรายการ").max(200),
   deposit: moneyField,
   withdraw: moneyField,
@@ -58,7 +63,7 @@ export async function addTransaction(input: z.input<typeof addTxSchema>) {
       fiscalMonthId: data.fiscalMonthId,
       accountId: data.accountId,
       categoryId: data.categoryId,
-      date: new Date(data.date + "T00:00:00Z"),
+      date: new Date(`${data.date}T${data.time ?? "00:00"}:00Z`),
       description: data.description,
       deposit: data.deposit,
       withdraw: data.withdraw,

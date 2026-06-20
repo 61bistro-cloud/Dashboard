@@ -24,6 +24,7 @@ export function AddTransactionForm({
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [date, setDate] = useState(defaultDate);
+  const [time, setTime] = useState("");
   const [desc, setDesc] = useState("");
   const [deposit, setDeposit] = useState("");
   const [withdraw, setWithdraw] = useState("");
@@ -31,6 +32,7 @@ export function AddTransactionForm({
   const [catId, setCatId] = useState<string>("");
 
   const reset = () => {
+    setTime("");
     setDesc("");
     setDeposit("");
     setWithdraw("");
@@ -50,6 +52,7 @@ export function AddTransactionForm({
               accountId,
               categoryId: catId || null,
               date,
+              time: time || null,
               description: desc,
               deposit: deposit || 0,
               withdraw: withdraw || 0,
@@ -65,12 +68,20 @@ export function AddTransactionForm({
       className="border-b border-hairline-soft px-5 py-3 bg-surface/50"
     >
       <div className="grid grid-cols-2 md:grid-cols-12 gap-2 items-end text-xs">
-        <Field label="วันที่" cols="col-span-2 md:col-span-2">
+        <Field label="วันที่" cols="col-span-1 md:col-span-2">
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             required
+            className="w-full rounded-input border border-hairline px-2 py-1.5"
+          />
+        </Field>
+        <Field label="เวลา" cols="col-span-1 md:col-span-1">
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
             className="w-full rounded-input border border-hairline px-2 py-1.5"
           />
         </Field>
@@ -110,7 +121,7 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5 text-right tabular-nums"
           />
         </Field>
-        <Field label="ช่องทาง" cols="col-span-2 md:col-span-2">
+        <Field label="ช่องทาง" cols="col-span-2 md:col-span-1">
           <input
             type="text"
             value={channel}
