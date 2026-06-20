@@ -39,6 +39,7 @@ model Business {
   posBatches          PosImportBatch[]
   accountOpenings     AccountOpening[]
   bankTransactions    BankTransaction[]
+  closings            MonthlyClosing[]
 }
 
 // Which businesses a non-OWNER user can access. OWNER sees all businesses
@@ -67,6 +68,7 @@ model User {
   posBatches       PosImportBatch[]
   bankTransactions BankTransaction[]
   businesses       UserBusiness[]
+  closings         MonthlyClosing[]
 }
 
 // ───────── Fiscal calendar (ปีงบ Apr-Mar) — SHARED across businesses ─────────
@@ -97,6 +99,7 @@ model FiscalMonth {
   revenueOverrides MonthlyRevenueOverride[]
   bankTransactions BankTransaction[]
   accountOpenings  AccountOpening[]
+  closings         MonthlyClosing[]
 
   @@unique([yearId, monthIndex])
   @@index([calendarYear, calendarMonth])
@@ -425,4 +428,67 @@ model BankTransaction {
 
   @@index([businessId, fiscalMonthId, accountId, date])
   @@index([categoryId])
+}
+
+// ───────── Monthly P&L Closing (ปิดงบรายเดือน) ─────────
+
+model MonthlyClosing {
+  id            Int    @id @default(autoincrement())
+  businessId    Int
+  fiscalMonthId Int
+  status        String @default("CLOSED") // CLOSED — record existing = month is closed
+
+  // Snapshot of the P&L at the moment of closing (frozen official numbers).
+  netRevenue   Float
+  posBillCount Int    @default(0)
+  food         Float  @default(0)
+  bev          Float  @default(0)
+  pack         Float  @default(0)
+  cogs         Float  @default(0)
+  laborBase    Float  @default(0)
+  laborExtra   Float  @default(0)
+  labor        Float  @default(0)
+  fixed        Float  @default(0)
+  totalCost    Float  @default(0)
+  netProfit    Float  @default(0)
+  marginPct    Float?
+
+  note       String?
+  closedById String?
+  closedAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  business    Business            @relation(fields: [businessId], references: [id])
+  fiscalMonth FiscalMonth         @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
+  closedBy    User?               @relation(fields: [closedById], references: [id], onDelete: SetNull)
+  adjustments ClosingAdjustment[]
+  logs        ClosingLog[]
+
+  @@unique([businessId, fiscalMonthId])
+}
+
+model ClosingAdjustment {
+  id        Int      @id @default(autoincrement())
+  closingId Int
+  kind      String // "REVENUE" | "COST"
+  label     String
+  amount    Float
+  createdAt DateTime @default(now())
+
+  closing MonthlyClosing @relation(fields: [closingId], references: [id], onDelete: Cascade)
+
+  @@index([closingId])
+}
+
+model ClosingLog {
+  id        Int      @id @default(autoincrement())
+  closingId Int
+  action    String // CLOSE | REOPEN | RESYNC | ADJUST_ADD | ADJUST_REMOVE | NOTE
+  detail    String?
+  byUserId  String?
+  createdAt DateTime @default(now())
+
+  closing MonthlyClosing @relation(fields: [closingId], references: [id], onDelete: Cascade)
+
+  @@index([closingId])
 }

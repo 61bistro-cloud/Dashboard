@@ -51,6 +51,7 @@ import {
   Target,
   CalendarDays,
   CalendarRange,
+  ClipboardCheck,
 } from "lucide-react";
 
 /** Single navigation icon table — keyed by route href */
@@ -58,6 +59,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/": LayoutDashboard,
   "/daily-pl": Calendar,
   "/monthly-pl": TrendingUp,
+  "/closing": ClipboardCheck,
   "/cost-setup": Settings,
   "/pos-sales": ReceiptText,
   "/bank": Landmark,

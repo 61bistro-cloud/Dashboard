@@ -126,6 +126,16 @@
   }
 }
 
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+}
+
 @layer utilities {
   /* iPhone safe-area padding helpers */
   .pt-safe {

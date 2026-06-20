@@ -34,6 +34,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["OWNER", "ACCOUNTANT"],
   },
   {
+    href: "/closing",
+    label: "ปิดงบรายเดือน",
+    icon: NAV_ICONS["/closing"],
+    roles: ["OWNER", "ACCOUNTANT"],
+  },
+  {
     href: "/cost-setup",
     label: "Cost Setup",
     icon: NAV_ICONS["/cost-setup"],
