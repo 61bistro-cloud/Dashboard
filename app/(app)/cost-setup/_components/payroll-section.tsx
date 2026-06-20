@@ -6,11 +6,11 @@ import {
   addEmployee,
   deleteEmployee,
   savePayroll,
-  moveEmployee,
+  reorderEmployees,
 } from "../actions";
 import { MoneyInput } from "./money-input";
 import { SectionCard } from "./section-card";
-import { ReorderButtons } from "./reorder-buttons";
+import { SortableList, SortableRow } from "./sortable";
 import { PAYROLL_EXTRA_LABELS } from "@/lib/fiscal";
 
 type EmpRow = {
@@ -44,9 +44,18 @@ export function PayrollSection({
 
   const [pendingDelete, startDelete] = useTransition();
   const [pendingAdd, startAdd] = useTransition();
+  const [, startReorder] = useTransition();
   const [addMode, setAddMode] = useState(false);
   const [newName, setNewName] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
+
+  const handleReorder = (newIds: number[]) => {
+    setEmps((prev) => {
+      const byId = new Map(prev.map((e) => [e.id, e]));
+      return newIds.map((id) => byId.get(id)!).filter(Boolean);
+    });
+    startReorder(() => reorderEmployees(newIds));
+  };
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,80 +103,78 @@ export function PayrollSection({
       }
     >
       <div className="space-y-1">
-        <div className="grid grid-cols-[1fr_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
+        <div className="grid grid-cols-[auto_1fr_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
+          <div className="w-5"></div>
           <div>พนักงาน</div>
           <div className="text-right">เงินเดือน (บาท)</div>
           <div></div>
         </div>
 
-        {emps.map((e, i) => {
-          const displayName = e.nameOverride ?? e.name;
-          const hasOverride = e.nameOverride != null;
-          return (
-            <div
-              key={e.id}
-              className="group grid grid-cols-[1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
-            >
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-soft tabular-nums">{i + 1}.</span>
-                <input
-                  type="text"
-                  value={displayName}
-                  onChange={(ev) => {
-                    const next = ev.target.value;
-                    setEmps((prev) =>
-                      prev.map((p) =>
-                        p.id === e.id
-                          ? {
-                              ...p,
-                              // Empty input → revert to global name on next save
-                              nameOverride: next === e.name ? null : next,
-                            }
-                          : p
-                      )
-                    );
-                  }}
-                  aria-label={`ชื่อพนักงาน ${e.shortName ?? e.name}`}
-                  className="flex-1 rounded-input border border-transparent bg-transparent px-1.5 py-0.5 text-sm hover:border-hairline focus:border-ink focus:bg-canvas focus:outline-none transition-colors"
-                />
-                {hasOverride && (
-                  <span
-                    className="text-xs text-amber-600 cursor-help"
-                    title="แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
-                  >
-                    เฉพาะเดือนนี้
-                  </span>
+        <SortableList ids={emps.map((e) => e.id)} onReorder={handleReorder}>
+          {emps.map((e) => {
+            const displayName = e.nameOverride ?? e.name;
+            const hasOverride = e.nameOverride != null;
+            return (
+              <SortableRow key={e.id} id={e.id}>
+                {({ dragHandle }) => (
+                  <div className="group grid grid-cols-[auto_1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface">
+                    {dragHandle}
+                    <div className="flex items-center gap-2 text-sm min-w-0">
+                      <input
+                        type="text"
+                        value={displayName}
+                        onChange={(ev) => {
+                          const next = ev.target.value;
+                          setEmps((prev) =>
+                            prev.map((p) =>
+                              p.id === e.id
+                                ? {
+                                    ...p,
+                                    nameOverride: next === e.name ? null : next,
+                                  }
+                                : p
+                            )
+                          );
+                        }}
+                        aria-label={`ชื่อพนักงาน ${e.shortName ?? e.name}`}
+                        className="flex-1 min-w-0 rounded-input border border-transparent bg-transparent px-1.5 py-0.5 text-sm hover:border-hairline focus:border-ink focus:bg-canvas focus:outline-none transition-colors"
+                      />
+                      {hasOverride && (
+                        <span
+                          className="text-xs text-amber-600 cursor-help shrink-0"
+                          title="แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
+                        >
+                          เฉพาะเดือนนี้
+                        </span>
+                      )}
+                    </div>
+                    <MoneyInput
+                      ariaLabel={`เงินเดือน ${e.shortName ?? e.name}`}
+                      value={e.amount}
+                      onChange={(n) =>
+                        setEmps((prev) =>
+                          prev.map((p) =>
+                            p.id === e.id ? { ...p, amount: n } : p
+                          )
+                        )
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(e.id, displayName)}
+                      disabled={pendingDelete}
+                      className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
+                      aria-label={`ลบพนักงาน ${displayName}`}
+                      title={`ลบพนักงาน ${displayName}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    </button>
+                  </div>
                 )}
-              </div>
-              <MoneyInput
-                ariaLabel={`เงินเดือน ${e.shortName ?? e.name}`}
-                value={e.amount}
-                onChange={(n) =>
-                  setEmps((prev) =>
-                    prev.map((p) => (p.id === e.id ? { ...p, amount: n } : p))
-                  )
-                }
-              />
-              <div className="flex items-center gap-0.5">
-                <ReorderButtons
-                  onMove={(d) => moveEmployee(e.id, d)}
-                  isFirst={i === 0}
-                  isLast={i === emps.length - 1}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleDelete(e.id, displayName)}
-                  disabled={pendingDelete}
-                  className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
-                  aria-label={`ลบพนักงาน ${displayName}`}
-                  title={`ลบพนักงาน ${displayName}`}
-                >
-                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
+              </SortableRow>
+            );
+          })}
+        </SortableList>
 
         {/* Add new employee */}
         {addMode ? (

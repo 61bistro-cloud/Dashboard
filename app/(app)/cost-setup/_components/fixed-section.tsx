@@ -6,11 +6,11 @@ import {
   addFixedCategory,
   deleteFixedCategory,
   saveFixed,
-  moveFixedCategory,
+  reorderFixedCategories,
 } from "../actions";
 import { MoneyInput } from "./money-input";
 import { SectionCard } from "./section-card";
-import { ReorderButtons } from "./reorder-buttons";
+import { SortableList, SortableRow } from "./sortable";
 import { FIXED_CAT_ICONS } from "@/lib/icons";
 
 type CatRow = {
@@ -37,9 +37,18 @@ export function FixedCostSection({
 
   const [pendingDelete, startDelete] = useTransition();
   const [pendingAdd, startAdd] = useTransition();
+  const [, startReorder] = useTransition();
   const [addMode, setAddMode] = useState(false);
   const [newName, setNewName] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
+
+  const handleReorder = (newIds: number[]) => {
+    setRows((prev) => {
+      const byId = new Map(prev.map((r) => [r.id, r]));
+      return newIds.map((id) => byId.get(id)!).filter(Boolean);
+    });
+    startReorder(() => reorderFixedCategories(newIds));
+  };
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,58 +92,55 @@ export function FixedCostSection({
       }
     >
       <div className="space-y-1">
-        <div className="grid grid-cols-[1fr_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
+        <div className="grid grid-cols-[auto_1fr_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
+          <div className="w-5"></div>
           <div>หมวด</div>
           <div className="text-right">จำนวน (บาท)</div>
           <div></div>
         </div>
 
-        {rows.map((r, i) => {
-          const RowIcon = FIXED_CAT_ICONS[r.name] ?? FolderDot;
-          return (
-            <div
-              key={r.id}
-              className="group grid grid-cols-[1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
-            >
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-soft tabular-nums w-5">
-                  {i + 1}.
-                </span>
-                <RowIcon
-                  className="h-4 w-4 text-muted-soft"
-                  strokeWidth={1.75}
-                />
-                {r.name}
-              </div>
-              <MoneyInput
-                ariaLabel={r.name}
-                value={r.amount}
-                onChange={(n) =>
-                  setRows((prev) =>
-                    prev.map((p) => (p.id === r.id ? { ...p, amount: n } : p))
-                  )
-                }
-              />
-              <div className="flex items-center gap-0.5">
-                <ReorderButtons
-                  onMove={(d) => moveFixedCategory(r.id, d)}
-                  isFirst={i === 0}
-                  isLast={i === rows.length - 1}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleDelete(r.id, r.name)}
-                  disabled={pendingDelete}
-                  className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
-                  aria-label={`ลบหมวด ${r.name}`}
-                  title={`ลบหมวด ${r.name}`}
-                >
-                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
+        <SortableList ids={rows.map((r) => r.id)} onReorder={handleReorder}>
+          {rows.map((r) => {
+            const RowIcon = FIXED_CAT_ICONS[r.name] ?? FolderDot;
+            return (
+              <SortableRow key={r.id} id={r.id}>
+                {({ dragHandle }) => (
+                  <div className="group grid grid-cols-[auto_1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface">
+                    {dragHandle}
+                    <div className="flex items-center gap-2 text-sm min-w-0">
+                      <RowIcon
+                        className="h-4 w-4 text-muted-soft shrink-0"
+                        strokeWidth={1.75}
+                      />
+                      <span className="truncate">{r.name}</span>
+                    </div>
+                    <MoneyInput
+                      ariaLabel={r.name}
+                      value={r.amount}
+                      onChange={(n) =>
+                        setRows((prev) =>
+                          prev.map((p) =>
+                            p.id === r.id ? { ...p, amount: n } : p
+                          )
+                        )
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(r.id, r.name)}
+                      disabled={pendingDelete}
+                      className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
+                      aria-label={`ลบหมวด ${r.name}`}
+                      title={`ลบหมวด ${r.name}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    </button>
+                  </div>
+                )}
+              </SortableRow>
+            );
+          })}
+        </SortableList>
 
         {/* Add new category */}
         {addMode ? (

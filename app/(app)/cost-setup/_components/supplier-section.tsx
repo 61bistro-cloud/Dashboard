@@ -6,11 +6,11 @@ import {
   addSupplier,
   deleteSupplier,
   saveSuppliers,
-  moveSupplier,
+  reorderSuppliers,
 } from "../actions";
 import { MoneyInput, fmt } from "./money-input";
 import { SectionCard } from "./section-card";
-import { ReorderButtons } from "./reorder-buttons";
+import { SortableList, SortableRow } from "./sortable";
 import { SUPPLIER_CATEGORY_LABELS } from "@/lib/fiscal";
 import { SUPPLIER_CAT_ICONS } from "@/lib/icons";
 
@@ -33,6 +33,20 @@ export function SupplierSection({
 }) {
   const [rows, setRows] = useState<SupRow[]>(suppliers);
   useEffect(() => setRows(suppliers), [suppliers]);
+  const [, startReorder] = useTransition();
+
+  // Reorder one category's suppliers; keep the other categories untouched.
+  const handleReorder = (cat: Cat, newIds: number[]) => {
+    setRows((prev) => {
+      const byId = new Map(prev.map((r) => [r.id, r]));
+      const reordered = newIds
+        .map((id) => byId.get(id))
+        .filter((r): r is SupRow => !!r);
+      let ri = 0;
+      return prev.map((r) => (r.category === cat ? (reordered[ri++] ?? r) : r));
+    });
+    startReorder(() => reorderSuppliers(newIds));
+  };
 
   const total = rows.reduce((s, r) => s + r.amount, 0);
 
@@ -73,6 +87,7 @@ export function SupplierSection({
               icon={CatIcon}
               rows={list}
               subtotal={subtotal}
+              onReorder={(newIds) => handleReorder(cat, newIds)}
               onAmountChange={(id, n) =>
                 setRows((prev) =>
                   prev.map((p) => (p.id === id ? { ...p, amount: n } : p))
@@ -104,6 +119,7 @@ function CategoryGroup({
   icon: CatIcon,
   rows,
   subtotal,
+  onReorder,
   onAmountChange,
   onNameChange,
 }: {
@@ -112,6 +128,7 @@ function CategoryGroup({
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   rows: SupRow[];
   subtotal: number;
+  onReorder: (newIds: number[]) => void;
   onAmountChange: (id: number, amount: number) => void;
   onNameChange: (id: number, name: string, globalName: string) => void;
 }) {
@@ -161,57 +178,55 @@ function CategoryGroup({
         </div>
       </div>
       <div className="space-y-1">
-        {rows.map((r, i) => {
-          const displayName = r.nameOverride ?? r.name;
-          const hasOverride = r.nameOverride != null;
-          return (
-            <div
-              key={r.id}
-              className="group grid grid-cols-[1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
-            >
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-soft tabular-nums">{i + 1}.</span>
-                <input
-                  type="text"
-                  value={displayName}
-                  onChange={(ev) => onNameChange(r.id, ev.target.value, r.name)}
-                  aria-label={`ชื่อ supplier ${r.name}`}
-                  className="flex-1 rounded-input border border-transparent bg-transparent px-1.5 py-0.5 text-sm hover:border-hairline focus:border-ink focus:bg-canvas focus:outline-none transition-colors"
-                />
-                {hasOverride && (
-                  <span
-                    className="text-xs text-amber-600 cursor-help"
-                    title="แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
-                  >
-                    เฉพาะเดือนนี้
-                  </span>
+        <SortableList ids={rows.map((r) => r.id)} onReorder={onReorder}>
+          {rows.map((r) => {
+            const displayName = r.nameOverride ?? r.name;
+            const hasOverride = r.nameOverride != null;
+            return (
+              <SortableRow key={r.id} id={r.id}>
+                {({ dragHandle }) => (
+                  <div className="group grid grid-cols-[auto_1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface">
+                    {dragHandle}
+                    <div className="flex items-center gap-2 text-sm min-w-0">
+                      <input
+                        type="text"
+                        value={displayName}
+                        onChange={(ev) =>
+                          onNameChange(r.id, ev.target.value, r.name)
+                        }
+                        aria-label={`ชื่อ supplier ${r.name}`}
+                        className="flex-1 min-w-0 rounded-input border border-transparent bg-transparent px-1.5 py-0.5 text-sm hover:border-hairline focus:border-ink focus:bg-canvas focus:outline-none transition-colors"
+                      />
+                      {hasOverride && (
+                        <span
+                          className="text-xs text-amber-600 cursor-help shrink-0"
+                          title="แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
+                        >
+                          เฉพาะเดือนนี้
+                        </span>
+                      )}
+                    </div>
+                    <MoneyInput
+                      ariaLabel={displayName}
+                      value={r.amount}
+                      onChange={(n) => onAmountChange(r.id, n)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(r.id, displayName)}
+                      disabled={pendingDelete}
+                      className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
+                      aria-label={`ลบ supplier ${displayName}`}
+                      title={`ลบ supplier ${displayName}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    </button>
+                  </div>
                 )}
-              </div>
-              <MoneyInput
-                ariaLabel={displayName}
-                value={r.amount}
-                onChange={(n) => onAmountChange(r.id, n)}
-              />
-              <div className="flex items-center gap-0.5">
-                <ReorderButtons
-                  onMove={(d) => moveSupplier(r.id, d)}
-                  isFirst={i === 0}
-                  isLast={i === rows.length - 1}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleDelete(r.id, displayName)}
-                  disabled={pendingDelete}
-                  className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
-                  aria-label={`ลบ supplier ${displayName}`}
-                  title={`ลบ supplier ${displayName}`}
-                >
-                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
+              </SortableRow>
+            );
+          })}
+        </SortableList>
 
         {addMode ? (
           <form
