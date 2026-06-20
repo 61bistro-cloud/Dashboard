@@ -30,12 +30,16 @@ export function StatementUpload({
   const [wrongPassword, setWrongPassword] = useState(false);
   const [rows, setRows] = useState<EditableRow[]>([]);
   const [imported, setImported] = useState<number | null>(null);
+  const [skipped, setSkipped] = useState(0);
+  const [openingBalance, setOpeningBalance] = useState<number | null>(null);
+  const [setOpening, setSetOpening] = useState(true);
 
   function onParse(formData: FormData) {
     setError(null);
     setNeedPassword(false);
     setWrongPassword(false);
     setImported(null);
+    setSkipped(0);
     startTransition(async () => {
       try {
         const result = await parseStatementPdf(formData);
@@ -53,6 +57,8 @@ export function StatementUpload({
             categoryId: r.suggestedCategoryId,
           }))
         );
+        setOpeningBalance(result.openingBalance ?? null);
+        setSetOpening(result.openingBalance != null);
         if (result.preview.length === 0) {
           setError("ไม่พบรายการใน PDF นี้ — รูปแบบไฟล์อาจไม่รองรับ");
         }
@@ -65,6 +71,7 @@ export function StatementUpload({
   function onImport() {
     setError(null);
     setImported(null);
+    setSkipped(0);
     const selectedRows = rows.filter((r) => r.selected);
     if (selectedRows.length === 0) {
       setError("กรุณาเลือกอย่างน้อย 1 รายการ");
@@ -75,11 +82,14 @@ export function StatementUpload({
         const result = await importStatementRows({
           fiscalMonthId,
           accountId,
+          setOpening: setOpening && openingBalance != null,
+          openingBalance,
           rows: selectedRows.map((r) => ({
             date: r.date,
             description: r.description.slice(0, 1000) || "(ไม่มีรายละเอียด)",
             deposit: r.deposit,
             withdraw: r.withdraw,
+            balance: r.balance,
             channel: (r.channel ?? "").slice(0, 500),
             note: "",
             categoryId: r.categoryId,
@@ -87,6 +97,7 @@ export function StatementUpload({
         });
         if (result.ok) {
           setImported(result.inserted);
+          setSkipped(result.skipped ?? 0);
           setRows([]);
         } else {
           setError(result.message ?? "บันทึกไม่สำเร็จ");
@@ -184,14 +195,41 @@ export function StatementUpload({
 
           {imported != null && (
             <div className="flex items-center gap-2 rounded-card border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
-              <Check className="h-4 w-4" />
-              บันทึก {imported} รายการเรียบร้อย
+              <Check className="h-4 w-4 shrink-0" />
+              <span>
+                บันทึก {imported} รายการเรียบร้อย
+                {skipped > 0 && (
+                  <span className="text-emerald-700/80">
+                    {" "}
+                    — ข้ามรายการซ้ำ {skipped} รายการ (กันยอดเบิ้ล)
+                  </span>
+                )}
+              </span>
             </div>
           )}
 
           {/* Step 2: Preview table */}
           {rows.length > 0 && (
             <div className="space-y-2">
+              {/* Opening balance from the statement */}
+              {openingBalance != null && (
+                <label className="flex items-start gap-2 rounded-card border border-sky-200 bg-sky-50 p-3 text-xs text-sky-900 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={setOpening}
+                    onChange={(e) => setSetOpening(e.target.checked)}
+                    className="mt-0.5 accent-sky-600"
+                  />
+                  <span>
+                    ตั้ง <strong>ยอดยกมา</strong> ของเดือนนี้ ={" "}
+                    <strong className="tabular-nums">
+                      {fmtTHB(openingBalance)}
+                    </strong>{" "}
+                    (จากบรรทัด &ldquo;ยอดยกมา&rdquo; ใน statement) —
+                    แนะนำให้ติ๊ก เพื่อให้ยอดคงเหลือตรงกับ statement
+                  </span>
+                </label>
+              )}
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="text-xs text-muted">
                   พบ {rows.length} รายการ — เลือก {selectedCount} รายการ ✓

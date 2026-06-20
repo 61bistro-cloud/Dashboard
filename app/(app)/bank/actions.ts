@@ -374,6 +374,8 @@ export type ParseStatementResult = {
   needPassword?: boolean;
   wrongPassword?: boolean;
   preview: PreviewTx[];
+  /** Brought-forward balance (ยอดยกมา) from the statement, if detected */
+  openingBalance?: number | null;
   rawText?: string;
 };
 
@@ -449,6 +451,7 @@ export async function parseStatementPdf(
     return {
       ok: true,
       preview,
+      openingBalance: parsed.openingBalance ?? null,
       rawText: parsed.rawText.join("\n\n"),
     };
   } catch (e) {
@@ -466,6 +469,9 @@ export async function parseStatementPdf(
 const importStatementSchema = z.object({
   fiscalMonthId: z.coerce.number().int().positive(),
   accountId: z.coerce.number().int().positive(),
+  // Optional: set the month's opening balance (ยอดยกมา) from the statement
+  setOpening: z.boolean().optional().default(false),
+  openingBalance: z.union([z.number(), z.null()]).optional(),
   rows: z.array(
     z.object({
       date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -474,6 +480,8 @@ const importStatementSchema = z.object({
       description: z.string().min(1).max(1000),
       deposit: moneyField,
       withdraw: moneyField,
+      // Running balance after this row (for dedup). Null if not parseable.
+      balance: z.union([z.number(), z.null()]).optional(),
       channel: z.string().max(500).optional().nullable().default(""),
       note: z.string().max(500).optional().nullable().default(""),
       categoryId: z.union([z.string(), z.number(), z.null()]).transform((v) => {
@@ -487,8 +495,20 @@ const importStatementSchema = z.object({
 export type ImportStatementResult = {
   ok: boolean;
   inserted: number;
+  skipped?: number;
   message?: string;
 };
+
+// Dedup fingerprints. The statement's running balance is near-unique per row
+// (robust even if the user edits the description); the description key is the
+// fallback that also bridges older rows imported before balanceAfter existed.
+const r2 = (n: number) => Math.round(n * 100) / 100;
+function fpBalance(d: string, dep: number, wd: number, bal: number): string {
+  return `${d}|${r2(dep)}|${r2(wd)}|b${r2(bal)}`;
+}
+function fpDesc(d: string, dep: number, wd: number, desc: string): string {
+  return `${d}|${r2(dep)}|${r2(wd)}|d${(desc || "").trim().slice(0, 60)}`;
+}
 
 export async function importStatementRows(
   input: z.input<typeof importStatementSchema>
@@ -519,24 +539,93 @@ export async function importStatementRows(
       return { ok: false, inserted: 0, message: "ไม่มีรายการให้บันทึก" };
     }
 
-    const result = await prisma.bankTransaction.createMany({
-      data: data.rows.map((r) => ({
-        businessId: biz.id,
-        fiscalMonthId: data.fiscalMonthId,
-        accountId: data.accountId,
-        categoryId: r.categoryId,
-        date: new Date(r.date + "T00:00:00Z"),
-        description: r.description,
-        deposit: r.deposit,
-        withdraw: r.withdraw,
-        channel: r.channel || null,
-        note: r.note || null,
-        createdById: session.user.id,
-      })),
+    // ── Dedup against what's already in this account ──
+    const existing = await prisma.bankTransaction.findMany({
+      where: { businessId: biz.id, accountId: data.accountId },
+      select: {
+        date: true,
+        deposit: true,
+        withdraw: true,
+        balanceAfter: true,
+        description: true,
+      },
     });
+    const seen = new Set<string>();
+    for (const t of existing) {
+      const d = t.date.toISOString().slice(0, 10);
+      seen.add(fpDesc(d, t.deposit, t.withdraw, t.description));
+      if (t.balanceAfter != null) {
+        seen.add(fpBalance(d, t.deposit, t.withdraw, t.balanceAfter));
+      }
+    }
+
+    const toInsert: typeof data.rows = [];
+    let skipped = 0;
+    for (const r of data.rows) {
+      const dk = fpDesc(r.date, r.deposit, r.withdraw, r.description);
+      const bk =
+        r.balance != null
+          ? fpBalance(r.date, r.deposit, r.withdraw, r.balance)
+          : null;
+      if (seen.has(dk) || (bk && seen.has(bk))) {
+        skipped += 1;
+        continue;
+      }
+      seen.add(dk);
+      if (bk) seen.add(bk);
+      toInsert.push(r);
+    }
+
+    let inserted = 0;
+    if (toInsert.length > 0) {
+      const result = await prisma.bankTransaction.createMany({
+        data: toInsert.map((r) => ({
+          businessId: biz.id,
+          fiscalMonthId: data.fiscalMonthId,
+          accountId: data.accountId,
+          categoryId: r.categoryId,
+          date: new Date(r.date + "T00:00:00Z"),
+          description: r.description,
+          deposit: r.deposit,
+          withdraw: r.withdraw,
+          balanceAfter: r.balance ?? null,
+          channel: r.channel || null,
+          note: r.note || null,
+          createdById: session.user.id,
+        })),
+      });
+      inserted = result.count;
+    }
+
+    // ── Optionally set the month's opening balance from the statement ──
+    if (data.setOpening && data.openingBalance != null) {
+      await prisma.accountOpening.upsert({
+        where: {
+          accountId_fiscalMonthId: {
+            accountId: data.accountId,
+            fiscalMonthId: data.fiscalMonthId,
+          },
+        },
+        update: { amount: data.openingBalance },
+        create: {
+          businessId: biz.id,
+          accountId: data.accountId,
+          fiscalMonthId: data.fiscalMonthId,
+          amount: data.openingBalance,
+        },
+      });
+    }
 
     revalidatePath("/bank");
-    return { ok: true, inserted: result.count };
+    return {
+      ok: true,
+      inserted,
+      skipped,
+      message:
+        skipped > 0
+          ? `บันทึก ${inserted} รายการ — ข้ามรายการซ้ำ ${skipped} รายการ`
+          : undefined,
+    };
   } catch (e) {
     console.error("[importStatementRows] unexpected error:", e);
     return {

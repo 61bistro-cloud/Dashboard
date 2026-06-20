@@ -39,6 +39,8 @@ export type ParseResult = {
   password?: "missing" | "wrong";
   message?: string;
   rows: ParsedTx[];
+  /** Statement's brought-forward balance (ยอดยกมา), if found */
+  openingBalance?: number | null;
   /** Raw text per page — useful for debugging or hand-fixing in the UI */
   rawText: string[];
 };
@@ -194,6 +196,23 @@ function detectBank(rawText: string[]): "SCB" | "KBANK" {
 }
 
 /**
+ * Find the statement's opening (brought-forward) balance:
+ *   KBANK: "ยอดยกมา"
+ *   SCB:   "ยอดเงินคงเหลือยกมา (BALANCE BROUGHT FORWARD)"
+ * Returns the balance figure on that row, or null if not present.
+ */
+function findOpeningBalance(rows: Row[]): number | null {
+  for (const r of rows) {
+    const joined = r.cells.map((c) => c.text).join(" ");
+    if (/ยอดยกมา|ยอดเงินคงเหลือยกมา|BALANCE BROUGHT FORWARD/i.test(joined)) {
+      const nums = r.cells.filter((c) => isNumeric(c.text));
+      if (nums.length) return num(nums[nums.length - 1].text);
+    }
+  }
+  return null;
+}
+
+/**
  * Entry point — open the statement, detect the bank, and parse its rows.
  * Kept the historical name `parseKbankPdf` for callers; now multi-bank.
  */
@@ -220,7 +239,9 @@ export async function parseKbankPdf(
           .map((r) => parseRow(r.cells.map((c) => c.text)))
           .filter((x): x is ParsedTx => x !== null);
 
-  return { ok: true, rows, rawText: ex.rawText };
+  const openingBalance = findOpeningBalance(ex.rows);
+
+  return { ok: true, rows, openingBalance, rawText: ex.rawText };
 }
 
 /** Alias with a clearer name for new call sites. */

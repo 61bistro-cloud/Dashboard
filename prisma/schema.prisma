@@ -410,6 +410,9 @@ model BankTransaction {
   withdraw    Float    @default(0)
   channel     String? // K PLUS / SCB Mobile / EDC / Cash / ATM ...
   note        String?
+  // Running balance shown on the statement after this row. Used to dedupe
+  // re-imports of overlapping date ranges. Null for manual entries.
+  balanceAfter Float?
 
   createdAt   DateTime @default(now())
   createdById String?

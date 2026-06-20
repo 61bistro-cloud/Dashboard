@@ -94,6 +94,14 @@
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
   }
+  /* Force readable colours on native <select> dropdown popups. color-scheme
+     alone isn't enough on some Windows/Chrome builds, so set them explicitly —
+     dark bg + light text in dark mode, white bg + dark text in light mode. */
+  select option,
+  select optgroup {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+  }
   ::selection {
     background: var(--color-ink);
     color: var(--color-canvas);
