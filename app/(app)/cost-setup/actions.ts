@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -466,5 +467,95 @@ export async function deleteSupplier(id: number) {
     });
   }
 
+  revalidatePath("/cost-setup");
+}
+
+// ───── REORDER (up/down within a group) ─────
+
+const dir = z.enum(["up", "down"]);
+
+/** Swap two rows' sortOrder. `rows` must be the ordered, same-group siblings. */
+async function swapOrder(
+  rows: { id: number; sortOrder: number }[],
+  id: number,
+  direction: "up" | "down",
+  update: (id: number, sortOrder: number) => Prisma.PrismaPromise<unknown>
+) {
+  const idx = rows.findIndex((r) => r.id === id);
+  if (idx < 0) return;
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= rows.length) return; // already at the edge
+  const a = rows[idx];
+  const b = rows[swapIdx];
+  await prisma.$transaction([
+    update(a.id, b.sortOrder),
+    update(b.id, a.sortOrder),
+  ]);
+}
+
+export async function moveEmployee(id: number, direction: z.infer<typeof dir>) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const own = await prisma.employee.findFirst({
+    where: { id, businessId: biz.id },
+    select: { id: true },
+  });
+  if (!own) throw new Error("ไม่พบพนักงานในธุรกิจปัจจุบัน");
+
+  const siblings = await prisma.employee.findMany({
+    where: { businessId: biz.id, active: true },
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, sortOrder: true },
+  });
+  await swapOrder(siblings, id, direction, (sid, so) =>
+    prisma.employee.update({ where: { id: sid }, data: { sortOrder: so } })
+  );
+  revalidatePath("/cost-setup");
+}
+
+export async function moveSupplier(id: number, direction: z.infer<typeof dir>) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const own = await prisma.supplier.findFirst({
+    where: { id, businessId: biz.id },
+    select: { id: true, category: true },
+  });
+  if (!own) throw new Error("ไม่พบ supplier ในธุรกิจปัจจุบัน");
+
+  // Reorder within the same category only
+  const siblings = await prisma.supplier.findMany({
+    where: { businessId: biz.id, active: true, category: own.category },
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, sortOrder: true },
+  });
+  await swapOrder(siblings, id, direction, (sid, so) =>
+    prisma.supplier.update({ where: { id: sid }, data: { sortOrder: so } })
+  );
+  revalidatePath("/cost-setup");
+}
+
+export async function moveFixedCategory(
+  id: number,
+  direction: z.infer<typeof dir>
+) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const own = await prisma.fixedCostCategory.findFirst({
+    where: { id, businessId: biz.id },
+    select: { id: true },
+  });
+  if (!own) throw new Error("ไม่พบหมวดในธุรกิจปัจจุบัน");
+
+  const siblings = await prisma.fixedCostCategory.findMany({
+    where: { businessId: biz.id, active: true },
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, sortOrder: true },
+  });
+  await swapOrder(siblings, id, direction, (sid, so) =>
+    prisma.fixedCostCategory.update({
+      where: { id: sid },
+      data: { sortOrder: so },
+    })
+  );
   revalidatePath("/cost-setup");
 }

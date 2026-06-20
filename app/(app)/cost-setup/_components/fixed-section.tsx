@@ -2,9 +2,15 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { Home, FolderDot, Trash2, Plus, AlertCircle } from "lucide-react";
-import { addFixedCategory, deleteFixedCategory, saveFixed } from "../actions";
+import {
+  addFixedCategory,
+  deleteFixedCategory,
+  saveFixed,
+  moveFixedCategory,
+} from "../actions";
 import { MoneyInput } from "./money-input";
 import { SectionCard } from "./section-card";
+import { ReorderButtons } from "./reorder-buttons";
 import { FIXED_CAT_ICONS } from "@/lib/icons";
 
 type CatRow = {
@@ -77,7 +83,7 @@ export function FixedCostSection({
       }
     >
       <div className="space-y-1">
-        <div className="grid grid-cols-[1fr_180px_28px] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
+        <div className="grid grid-cols-[1fr_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
           <div>หมวด</div>
           <div className="text-right">จำนวน (บาท)</div>
           <div></div>
@@ -88,7 +94,7 @@ export function FixedCostSection({
           return (
             <div
               key={r.id}
-              className="group grid grid-cols-[1fr_180px_28px] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
+              className="group grid grid-cols-[1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
             >
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-muted-soft tabular-nums w-5">
@@ -109,16 +115,23 @@ export function FixedCostSection({
                   )
                 }
               />
-              <button
-                type="button"
-                onClick={() => handleDelete(r.id, r.name)}
-                disabled={pendingDelete}
-                className="text-muted-soft hover:text-red-600 opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-30 transition-opacity"
-                aria-label={`ลบหมวด ${r.name}`}
-                title={`ลบหมวด ${r.name}`}
-              >
-                <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </button>
+              <div className="flex items-center gap-0.5">
+                <ReorderButtons
+                  onMove={(d) => moveFixedCategory(r.id, d)}
+                  isFirst={i === 0}
+                  isLast={i === rows.length - 1}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDelete(r.id, r.name)}
+                  disabled={pendingDelete}
+                  className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
+                  aria-label={`ลบหมวด ${r.name}`}
+                  title={`ลบหมวด ${r.name}`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                </button>
+              </div>
             </div>
           );
         })}

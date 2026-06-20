@@ -2,9 +2,15 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { Boxes, Trash2, Plus, AlertCircle } from "lucide-react";
-import { addSupplier, deleteSupplier, saveSuppliers } from "../actions";
+import {
+  addSupplier,
+  deleteSupplier,
+  saveSuppliers,
+  moveSupplier,
+} from "../actions";
 import { MoneyInput, fmt } from "./money-input";
 import { SectionCard } from "./section-card";
+import { ReorderButtons } from "./reorder-buttons";
 import { SUPPLIER_CATEGORY_LABELS } from "@/lib/fiscal";
 import { SUPPLIER_CAT_ICONS } from "@/lib/icons";
 
@@ -161,7 +167,7 @@ function CategoryGroup({
           return (
             <div
               key={r.id}
-              className="group grid grid-cols-[1fr_180px_28px] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
+              className="group grid grid-cols-[1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
             >
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-muted-soft tabular-nums">{i + 1}.</span>
@@ -186,16 +192,23 @@ function CategoryGroup({
                 value={r.amount}
                 onChange={(n) => onAmountChange(r.id, n)}
               />
-              <button
-                type="button"
-                onClick={() => handleDelete(r.id, displayName)}
-                disabled={pendingDelete}
-                className="text-muted-soft hover:text-red-600 opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-30 transition-opacity"
-                aria-label={`ลบ supplier ${displayName}`}
-                title={`ลบ supplier ${displayName}`}
-              >
-                <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </button>
+              <div className="flex items-center gap-0.5">
+                <ReorderButtons
+                  onMove={(d) => moveSupplier(r.id, d)}
+                  isFirst={i === 0}
+                  isLast={i === rows.length - 1}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDelete(r.id, displayName)}
+                  disabled={pendingDelete}
+                  className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
+                  aria-label={`ลบ supplier ${displayName}`}
+                  title={`ลบ supplier ${displayName}`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                </button>
+              </div>
             </div>
           );
         })}

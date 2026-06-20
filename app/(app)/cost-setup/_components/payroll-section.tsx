@@ -2,9 +2,15 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { Users, Trash2, Plus, AlertCircle } from "lucide-react";
-import { addEmployee, deleteEmployee, savePayroll } from "../actions";
+import {
+  addEmployee,
+  deleteEmployee,
+  savePayroll,
+  moveEmployee,
+} from "../actions";
 import { MoneyInput } from "./money-input";
 import { SectionCard } from "./section-card";
+import { ReorderButtons } from "./reorder-buttons";
 import { PAYROLL_EXTRA_LABELS } from "@/lib/fiscal";
 
 type EmpRow = {
@@ -88,7 +94,7 @@ export function PayrollSection({
       }
     >
       <div className="space-y-1">
-        <div className="grid grid-cols-[1fr_180px_28px] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
+        <div className="grid grid-cols-[1fr_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
           <div>พนักงาน</div>
           <div className="text-right">เงินเดือน (บาท)</div>
           <div></div>
@@ -100,7 +106,7 @@ export function PayrollSection({
           return (
             <div
               key={e.id}
-              className="group grid grid-cols-[1fr_180px_28px] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
+              className="group grid grid-cols-[1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
             >
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-muted-soft tabular-nums">{i + 1}.</span>
@@ -142,16 +148,23 @@ export function PayrollSection({
                   )
                 }
               />
-              <button
-                type="button"
-                onClick={() => handleDelete(e.id, displayName)}
-                disabled={pendingDelete}
-                className="text-muted-soft hover:text-red-600 opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-30 transition-opacity"
-                aria-label={`ลบพนักงาน ${displayName}`}
-                title={`ลบพนักงาน ${displayName}`}
-              >
-                <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </button>
+              <div className="flex items-center gap-0.5">
+                <ReorderButtons
+                  onMove={(d) => moveEmployee(e.id, d)}
+                  isFirst={i === 0}
+                  isLast={i === emps.length - 1}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDelete(e.id, displayName)}
+                  disabled={pendingDelete}
+                  className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
+                  aria-label={`ลบพนักงาน ${displayName}`}
+                  title={`ลบพนักงาน ${displayName}`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                </button>
+              </div>
             </div>
           );
         })}
