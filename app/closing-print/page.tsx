@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { fmtTHB } from "@/lib/fiscal";
 import { getCurrentBusiness } from "@/lib/business";
 import { getClosingView } from "@/lib/closing";
+import { PLStatement } from "@/components/pl-statement";
 import { PrintButton } from "./print-button";
 
 export const metadata = { title: "งบกำไรขาดทุน — Export" };
@@ -99,75 +100,10 @@ export default async function ClosingPrintPage({
           </div>
         )}
 
-        {/* P&L table */}
-        <table className="mt-6 w-full text-sm">
-          <tbody>
-            <PHead>รายได้ (Revenue)</PHead>
-            <PRow
-              label="ยอดขายสุทธิ (POS / Override)"
-              v={money(base.netRevenue)}
-              indent
-            />
-            {view.adjustRevenue !== 0 && (
-              <PRow
-                label="ปรับปรุงรายได้"
-                v={money(view.adjustRevenue)}
-                indent
-              />
-            )}
-            <PSub label="รวมรายได้" v={money(view.final.netRevenue)} />
-
-            <PHead>ต้นทุนขาย (COGS)</PHead>
-            <PRow label="วัตถุดิบอาหาร" v={money(base.food)} indent />
-            <PRow label="วัตถุดิบเครื่องดื่ม" v={money(base.bev)} indent />
-            <PRow label="บรรจุภัณฑ์" v={money(base.pack)} indent />
-            <PSub label="รวมต้นทุนขาย" v={money(base.cogs)} />
-
-            <PHead>ค่าแรงพนักงาน (Labor)</PHead>
-            <PRow label="เงินเดือน" v={money(base.laborBase)} indent />
-            <PRow
-              label="OT / โบนัส / พิเศษ"
-              v={money(base.laborExtra)}
-              indent
-            />
-            <PSub label="รวมค่าแรง" v={money(base.labor)} />
-
-            <PHead>ค่าใช้จ่ายประจำ (Fixed)</PHead>
-            <PRow
-              label="ค่าเช่า / สาธารณูปโภค / อื่นๆ"
-              v={money(base.fixed)}
-              indent
-            />
-            {view.adjustCost !== 0 && (
-              <PRow label="ปรับปรุงต้นทุน" v={money(view.adjustCost)} indent />
-            )}
-            <PSub label="รวมต้นทุนทั้งหมด" v={money(view.final.totalCost)} />
-
-            <tr className="border-t-2 border-black">
-              <td className="pt-3 text-base font-bold">
-                กำไรสุทธิ (Net Profit)
-              </td>
-              <td
-                className={
-                  "pt-3 text-right text-base font-bold tabular-nums " +
-                  (view.final.netProfit >= 0
-                    ? "text-emerald-700"
-                    : "text-red-700")
-                }
-              >
-                {money(view.final.netProfit)}
-              </td>
-            </tr>
-            <tr>
-              <td className="text-sm text-neutral-500">Net Margin</td>
-              <td className="text-right text-sm tabular-nums text-neutral-500">
-                {view.final.marginPct == null
-                  ? "-"
-                  : `${(view.final.marginPct * 100).toFixed(1)}%`}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {/* P&L table (professional hierarchical statement with breakdowns) */}
+        <div className="mt-6">
+          <PLStatement view={view} print />
+        </div>
 
         {/* Cost ratios */}
         <div className="mt-5 grid grid-cols-4 gap-3 text-center text-xs">
@@ -251,44 +187,5 @@ export default async function ClosingPrintPage({
         </div>
       </div>
     </div>
-  );
-}
-
-function PHead({ children }: { children: React.ReactNode }) {
-  return (
-    <tr>
-      <td
-        colSpan={2}
-        className="pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500"
-      >
-        {children}
-      </td>
-    </tr>
-  );
-}
-function PRow({
-  label,
-  v,
-  indent,
-}: {
-  label: string;
-  v: string;
-  indent?: boolean;
-}) {
-  return (
-    <tr>
-      <td className={"py-1 " + (indent ? "pl-4 text-neutral-600" : "")}>
-        {label}
-      </td>
-      <td className="py-1 text-right tabular-nums">{v}</td>
-    </tr>
-  );
-}
-function PSub({ label, v }: { label: string; v: string }) {
-  return (
-    <tr className="border-t border-neutral-300">
-      <td className="py-1.5 font-semibold">{label}</td>
-      <td className="py-1.5 text-right font-semibold tabular-nums">{v}</td>
-    </tr>
   );
 }

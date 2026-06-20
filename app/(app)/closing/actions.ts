@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireBusiness } from "@/lib/business";
 import { getYearlyPL } from "@/lib/pl-calc";
+import { computeBreakdown } from "@/lib/closing";
 
 /** Owner approval password. Override via env, defaults to the shared Owner123. */
 const APPROVE_PASSWORD =
@@ -35,6 +36,7 @@ async function computeSnapshot(businessId: number, fiscalMonthId: number) {
   const yearly = await getYearlyPL(fm.year.yearBE, businessId);
   const m = yearly?.months.find((x) => x.fiscalMonthId === fiscalMonthId);
   if (!m) throw new Error("คำนวณ P&L ไม่ได้");
+  const breakdown = await computeBreakdown(businessId, fiscalMonthId);
   return {
     netRevenue: m.netRevenue,
     posBillCount: m.posBillCount,
@@ -49,6 +51,8 @@ async function computeSnapshot(businessId: number, fiscalMonthId: number) {
     totalCost: m.totalCost,
     netProfit: m.netProfit,
     marginPct: m.marginPct,
+    // Freeze the line-item sources alongside the totals
+    detailJson: JSON.stringify(breakdown),
   };
 }
 

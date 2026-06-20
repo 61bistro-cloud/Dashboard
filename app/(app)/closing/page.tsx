@@ -11,11 +11,12 @@ import {
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { fmtTHB, getCurrentFiscalMonth } from "@/lib/fiscal";
+import { getCurrentFiscalMonth } from "@/lib/fiscal";
 import { getCurrentBusiness } from "@/lib/business";
 import { getClosingView, type CheckStatus } from "@/lib/closing";
 import { MonthPicker } from "../cost-setup/_components/month-picker";
 import { PageHeader } from "@/components/page-header";
+import { PLStatement } from "@/components/pl-statement";
 import { ClosingControls } from "./_components/closing-controls";
 import { Adjustments } from "./_components/adjustments";
 
@@ -215,66 +216,8 @@ export default async function ClosingPage({
               : "ตัวเลขปัจจุบันจากบัญชีรายวัน (ยังไม่ปิด)"}
           </p>
         </header>
-        <div className="px-5 py-4">
-          <table className="w-full text-sm">
-            <tbody>
-              <Group title="รายได้ (Revenue)" />
-              <Line
-                label="ยอดขายสุทธิ (POS / Override)"
-                value={base.netRevenue}
-              />
-              {view.adjustRevenue !== 0 && (
-                <Line label="+ ปรับปรุงรายได้" value={view.adjustRevenue} sub />
-              )}
-              <Subtotal label="รวมรายได้" value={view.final.netRevenue} />
-
-              <Group title="ต้นทุนขาย (COGS)" />
-              <Line label="วัตถุดิบอาหาร" value={base.food} sub />
-              <Line label="วัตถุดิบเครื่องดื่ม" value={base.bev} sub />
-              <Line label="บรรจุภัณฑ์" value={base.pack} sub />
-              <Subtotal label="รวม COGS" value={base.cogs} />
-
-              <Group title="ค่าแรง (Labor)" />
-              <Line label="เงินเดือนพนักงาน" value={base.laborBase} sub />
-              <Line label="OT / โบนัส / พิเศษ" value={base.laborExtra} sub />
-              <Subtotal label="รวม Labor" value={base.labor} />
-
-              <Group title="ค่าใช้จ่ายประจำ (Fixed)" />
-              <Line
-                label="ค่าเช่า / ไฟ-น้ำ / Subscription ฯลฯ"
-                value={base.fixed}
-                sub
-              />
-              {view.adjustCost !== 0 && (
-                <Line label="+ ปรับปรุงต้นทุน" value={view.adjustCost} sub />
-              )}
-              <Subtotal label="รวมต้นทุนทั้งหมด" value={view.final.totalCost} />
-
-              <tr>
-                <td className="pt-4 pb-1 text-base font-semibold">
-                  กำไรสุทธิ (Net Profit)
-                </td>
-                <td
-                  className={
-                    "pt-4 pb-1 text-right text-base font-semibold tabular-nums " +
-                    (view.final.netProfit >= 0
-                      ? "text-emerald-700"
-                      : "text-red-700")
-                  }
-                >
-                  {fmtTHB(view.final.netProfit)}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-1 text-sm text-muted">Net Margin</td>
-                <td className="py-1 text-right text-sm tabular-nums text-muted">
-                  {view.final.marginPct == null
-                    ? "-"
-                    : `${(view.final.marginPct * 100).toFixed(1)}%`}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="px-3 sm:px-5 py-4">
+          <PLStatement view={view} />
 
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <Kpi label="Food %" v={ratios.food} />
@@ -324,44 +267,6 @@ export default async function ClosingPage({
   );
 }
 
-function Group({ title }: { title: string }) {
-  return (
-    <tr>
-      <td
-        colSpan={2}
-        className="pt-3 pb-1 text-[11px] font-medium uppercase tracking-wide text-muted"
-      >
-        {title}
-      </td>
-    </tr>
-  );
-}
-function Line({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: number;
-  sub?: boolean;
-}) {
-  return (
-    <tr>
-      <td className={"py-1 " + (sub ? "pl-4 text-muted" : "")}>{label}</td>
-      <td className="py-1 text-right tabular-nums">{fmtTHB(value)}</td>
-    </tr>
-  );
-}
-function Subtotal({ label, value }: { label: string; value: number }) {
-  return (
-    <tr className="border-t border-hairline-soft">
-      <td className="py-1.5 font-medium">{label}</td>
-      <td className="py-1.5 text-right font-medium tabular-nums">
-        {fmtTHB(value)}
-      </td>
-    </tr>
-  );
-}
 function Kpi({ label, v }: { label: string; v: number | null }) {
   return (
     <div className="rounded-input border border-hairline bg-surface px-3 py-2">

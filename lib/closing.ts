@@ -1,6 +1,126 @@
 import { prisma } from "@/lib/prisma";
 import { getYearlyPL, getDataQuality, type MonthlyTotals } from "@/lib/pl-calc";
 import { getReconciliation, type ReconRow } from "@/lib/bank-calc";
+import { PAYROLL_EXTRA_LABELS } from "@/lib/fiscal";
+
+export type BreakdownLine = { label: string; amount: number };
+export type Breakdown = {
+  revenue: BreakdownLine[]; // POS by payment type (+ override reconcile)
+  cogsFood: BreakdownLine[];
+  cogsBev: BreakdownLine[];
+  cogsPack: BreakdownLine[];
+  laborSalary: BreakdownLine[];
+  laborExtra: BreakdownLine[];
+  fixed: BreakdownLine[];
+};
+
+function emptyBreakdown(): Breakdown {
+  return {
+    revenue: [],
+    cogsFood: [],
+    cogsBev: [],
+    cogsPack: [],
+    laborSalary: [],
+    laborExtra: [],
+    fixed: [],
+  };
+}
+function normalizeBreakdown(b: Partial<Breakdown>): Breakdown {
+  return { ...emptyBreakdown(), ...b };
+}
+
+/** Per-line-item sources of each P&L figure, computed from the daily books. */
+export async function computeBreakdown(
+  businessId: number,
+  fiscalMonthId: number
+): Promise<Breakdown> {
+  const month = await prisma.fiscalMonth.findUnique({
+    where: { id: fiscalMonthId },
+  });
+  if (!month) return emptyBreakdown();
+  const mm = String(month.calendarMonth).padStart(2, "0");
+  const monthStart = `${month.calendarYear}-${mm}-01`;
+  const monthEnd = `${month.calendarYear}-${mm}-${String(month.daysInMonth).padStart(2, "0")}`;
+
+  const [posByPay, override, purchases, payrolls, extras, fixedCosts] =
+    await Promise.all([
+      prisma.posBill.groupBy({
+        by: ["paymentType"],
+        where: {
+          businessId,
+          businessDate: { gte: monthStart, lte: monthEnd },
+        },
+        _sum: { netAmount: true },
+      }),
+      prisma.monthlyRevenueOverride.findUnique({
+        where: { businessId_fiscalMonthId: { businessId, fiscalMonthId } },
+      }),
+      prisma.supplierPurchase.findMany({
+        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+        include: { supplier: { select: { name: true, category: true } } },
+      }),
+      prisma.employeePayroll.findMany({
+        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+        include: { employee: { select: { name: true } } },
+      }),
+      prisma.payrollExtra.findMany({
+        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+      }),
+      prisma.fixedCost.findMany({
+        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+        include: { category: { select: { name: true } } },
+      }),
+    ]);
+
+  // Revenue — POS by payment type, then reconcile to override if it's higher
+  const posSum = posByPay.reduce((s, r) => s + (r._sum.netAmount ?? 0), 0);
+  const revenue: BreakdownLine[] = posByPay
+    .filter((r) => (r._sum.netAmount ?? 0) !== 0)
+    .map((r) => ({
+      label: r.paymentType || "อื่นๆ / ไม่ระบุ",
+      amount: r._sum.netAmount ?? 0,
+    }))
+    .sort((a, b) => b.amount - a.amount);
+  if (override && override.amount > posSum + 0.01) {
+    revenue.push({
+      label: "ปรับยอดรายได้ (กรอกเอง / Override)",
+      amount: override.amount - posSum,
+    });
+  }
+
+  const cogsFood: BreakdownLine[] = [];
+  const cogsBev: BreakdownLine[] = [];
+  const cogsPack: BreakdownLine[] = [];
+  for (const p of purchases) {
+    const line = { label: p.nameOverride ?? p.supplier.name, amount: p.amount };
+    if (p.supplier.category === "FOOD") cogsFood.push(line);
+    else if (p.supplier.category === "BEVERAGE") cogsBev.push(line);
+    else cogsPack.push(line);
+  }
+
+  const laborSalary: BreakdownLine[] = payrolls.map((p) => ({
+    label: p.nameOverride ?? p.employee.name,
+    amount: p.amount,
+  }));
+  const laborExtra: BreakdownLine[] = extras.map((e) => ({
+    label: PAYROLL_EXTRA_LABELS[e.type] ?? e.type,
+    amount: e.amount,
+  }));
+  const fixed: BreakdownLine[] = fixedCosts.map((f) => ({
+    label: f.category.name,
+    amount: f.amount,
+  }));
+
+  return {
+    revenue,
+    cogsFood,
+    cogsBev,
+    cogsPack,
+    laborSalary,
+    laborExtra,
+    fixed,
+  };
+}
 
 export type CheckStatus = "pass" | "warn" | "fail";
 export type CheckItem = {
@@ -52,6 +172,7 @@ export type ClosingView = {
   recon: ReconRow[];
   checks: CheckItem[];
   closing: ClosingRecord | null;
+  breakdown: Breakdown;
   adjustments: ClosingAdjustmentRow[];
   adjustRevenue: number;
   adjustCost: number;
@@ -196,6 +317,18 @@ export async function getClosingView(
 
   const checks = buildChecks(live, daysWithSales, recon, drift.length > 0);
 
+  // Breakdown: use the frozen snapshot if the month is closed, else compute live
+  let breakdown: Breakdown;
+  if (record?.detailJson) {
+    try {
+      breakdown = normalizeBreakdown(JSON.parse(record.detailJson));
+    } catch {
+      breakdown = await computeBreakdown(businessId, fiscalMonthId);
+    }
+  } else {
+    breakdown = await computeBreakdown(businessId, fiscalMonthId);
+  }
+
   return {
     month: {
       id: month.id,
@@ -209,6 +342,7 @@ export async function getClosingView(
     recon,
     checks,
     closing,
+    breakdown,
     adjustments,
     adjustRevenue,
     adjustCost,

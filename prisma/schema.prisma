@@ -453,6 +453,10 @@ model MonthlyClosing {
   netProfit    Float  @default(0)
   marginPct    Float?
 
+  // Frozen line-item breakdown (JSON) captured at close, so the PDF shows the
+  // exact sources of each figure even if daily data changes later.
+  detailJson String?
+
   note       String?
   closedById String?
   closedAt   DateTime @default(now())
