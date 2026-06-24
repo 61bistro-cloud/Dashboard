@@ -40,6 +40,7 @@ model Business {
   accountOpenings     AccountOpening[]
   bankTransactions    BankTransaction[]
   closings            MonthlyClosing[]
+  slips               Slip[]
 }
 
 // Which businesses a non-OWNER user can access. OWNER sees all businesses
@@ -357,6 +358,7 @@ model BankAccount {
   business     Business          @relation(fields: [businessId], references: [id])
   openings     AccountOpening[]
   transactions BankTransaction[]
+  slips        Slip[]
 
   @@unique([businessId, code])
   @@index([businessId])
@@ -425,6 +427,7 @@ model BankTransaction {
   fiscalMonth FiscalMonth          @relation(fields: [fiscalMonthId], references: [id], onDelete: Cascade)
   category    TransactionCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   createdBy   User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  slips       Slip[]
 
   @@index([businessId, fiscalMonthId, accountId, date])
   @@index([categoryId])
@@ -495,4 +498,54 @@ model ClosingLog {
   closing MonthlyClosing @relation(fields: [closingId], references: [id], onDelete: Cascade)
 
   @@index([closingId])
+}
+
+// ───────── Slip Reconciliation (ตรวจสลิปโอนเงิน) ─────────
+
+model Slip {
+  id         Int    @id @default(autoincrement())
+  businessId Int
+
+  // Downscaled JPEG stored in-DB; served via /api/slip/[id].
+  imageData   Bytes
+  mimeType    String  @default("image/jpeg")
+  fileName    String?
+  contentHash String // sha256 of the stored bytes — dedup re-uploads
+
+  // Workflow state
+  status        String  @default("PENDING") // PENDING | REVIEW | UNMATCHED | CONFIRMED | REJECTED | FAILED
+  extractStatus String  @default("PENDING") // PENDING | OK | FAILED | SKIPPED
+  extractError  String?
+
+  // Extracted from the slip (by AI vision, or typed in by hand)
+  amount       Float?
+  transferAt   DateTime?
+  senderName   String?
+  receiverName String?
+  bankName     String?
+  ref          String?
+  confidence   Float?
+  rawText      String?
+
+  // Matching / reconciliation against the bank statement
+  accountId           Int?
+  matchedTxId         Int?
+  suggestedCategoryId Int?
+
+  // Audit
+  uploadedByName  String?
+  confirmedByName String?
+  confirmedAt     DateTime?
+  note            String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business  Business         @relation(fields: [businessId], references: [id])
+  account   BankAccount?     @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  matchedTx BankTransaction? @relation(fields: [matchedTxId], references: [id], onDelete: SetNull)
+
+  @@unique([businessId, contentHash])
+  @@index([businessId, status])
+  @@index([matchedTxId])
+  @@index([accountId])
 }

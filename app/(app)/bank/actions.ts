@@ -372,6 +372,8 @@ export type PreviewTx = {
   channel: string | null;
   suggestedCategoryId: number | null;
   suggestedCategoryName: string | null;
+  /** true = already imported into this account, or repeated earlier in this file */
+  duplicate: boolean;
 };
 
 export type ParseStatementResult = {
@@ -394,6 +396,7 @@ export async function parseStatementPdf(
 
     const file = formData.get("file");
     const password = String(formData.get("password") ?? "");
+    const accountId = Number(formData.get("accountId")) || null;
 
     if (!(file instanceof File) || file.size === 0) {
       return { ok: false, message: "กรุณาเลือกไฟล์ PDF ก่อน", preview: [] };
@@ -433,12 +436,41 @@ export async function parseStatementPdf(
     });
     const byName = new Map(categories.map((c) => [c.name, c.id]));
 
+    // Flag rows already imported into this account, or repeated within the file.
+    // Balance-primary dedup so legit same-day / same-amount rows aren't dropped.
+    const seen = newSeen();
+    if (accountId) {
+      const existing = await prisma.bankTransaction.findMany({
+        where: { businessId: biz.id, accountId },
+        select: {
+          date: true,
+          deposit: true,
+          withdraw: true,
+          balanceAfter: true,
+          description: true,
+        },
+      });
+      for (const t of existing) {
+        const d = t.date.toISOString().slice(0, 10);
+        addSeen(seen, d, t.deposit, t.withdraw, t.description, t.balanceAfter);
+      }
+    }
+
     const preview: PreviewTx[] = parsed.rows.map((r, idx) => {
       const suggestedName = suggestCategoryName(
         r.description,
         r.deposit,
         r.withdraw
       );
+      const duplicate = isDupRow(
+        seen,
+        r.date,
+        r.deposit,
+        r.withdraw,
+        r.description,
+        r.balance
+      );
+      addSeen(seen, r.date, r.deposit, r.withdraw, r.description, r.balance);
       return {
         idx,
         date: r.date,
@@ -452,6 +484,7 @@ export async function parseStatementPdf(
           ? (byName.get(suggestedName) ?? null)
           : null,
         suggestedCategoryName: suggestedName,
+        duplicate,
       };
     });
 
@@ -512,15 +545,65 @@ export type ImportStatementResult = {
   message?: string;
 };
 
-// Dedup fingerprints. The statement's running balance is near-unique per row
-// (robust even if the user edits the description); the description key is the
-// fallback that also bridges older rows imported before balanceAfter existed.
+// Dedup fingerprints. The statement's running balance is unique per row, so it
+// is the PRIMARY key — two different transactions with the same date+amount+desc
+// (e.g. two ฿50 PromptPay receipts in one day) have different running balances
+// and must NOT be collapsed. The description key is only a fallback for rows
+// that genuinely have no balance (manual entries / pre-balanceAfter imports).
 const r2 = (n: number) => Math.round(n * 100) / 100;
 function fpBalance(d: string, dep: number, wd: number, bal: number): string {
   return `${d}|${r2(dep)}|${r2(wd)}|b${r2(bal)}`;
 }
 function fpDesc(d: string, dep: number, wd: number, desc: string): string {
   return `${d}|${r2(dep)}|${r2(wd)}|d${(desc || "").trim().slice(0, 60)}`;
+}
+
+type SeenSets = {
+  bal: Set<string>; // balance fingerprints of rows that have a balance
+  descAll: Set<string>; // desc fingerprints of every row
+  descNoBal: Set<string>; // desc fingerprints of rows WITHOUT a balance
+};
+
+function newSeen(): SeenSets {
+  return { bal: new Set(), descAll: new Set(), descNoBal: new Set() };
+}
+
+function addSeen(
+  s: SeenSets,
+  d: string,
+  dep: number,
+  wd: number,
+  desc: string,
+  bal: number | null
+) {
+  s.descAll.add(fpDesc(d, dep, wd, desc));
+  if (bal != null) s.bal.add(fpBalance(d, dep, wd, bal));
+  else s.descNoBal.add(fpDesc(d, dep, wd, desc));
+}
+
+/**
+ * A row is a duplicate when:
+ *  - it has a balance and that exact balance was already seen (same line), OR
+ *  - it has a balance but matches an older balance-less row by description, OR
+ *  - it has no balance and matches any seen row by description.
+ * Two balance-bearing rows are NEVER merged on description alone, so legit
+ * same-day / same-amount transactions are kept.
+ */
+function isDupRow(
+  s: SeenSets,
+  d: string,
+  dep: number,
+  wd: number,
+  desc: string,
+  bal: number | null
+): boolean {
+  if (bal != null) {
+    return (
+      s.bal.has(fpBalance(d, dep, wd, bal)) ||
+      s.descNoBal.has(fpDesc(d, dep, wd, desc))
+    );
+  }
+  return s.descAll.has(fpDesc(d, dep, wd, desc));
 }
 
 export async function importStatementRows(
@@ -563,29 +646,21 @@ export async function importStatementRows(
         description: true,
       },
     });
-    const seen = new Set<string>();
+    const seen = newSeen();
     for (const t of existing) {
       const d = t.date.toISOString().slice(0, 10);
-      seen.add(fpDesc(d, t.deposit, t.withdraw, t.description));
-      if (t.balanceAfter != null) {
-        seen.add(fpBalance(d, t.deposit, t.withdraw, t.balanceAfter));
-      }
+      addSeen(seen, d, t.deposit, t.withdraw, t.description, t.balanceAfter);
     }
 
     const toInsert: typeof data.rows = [];
     let skipped = 0;
     for (const r of data.rows) {
-      const dk = fpDesc(r.date, r.deposit, r.withdraw, r.description);
-      const bk =
-        r.balance != null
-          ? fpBalance(r.date, r.deposit, r.withdraw, r.balance)
-          : null;
-      if (seen.has(dk) || (bk && seen.has(bk))) {
+      const bal = r.balance ?? null;
+      if (isDupRow(seen, r.date, r.deposit, r.withdraw, r.description, bal)) {
         skipped += 1;
         continue;
       }
-      seen.add(dk);
-      if (bk) seen.add(bk);
+      addSeen(seen, r.date, r.deposit, r.withdraw, r.description, bal);
       toInsert.push(r);
     }
 

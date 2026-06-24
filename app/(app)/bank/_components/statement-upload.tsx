@@ -33,6 +33,7 @@ export function StatementUpload({
   const [skipped, setSkipped] = useState(0);
   const [openingBalance, setOpeningBalance] = useState<number | null>(null);
   const [setOpening, setSetOpening] = useState(true);
+  const [hideDuplicates, setHideDuplicates] = useState(true);
 
   function onParse(formData: FormData) {
     setError(null);
@@ -40,6 +41,7 @@ export function StatementUpload({
     setWrongPassword(false);
     setImported(null);
     setSkipped(0);
+    setHideDuplicates(true);
     startTransition(async () => {
       try {
         const result = await parseStatementPdf(formData);
@@ -53,7 +55,7 @@ export function StatementUpload({
         setRows(
           result.preview.map((r) => ({
             ...r,
-            selected: r.deposit > 0 || r.withdraw > 0,
+            selected: (r.deposit > 0 || r.withdraw > 0) && !r.duplicate,
             categoryId: r.suggestedCategoryId,
           }))
         );
@@ -116,6 +118,8 @@ export function StatementUpload({
   }
 
   const selectedCount = rows.filter((r) => r.selected).length;
+  const dupCount = rows.filter((r) => r.duplicate).length;
+  const visibleRows = hideDuplicates ? rows.filter((r) => !r.duplicate) : rows;
 
   return (
     <div className="border-t border-hairline-soft">
@@ -137,6 +141,7 @@ export function StatementUpload({
             action={onParse}
             className="flex flex-wrap items-end gap-3 rounded-card bg-surface p-3"
           >
+            <input type="hidden" name="accountId" value={accountId} />
             <div className="flex-1 min-w-[240px]">
               <label className="block text-xs text-muted mb-1">
                 ไฟล์ Statement (PDF)
@@ -231,17 +236,33 @@ export function StatementUpload({
                   </span>
                 </label>
               )}
+              {dupCount > 0 && (
+                <div className="flex items-start justify-between gap-3 rounded-card border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                  <span>
+                    ตัดรายการซ้ำออก <strong>{dupCount}</strong> รายการ
+                    (เคยนำเข้าแล้ว หรือซ้ำกันในไฟล์) — ระบบไม่ติ๊กเลือกให้นำเข้า
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setHideDuplicates((v) => !v)}
+                    className="shrink-0 underline hover:text-amber-950"
+                  >
+                    {hideDuplicates ? "แสดงรายการซ้ำ" : "ซ่อนรายการซ้ำ"}
+                  </button>
+                </div>
+              )}
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="text-xs text-muted">
-                  พบ {rows.length} รายการ — เลือก {selectedCount} รายการ ✓
-                  ตรวจสอบและแก้หมวดก่อนยืนยัน
+                  พบ {rows.length} รายการ
+                  {dupCount > 0 && ` (ซ้ำ ${dupCount})`} — เลือก {selectedCount}{" "}
+                  รายการ ✓ ตรวจสอบและแก้หมวดก่อนยืนยัน
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() =>
                       setRows((prev) =>
-                        prev.map((r) => ({ ...r, selected: true }))
+                        prev.map((r) => ({ ...r, selected: !r.duplicate }))
                       )
                     }
                     className="text-xs text-ink/75 underline hover:text-ink"
@@ -271,96 +292,115 @@ export function StatementUpload({
                 </div>
               </div>
 
-              <div className="overflow-x-auto rounded-card border border-hairline">
-                <table className="w-full text-xs">
-                  <thead className="bg-surface text-left">
-                    <tr>
-                      <th className="px-2 py-2 font-medium w-10">เลือก</th>
-                      <th className="px-2 py-2 font-medium">วันที่</th>
-                      <th className="px-2 py-2 font-medium">รายการ</th>
-                      <th className="px-2 py-2 font-medium text-right">ฝาก</th>
-                      <th className="px-2 py-2 font-medium text-right">ถอน</th>
-                      <th className="px-2 py-2 font-medium">ช่องทาง</th>
-                      <th className="px-2 py-2 font-medium">หมวด</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-hairline-soft">
-                    {rows.map((r) => (
-                      <tr
-                        key={r.idx}
-                        className={
-                          r.selected
-                            ? ""
-                            : "bg-surface/50 text-muted-soft opacity-60"
-                        }
-                      >
-                        <td className="px-2 py-1.5">
-                          <input
-                            type="checkbox"
-                            checked={r.selected}
-                            onChange={(e) =>
-                              updateRow(r.idx, { selected: e.target.checked })
-                            }
-                            className="accent-ink"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <input
-                            type="date"
-                            value={r.date}
-                            onChange={(e) =>
-                              updateRow(r.idx, { date: e.target.value })
-                            }
-                            disabled={!r.selected}
-                            className="rounded border border-hairline-soft bg-canvas px-1 py-0.5 text-xs w-32"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5 min-w-[200px]">
-                          <input
-                            type="text"
-                            value={r.description}
-                            onChange={(e) =>
-                              updateRow(r.idx, { description: e.target.value })
-                            }
-                            disabled={!r.selected}
-                            className="w-full rounded border border-hairline-soft bg-canvas px-1 py-0.5 text-xs"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5 text-right tabular-nums text-emerald-700">
-                          {r.deposit > 0 ? fmtTHB(r.deposit) : "-"}
-                        </td>
-                        <td className="px-2 py-1.5 text-right tabular-nums text-red-700">
-                          {r.withdraw > 0 ? fmtTHB(r.withdraw) : "-"}
-                        </td>
-                        <td className="px-2 py-1.5 text-muted text-xs">
-                          {r.channel ?? "-"}
-                        </td>
-                        <td className="px-2 py-1.5 min-w-[180px]">
-                          <select
-                            value={r.categoryId ?? ""}
-                            onChange={(e) =>
-                              updateRow(r.idx, {
-                                categoryId: e.target.value
-                                  ? Number(e.target.value)
-                                  : null,
-                              })
-                            }
-                            disabled={!r.selected}
-                            className="w-full rounded border border-hairline-soft bg-canvas px-1 py-0.5 text-xs"
-                          >
-                            <option value="">— ไม่ระบุ —</option>
-                            {categories.map((c) => (
-                              <option key={c.id} value={c.id}>
-                                {c.name}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
+              {visibleRows.length > 0 ? (
+                <div className="overflow-x-auto rounded-card border border-hairline">
+                  <table className="w-full text-xs">
+                    <thead className="bg-surface text-left">
+                      <tr>
+                        <th className="px-2 py-2 font-medium w-10">เลือก</th>
+                        <th className="px-2 py-2 font-medium">วันที่</th>
+                        <th className="px-2 py-2 font-medium">รายการ</th>
+                        <th className="px-2 py-2 font-medium text-right">
+                          ฝาก
+                        </th>
+                        <th className="px-2 py-2 font-medium text-right">
+                          ถอน
+                        </th>
+                        <th className="px-2 py-2 font-medium">ช่องทาง</th>
+                        <th className="px-2 py-2 font-medium">หมวด</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-hairline-soft">
+                      {visibleRows.map((r) => (
+                        <tr
+                          key={r.idx}
+                          className={
+                            r.duplicate
+                              ? "bg-amber-50/50 text-muted-soft"
+                              : r.selected
+                                ? ""
+                                : "bg-surface/50 text-muted-soft opacity-60"
+                          }
+                        >
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="checkbox"
+                              checked={r.selected}
+                              onChange={(e) =>
+                                updateRow(r.idx, { selected: e.target.checked })
+                              }
+                              className="accent-ink"
+                            />
+                            {r.duplicate && (
+                              <div className="mt-0.5 text-[10px] font-medium text-amber-700">
+                                ซ้ำ
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="date"
+                              value={r.date}
+                              onChange={(e) =>
+                                updateRow(r.idx, { date: e.target.value })
+                              }
+                              disabled={!r.selected}
+                              className="rounded border border-hairline-soft bg-canvas px-1 py-0.5 text-xs w-32"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5 min-w-[200px]">
+                            <input
+                              type="text"
+                              value={r.description}
+                              onChange={(e) =>
+                                updateRow(r.idx, {
+                                  description: e.target.value,
+                                })
+                              }
+                              disabled={!r.selected}
+                              className="w-full rounded border border-hairline-soft bg-canvas px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5 text-right tabular-nums text-emerald-700">
+                            {r.deposit > 0 ? fmtTHB(r.deposit) : "-"}
+                          </td>
+                          <td className="px-2 py-1.5 text-right tabular-nums text-red-700">
+                            {r.withdraw > 0 ? fmtTHB(r.withdraw) : "-"}
+                          </td>
+                          <td className="px-2 py-1.5 text-muted text-xs">
+                            {r.channel ?? "-"}
+                          </td>
+                          <td className="px-2 py-1.5 min-w-[180px]">
+                            <select
+                              value={r.categoryId ?? ""}
+                              onChange={(e) =>
+                                updateRow(r.idx, {
+                                  categoryId: e.target.value
+                                    ? Number(e.target.value)
+                                    : null,
+                                })
+                              }
+                              disabled={!r.selected}
+                              className="w-full rounded border border-hairline-soft bg-canvas px-1 py-0.5 text-xs"
+                            >
+                              <option value="">— ไม่ระบุ —</option>
+                              {categories.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                  {c.name}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="rounded-card border border-hairline bg-surface/40 px-4 py-6 text-center text-xs text-muted">
+                  ทุกรายการในไฟล์นี้เคยนำเข้าแล้ว — ไม่มีรายการใหม่ให้บันทึก
+                </p>
+              )}
 
               <div className="flex items-center justify-end gap-2 pt-1">
                 <button

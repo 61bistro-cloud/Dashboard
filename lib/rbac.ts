@@ -58,6 +58,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["OWNER", "ACCOUNTANT"],
   },
   {
+    href: "/slips",
+    label: "ตรวจสลิป",
+    icon: NAV_ICONS["/slips"],
+    roles: ["OWNER", "ACCOUNTANT"],
+  },
+  {
     href: "/admin/businesses",
     label: "จัดการธุรกิจ",
     icon: NAV_ICONS["/admin/businesses"],
