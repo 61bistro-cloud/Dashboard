@@ -69,6 +69,12 @@ export const NAV_ITEMS: NavItem[] = [
     icon: NAV_ICONS["/admin/users"],
     roles: ["OWNER"],
   },
+  {
+    href: "/admin/google",
+    label: "เชื่อม Google Drive",
+    icon: NAV_ICONS["/admin/google"],
+    roles: ["OWNER"],
+  },
 ];
 
 export function canAccess(pathname: string, role: Role): boolean {

@@ -52,6 +52,7 @@ import {
   CalendarDays,
   CalendarRange,
   ClipboardCheck,
+  CloudCog,
 } from "lucide-react";
 
 /** Single navigation icon table — keyed by route href */
@@ -65,6 +66,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/bank": Landmark,
   "/admin/users": Users,
   "/admin/businesses": Building2,
+  "/admin/google": CloudCog,
 };
 
 /** Fixed cost category icons (matches FixedCostCategory.name) */

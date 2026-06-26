@@ -24,6 +24,15 @@ model Business {
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 
+  // Google Drive / Sheets integration (per business)
+  googleRefreshToken String?
+  googleEmail        String?
+  driveRootFolderId  String?
+  driveSlipFolderId  String?
+  driveBillFolderId  String?
+  masterSheetId      String?
+  googleSyncedAt     DateTime?
+
   users               UserBusiness[]
   employees           Employee[]
   suppliers           Supplier[]
@@ -40,6 +49,7 @@ model Business {
   accountOpenings     AccountOpening[]
   bankTransactions    BankTransaction[]
   closings            MonthlyClosing[]
+  driveFiles          DriveFile[]
 }
 
 // Which businesses a non-OWNER user can access. OWNER sees all businesses
@@ -495,4 +505,24 @@ model ClosingLog {
   closing MonthlyClosing @relation(fields: [closingId], references: [id], onDelete: Cascade)
 
   @@index([closingId])
+}
+
+// ───────── Drive evidence files (หลักฐานการโอน / บิลซื้อ) ─────────
+
+model DriveFile {
+  id             Int      @id @default(autoincrement())
+  businessId     Int
+  kind           String // SLIP | BILL
+  fiscalMonthId  Int?
+  driveFileId    String
+  webViewLink    String
+  name           String
+  mimeType       String?
+  uploadedByName String?
+  note           String?
+  createdAt      DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id])
+
+  @@index([businessId, kind])
 }
