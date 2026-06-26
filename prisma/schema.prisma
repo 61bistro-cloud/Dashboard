@@ -33,6 +33,10 @@ model Business {
   masterSheetId      String?
   googleSyncedAt     DateTime?
 
+  // LINE Messaging API — receive slips/bills sent to the shop's LINE OA
+  lineChannelSecret String?
+  lineChannelToken  String?
+
   users               UserBusiness[]
   employees           Employee[]
   suppliers           Supplier[]

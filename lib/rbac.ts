@@ -71,7 +71,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/admin/google",
-    label: "เชื่อม Google Drive",
+    label: "เชื่อมต่อ Google / LINE",
     icon: NAV_ICONS["/admin/google"],
     roles: ["OWNER"],
   },

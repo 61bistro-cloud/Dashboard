@@ -13,6 +13,7 @@ import { getCurrentBusiness } from "@/lib/business";
 import { folderUrl, sheetUrl, googleConfigured } from "@/lib/google";
 import { PageHeader } from "@/components/page-header";
 import { GooglePanel } from "./_components/google-panel";
+import { LineConfig } from "./_components/line-config";
 
 export const maxDuration = 60;
 
@@ -39,6 +40,7 @@ export default async function GoogleAdminPage() {
         driveRootFolderId: true,
         masterSheetId: true,
         googleSyncedAt: true,
+        lineChannelSecret: true,
       },
     }),
     prisma.fiscalMonth.findMany({
@@ -54,6 +56,9 @@ export default async function GoogleAdminPage() {
 
   const connected = !!b?.googleRefreshToken;
   const structureReady = !!b?.masterSheetId;
+  const lineConfigured = !!b?.lineChannelSecret;
+  const webhookUrl =
+    "https://dashboard-roan-eta-72.vercel.app/api/line/webhook";
   const monthOpts = months.map((m) => ({
     id: m.id,
     label: `${m.label} ${m.year.yearBE}`,
@@ -63,8 +68,8 @@ export default async function GoogleAdminPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-[900px] mx-auto space-y-6">
       <PageHeader
         icon={CloudCog}
-        title="เชื่อม Google Drive"
-        description={`${biz.name} — เก็บหลักฐาน/บิล + Master Sheet ใน Google Drive ของร้าน`}
+        title="เชื่อมต่อ Google / LINE"
+        description={`${biz.name} — Master Sheet + หลักฐาน/บิล ใน Google Drive + รับสลิปผ่าน LINE`}
       />
 
       {!googleConfigured() && (
@@ -129,6 +134,8 @@ export default async function GoogleAdminPage() {
           />
         </div>
       </section>
+
+      <LineConfig configured={lineConfigured} webhookUrl={webhookUrl} />
 
       {/* Recent uploads */}
       {recent.length > 0 && (

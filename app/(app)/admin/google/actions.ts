@@ -162,3 +162,42 @@ export async function uploadEvidenceFile(formData: FormData) {
     return { ok: false, message: (e as Error).message ?? String(e) };
   }
 }
+
+// ───── LINE channel config ─────
+
+const lineSchema = z.object({
+  channelSecret: z.string().trim().max(200).optional(),
+  channelToken: z.string().trim().max(4000).optional(),
+});
+
+export async function saveLineConfig(input: z.input<typeof lineSchema>) {
+  try {
+    await requireOwner();
+    const biz = await requireBusiness();
+    const data = lineSchema.parse(input);
+    await prisma.business.update({
+      where: { id: biz.id },
+      data: {
+        // only overwrite a field when a new value is given (blank = keep old)
+        lineChannelSecret: data.channelSecret || undefined,
+        lineChannelToken: data.channelToken || undefined,
+      },
+    });
+    revalidatePath("/admin/google");
+    return { ok: true as const };
+  } catch (e) {
+    console.error("[saveLineConfig]", e);
+    return { ok: false as const, message: (e as Error).message ?? String(e) };
+  }
+}
+
+export async function disconnectLine() {
+  await requireOwner();
+  const biz = await requireBusiness();
+  await prisma.business.update({
+    where: { id: biz.id },
+    data: { lineChannelSecret: null, lineChannelToken: null },
+  });
+  revalidatePath("/admin/google");
+  return { ok: true };
+}
