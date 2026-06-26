@@ -451,8 +451,8 @@ export async function parseStatementPdf(
         },
       });
       for (const t of existing) {
-        const d = t.date.toISOString().slice(0, 10);
-        addSeen(seen, d, t.deposit, t.withdraw, t.description, t.balanceAfter);
+        const dt = t.date.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
+        addSeen(seen, dt, t.deposit, t.withdraw, t.description, t.balanceAfter);
       }
     }
 
@@ -462,15 +462,16 @@ export async function parseStatementPdf(
         r.deposit,
         r.withdraw
       );
+      const dt = `${r.date}T${r.time ?? "00:00"}`;
       const duplicate = isDupRow(
         seen,
-        r.date,
+        dt,
         r.deposit,
         r.withdraw,
         r.description,
         r.balance
       );
-      addSeen(seen, r.date, r.deposit, r.withdraw, r.description, r.balance);
+      addSeen(seen, dt, r.deposit, r.withdraw, r.description, r.balance);
       return {
         idx,
         date: r.date,
@@ -545,7 +546,9 @@ export type ImportStatementResult = {
   message?: string;
 };
 
-// Dedup fingerprints. The statement's running balance is unique per row, so it
+// Dedup fingerprints, keyed on the full timestamp (date + time to the minute),
+// so two rows at different times are never treated as the same.
+// The statement's running balance is unique per row, so it
 // is the PRIMARY key — two different transactions with the same date+amount+desc
 // (e.g. two ฿50 PromptPay receipts in one day) have different running balances
 // and must NOT be collapsed. The description key is only a fallback for rows
@@ -648,19 +651,20 @@ export async function importStatementRows(
     });
     const seen = newSeen();
     for (const t of existing) {
-      const d = t.date.toISOString().slice(0, 10);
-      addSeen(seen, d, t.deposit, t.withdraw, t.description, t.balanceAfter);
+      const dt = t.date.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
+      addSeen(seen, dt, t.deposit, t.withdraw, t.description, t.balanceAfter);
     }
 
     const toInsert: typeof data.rows = [];
     let skipped = 0;
     for (const r of data.rows) {
       const bal = r.balance ?? null;
-      if (isDupRow(seen, r.date, r.deposit, r.withdraw, r.description, bal)) {
+      const dt = `${r.date}T${r.time ?? "00:00"}`;
+      if (isDupRow(seen, dt, r.deposit, r.withdraw, r.description, bal)) {
         skipped += 1;
         continue;
       }
-      addSeen(seen, r.date, r.deposit, r.withdraw, r.description, bal);
+      addSeen(seen, dt, r.deposit, r.withdraw, r.description, bal);
       toInsert.push(r);
     }
 

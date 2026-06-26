@@ -52,7 +52,6 @@ import {
   CalendarDays,
   CalendarRange,
   ClipboardCheck,
-  ScanLine,
 } from "lucide-react";
 
 /** Single navigation icon table — keyed by route href */
@@ -64,7 +63,6 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/cost-setup": Settings,
   "/pos-sales": ReceiptText,
   "/bank": Landmark,
-  "/slips": ScanLine,
   "/admin/users": Users,
   "/admin/businesses": Building2,
 };
@@ -143,7 +141,6 @@ export {
   ChartBar,
   ChartLine,
   Target,
-  ScanLine,
 };
 
 export type { LucideIcon };

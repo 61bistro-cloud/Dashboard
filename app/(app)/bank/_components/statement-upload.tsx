@@ -347,6 +347,11 @@ export function StatementUpload({
                               disabled={!r.selected}
                               className="rounded border border-hairline-soft bg-canvas px-1 py-0.5 text-xs w-32"
                             />
+                            {r.time && (
+                              <div className="mt-0.5 text-[10px] text-muted-soft tabular-nums">
+                                {r.time} น.
+                              </div>
+                            )}
                           </td>
                           <td className="px-2 py-1.5 min-w-[200px]">
                             <input
