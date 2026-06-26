@@ -34,13 +34,20 @@ export function GooglePanel({
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
-  function run(fn: () => Promise<unknown>, ok?: string) {
+  function run(
+    fn: () => Promise<{ ok: boolean; message?: string } | void>,
+    okMsg?: string
+  ) {
     setMsg(null);
     setErr(null);
     startTransition(async () => {
       try {
-        await fn();
-        if (ok) setMsg(ok);
+        const r = await fn();
+        if (r && r.ok === false) {
+          setErr(r.message ?? "เกิดข้อผิดพลาด");
+          return;
+        }
+        if (okMsg) setMsg(okMsg);
         router.refresh();
       } catch (e) {
         setErr((e as Error).message ?? "เกิดข้อผิดพลาด");
@@ -84,7 +91,8 @@ export function GooglePanel({
           onClick={() =>
             run(async () => {
               const r = await syncNow();
-              if (r?.ok) setMsg(`ซิงค์เข้า Master Sheet แล้ว (${r.tabs} แท็บ)`);
+              if (!r.ok) return r;
+              setMsg(`ซิงค์เข้า Master Sheet แล้ว (${r.tabs} แท็บ)`);
             })
           }
           disabled={pending}

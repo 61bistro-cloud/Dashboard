@@ -15,21 +15,56 @@ async function requireOwner() {
   return session;
 }
 
+/** Turn a googleapis error into a friendly Thai message. */
+function gerr(e: unknown): string {
+  const any = e as {
+    response?: { data?: { error?: { message?: string } } };
+    errors?: { message?: string }[];
+    message?: string;
+  };
+  const msg =
+    any?.response?.data?.error?.message ||
+    any?.errors?.[0]?.message ||
+    any?.message ||
+    String(e);
+  if (/Sheets API has not been used|Sheets API.*disabled/i.test(msg))
+    return "ยังไม่ได้เปิด Google Sheets API ใน Google Cloud — เปิดแล้วรอ 1-2 นาที ลองใหม่";
+  if (/Drive API has not been used|Drive API.*disabled/i.test(msg))
+    return "ยังไม่ได้เปิด Google Drive API ใน Google Cloud — เปิดแล้วรอ 1-2 นาที ลองใหม่";
+  if (
+    /insufficient.*scope|insufficientPermissions|SCOPE_INSUFFICIENT/i.test(msg)
+  )
+    return "สิทธิ์ไม่พอ — กด ‘ตัดการเชื่อม’ แล้วเชื่อมใหม่ (กดอนุญาตให้ครบ)";
+  if (/invalid_grant|expired or revoked/i.test(msg))
+    return "การเชื่อมหมดอายุ — กด ‘ตัดการเชื่อม’ แล้วเชื่อมใหม่";
+  return `Google error: ${msg}`;
+}
+
 export async function createStructure() {
-  await requireOwner();
-  const biz = await requireBusiness();
-  await ensureStructure(biz.id);
-  revalidatePath("/admin/google");
-  return { ok: true };
+  try {
+    await requireOwner();
+    const biz = await requireBusiness();
+    await ensureStructure(biz.id);
+    revalidatePath("/admin/google");
+    return { ok: true as const };
+  } catch (e) {
+    console.error("[createStructure]", e);
+    return { ok: false as const, message: gerr(e) };
+  }
 }
 
 export async function syncNow() {
-  await requireOwner();
-  const biz = await requireBusiness();
-  const tabs = await buildMasterTabs(biz.id);
-  const url = await syncMaster(biz.id, tabs);
-  revalidatePath("/admin/google");
-  return { ok: true, url, tabs: tabs.length };
+  try {
+    await requireOwner();
+    const biz = await requireBusiness();
+    const tabs = await buildMasterTabs(biz.id);
+    const url = await syncMaster(biz.id, tabs);
+    revalidatePath("/admin/google");
+    return { ok: true as const, url, tabs: tabs.length };
+  } catch (e) {
+    console.error("[syncNow]", e);
+    return { ok: false as const, message: gerr(e) };
+  }
 }
 
 export async function disconnectGoogle() {
