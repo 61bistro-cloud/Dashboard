@@ -179,8 +179,8 @@ export default async function GoogleAdminPage() {
             (ที่ใช้ทำ login)
           </li>
           <li>
-            ใน OAuth consent screen เพิ่ม scope: <code>drive.file</code> และ{" "}
-            <code>spreadsheets</code>
+            ใน OAuth consent screen → <strong>Data Access</strong> เพิ่ม scope:{" "}
+            <code>https://www.googleapis.com/auth/drive.file</code> (อันเดียวพอ)
           </li>
           <li>
             ใน OAuth Client เพิ่ม <strong>Authorized redirect URI</strong>:

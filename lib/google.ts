@@ -7,8 +7,10 @@ const FOLDER_MIME = "application/vnd.google-apps.folder";
 export const GOOGLE_SCOPES = [
   "openid",
   "email",
-  "https://www.googleapis.com/auth/drive.file", // only files this app creates
-  "https://www.googleapis.com/auth/spreadsheets",
+  // drive.file alone is enough for BOTH Drive uploads AND editing the Master
+  // Sheet we create — the Sheets API accepts drive.file for app-created
+  // spreadsheets. It's NON-sensitive, so Google requires no app verification.
+  "https://www.googleapis.com/auth/drive.file",
 ];
 
 export function googleConfigured(): boolean {
