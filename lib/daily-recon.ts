@@ -148,10 +148,11 @@ export async function getDailyRecon(
       const settleDate = addDays(date, lag[key] ?? 0);
       const inAmt = bankMap.get(settleDate)?.[key] ?? 0;
       bankIn[key] = inAmt;
-      fee[key] = r2(pos[key] - inAmt);
+      // Only a meaningful fee/GP once the settlement deposit actually exists.
+      fee[key] = inAmt > 0 ? r2(pos[key] - inAmt) : 0;
       totals.pos[key] = r2(totals.pos[key] + pos[key]);
       totals.bankIn[key] = r2(totals.bankIn[key] + inAmt);
-      totals.fee[key] = r2(totals.fee[key] + fee[key]);
+      if (inAmt > 0) totals.fee[key] = r2(totals.fee[key] + fee[key]);
     }
     const expense = outMap.get(date) ?? 0;
     totals.expense = r2(totals.expense + expense);

@@ -150,6 +150,18 @@ export default async function DailyReconPage({
         </button>
       </form>
 
+      {totalInFee === 0 && (
+        <div className="rounded-card border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <strong>ช่อง “เข้าจริง” ยังว่าง</strong> — ตัวเลขนี้ดึงจาก statement
+          ธนาคารอัตโนมัติ (ไม่ต้องกรอกเอง)
+          ยังว่างเพราะเดือนนี้ยังไม่มีรายการเงินเข้าจากธนาคาร
+          <br />
+          👉 ไปหน้า <strong>Bank &amp; Reconcile</strong> → นำเข้า statement
+          เดือนนี้ → จัดหมวดรายการ “เงินเข้า” ให้เป็นช่องทาง (Grab / LINE MAN /
+          EDC-PromptPay) แล้วกลับมาหน้านี้ ตัวเลขจะขึ้นเอง
+        </div>
+      )}
+
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <SummaryCard
@@ -168,8 +180,14 @@ export default async function DailyReconPage({
           icon={Percent}
           tone="amber"
           label="ค่าธรรมเนียม / GP รวม"
-          value={fmtTHB(totalFee)}
-          sub={feePct != null ? `${feePct.toFixed(2)}% ของยอดขาย` : undefined}
+          value={totalInFee > 0 ? fmtTHB(totalFee) : "-"}
+          sub={
+            totalInFee > 0
+              ? feePct != null
+                ? `${feePct.toFixed(2)}% ของยอดขาย`
+                : undefined
+              : "รอนำเข้า statement"
+          }
         />
         <SummaryCard
           icon={ArrowDownRight}
@@ -335,7 +353,7 @@ function Cells({
               : "text-muted-soft"
         }`}
       >
-        {pos > 0 || bankIn > 0 ? fmtTHB(fee) : "-"}
+        {bankIn > 0 ? fmtTHB(fee) : "-"}
       </td>
     </>
   );
