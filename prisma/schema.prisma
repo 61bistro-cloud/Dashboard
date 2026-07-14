@@ -517,6 +517,9 @@ model DriveFile {
   id             Int      @id @default(autoincrement())
   businessId     Int
   kind           String // SLIP | BILL
+  // optional link to a specific record (polymorphic)
+  refType        String? // BANK_TX | PURCHASE | CLOSING | POS
+  refId          String?
   fiscalMonthId  Int?
   driveFileId    String
   webViewLink    String
@@ -529,4 +532,5 @@ model DriveFile {
   business Business @relation(fields: [businessId], references: [id])
 
   @@index([businessId, kind])
+  @@index([refType, refId])
 }

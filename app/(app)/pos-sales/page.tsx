@@ -10,16 +10,16 @@ import {
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { fmtTHB } from "@/lib/fiscal";
+import { fmtTHB, getCurrentFiscalMonth } from "@/lib/fiscal";
 import { getCurrentBusiness } from "@/lib/business";
+import { MonthPicker } from "../cost-setup/_components/month-picker";
 import { UploadForm } from "./_components/upload-form";
 import { DeleteBatchButton } from "./_components/delete-batch-button";
 import { PageHeader } from "@/components/page-header";
 import type { LucideIcon } from "lucide-react";
 
 type SearchParams = Promise<{
-  from?: string;
-  to?: string;
+  month?: string;
   channel?: string;
   payment?: string;
   page?: string;
@@ -50,16 +50,50 @@ export default async function PosSalesPage({
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page ?? "1"));
 
+  // ── Month selector — default to the latest month that has POS data ──
+  const allMonths = await prisma.fiscalMonth.findMany({
+    orderBy: [{ year: { yearBE: "desc" } }, { monthIndex: "asc" }],
+    include: { year: true },
+  });
+  let sel: {
+    id: number;
+    calendarYear: number;
+    calendarMonth: number;
+    daysInMonth: number;
+  } | null =
+    (sp.month ? allMonths.find((m) => m.id === Number(sp.month)) : null) ??
+    null;
+  if (!sel && allMonths.length > 0) {
+    const latest = await prisma.posBill.findFirst({
+      where: { businessId: business.id },
+      orderBy: { businessDate: "desc" },
+      select: { businessDate: true },
+    });
+    if (latest) {
+      const [ly, lm] = latest.businessDate.split("-").map(Number);
+      sel =
+        allMonths.find(
+          (m) => m.calendarYear === ly && m.calendarMonth === lm
+        ) ?? null;
+    }
+    if (!sel) sel = (await getCurrentFiscalMonth()) ?? allMonths[0] ?? null;
+  }
+  const selectedMonthId = sel?.id ?? 0;
+  const monthStart = sel
+    ? `${sel.calendarYear}-${String(sel.calendarMonth).padStart(2, "0")}-01`
+    : undefined;
+  const monthEnd = sel
+    ? `${sel.calendarYear}-${String(sel.calendarMonth).padStart(2, "0")}-${String(sel.daysInMonth).padStart(2, "0")}`
+    : undefined;
+
   const where: {
     businessId: number;
     businessDate?: { gte?: string; lte?: string };
     channel?: string;
     paymentType?: string;
   } = { businessId: business.id };
-  if (sp.from || sp.to) {
-    where.businessDate = {};
-    if (sp.from) where.businessDate.gte = sp.from;
-    if (sp.to) where.businessDate.lte = sp.to;
+  if (monthStart && monthEnd) {
+    where.businessDate = { gte: monthStart, lte: monthEnd };
   }
   if (sp.channel) where.channel = sp.channel;
   if (sp.payment) where.paymentType = sp.payment;
@@ -136,6 +170,17 @@ export default async function PosSalesPage({
         icon={ReceiptText}
         title="POS Sales"
         description="ข้อมูลบิลจาก Foodstory — Upload .xlsx แล้วระบบจะ parse + dedupe ตามเลขบิล"
+        action={
+          selectedMonthId ? (
+            <MonthPicker
+              months={allMonths.map((m) => ({
+                id: m.id,
+                label: `${m.label} ${m.year.yearBE}`,
+              }))}
+              currentId={selectedMonthId}
+            />
+          ) : undefined
+        }
       />
 
       {/* Stats */}
@@ -239,25 +284,13 @@ export default async function PosSalesPage({
       <section className="rounded-card border border-hairline bg-canvas">
         <header className="flex items-center justify-between gap-3 border-b border-hairline-soft px-5 py-3 flex-wrap">
           <h2 className="text-sm font-semibold">
-            บิลทั้งหมด ({totalBills.toLocaleString("th-TH")})
+            บิลในเดือนนี้ ({totalBills.toLocaleString("th-TH")})
           </h2>
           <div className="flex items-center gap-2 flex-wrap">
             <form className="flex items-center gap-2 flex-wrap text-sm">
-              <input
-                type="date"
-                name="from"
-                defaultValue={sp.from}
-                className="rounded-input border border-hairline px-2 py-1"
-                aria-label="จากวันที่"
-              />
-              <span className="text-muted-soft">→</span>
-              <input
-                type="date"
-                name="to"
-                defaultValue={sp.to}
-                className="rounded-input border border-hairline px-2 py-1"
-                aria-label="ถึงวันที่"
-              />
+              {selectedMonthId ? (
+                <input type="hidden" name="month" value={selectedMonthId} />
+              ) : null}
               <select
                 name="channel"
                 defaultValue={sp.channel ?? ""}
@@ -298,8 +331,8 @@ export default async function PosSalesPage({
             <a
               href={(() => {
                 const qs = new URLSearchParams();
-                if (sp.from) qs.set("from", sp.from);
-                if (sp.to) qs.set("to", sp.to);
+                if (monthStart) qs.set("from", monthStart);
+                if (monthEnd) qs.set("to", monthEnd);
                 if (sp.channel) qs.set("channel", sp.channel);
                 if (sp.payment) qs.set("payment", sp.payment);
                 const s = qs.toString();

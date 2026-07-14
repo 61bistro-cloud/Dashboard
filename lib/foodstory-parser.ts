@@ -348,8 +348,9 @@ export function parseFoodstoryBuffer(buf: ArrayBuffer): ParseResult {
       tip: num(get("tip")),
       refund: num(get("refund")),
       totalDiscount: itemDiscount + billDiscount + voucherDiscount,
-      // Net = totalAmount (after discounts, before VAT/service) — same as Excel "💰 ยอดสุทธิ"
-      netAmount: totalAmount,
+      // Net revenue = the "รวมสุทธิ (ยอดก่อนภาษี + ภาษี + ยอดปัดเศษ) − ยอดขายไม่มีภาษี"
+      // column (what the customer actually paid) — NOT "ยอดรวม" (pre-VAT/service).
+      netAmount: grandTotal,
       orderType: str(get("orderType")),
       paymentType: str(get("paymentType")),
       paymentMethod: str(get("paymentMethod")),
