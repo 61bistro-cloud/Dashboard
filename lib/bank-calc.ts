@@ -214,7 +214,7 @@ export type ReconRow = {
 };
 
 /** Map Foodstory PosBill.paymentType / channel → our internal posChannel buckets. */
-function classifyBill(b: {
+export function classifyBill(b: {
   paymentType: string | null;
   channel: string | null;
 }): string | null {
