@@ -54,6 +54,8 @@ model Business {
   bankTransactions    BankTransaction[]
   closings            MonthlyClosing[]
   driveFiles          DriveFile[]
+  reconItems          ReconItem[]
+  reconEntries        ReconEntry[]
 }
 
 // Which businesses a non-OWNER user can access. OWNER sees all businesses
@@ -509,6 +511,44 @@ model ClosingLog {
   closing MonthlyClosing @relation(fields: [closingId], references: [id], onDelete: Cascade)
 
   @@index([closingId])
+}
+
+// ───────── Daily reconciliation (รายการกระทบยอด + ยอดเข้าจริงที่กรอกเอง) ─────────
+
+model ReconItem {
+  id         Int     @id @default(autoincrement())
+  businessId Int
+  name       String
+  /// Priority: bills are matched against items in this order, first match wins.
+  sortOrder  Int     @default(0)
+  active     Boolean @default(true)
+  /// Which PosBill field to match on: PAYMENT | TABLE | CHANNEL. Null = manual-only.
+  matchField String?
+  /// Comma-separated, case-insensitive "contains" keywords.
+  matchKeywords String?
+  createdAt     DateTime @default(now())
+
+  business Business     @relation(fields: [businessId], references: [id])
+  entries  ReconEntry[]
+
+  @@index([businessId, sortOrder])
+}
+
+model ReconEntry {
+  id          Int      @id @default(autoincrement())
+  businessId  Int
+  reconItemId Int
+  /// Business day, YYYY-MM-DD
+  date      String
+  actual    Float
+  note      String?
+  updatedAt DateTime @updatedAt
+
+  business  Business  @relation(fields: [businessId], references: [id])
+  reconItem ReconItem @relation(fields: [reconItemId], references: [id], onDelete: Cascade)
+
+  @@unique([reconItemId, date])
+  @@index([businessId, date])
 }
 
 // ───────── Drive evidence files (หลักฐานการโอน / บิลซื้อ) ─────────
