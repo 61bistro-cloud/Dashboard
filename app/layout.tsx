@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Noto_Sans_Thai } from "next/font/google";
+import { Inter, Sarabun } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -9,7 +9,7 @@ const inter = Inter({
   axes: ["opsz"],
 });
 
-const notoThai = Noto_Sans_Thai({
+const sarabun = Sarabun({
   subsets: ["thai"],
   variable: "--font-thai",
   display: "swap",
@@ -58,7 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="th"
-      className={`${inter.variable} ${notoThai.variable}`}
+      className={`${inter.variable} ${sarabun.variable}`}
       suppressHydrationWarning
     >
       <head>
