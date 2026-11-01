@@ -290,3 +290,64 @@ export function folderUrl(id: string | null) {
 export function sheetUrl(id: string | null) {
   return id ? `https://docs.google.com/spreadsheets/d/${id}` : null;
 }
+
+/** OCR through Drive's image/PDF → Google Docs conversion, using the existing
+ * drive.file grant. Only the newly created temporary document is trashed.
+ * The original evidence file is never moved, overwritten or deleted.
+ */
+export async function readEvidenceText(
+  businessId: number,
+  fileId: string
+): Promise<string> {
+  const b = await getBiz(businessId);
+  const drive = google.drive({ version: "v3", auth: clientFor(b) });
+  const meta = await drive.files.get({ fileId, fields: "mimeType,size" });
+  if (
+    !/^(image\/(jpeg|png|gif|bmp)|application\/pdf)$/.test(
+      meta.data.mimeType ?? ""
+    )
+  )
+    throw new Error(
+      "อ่านอัตโนมัติรองรับ JPG, PNG และ PDF เป็นหลัก กรุณากรอกยอดและวันที่เองสำหรับไฟล์นี้"
+    );
+  if (Number(meta.data.size ?? 0) > 10 * 1024 * 1024)
+    throw new Error("ไฟล์ใหญ่เกินขนาดอ่านอัตโนมัติ กรุณากรอกยอดและวันที่เอง");
+  const content = await drive.files.get(
+    { fileId, alt: "media" },
+    { responseType: "arraybuffer", timeout: 10000 }
+  );
+  let temporaryId: string | undefined;
+  try {
+    const converted = await drive.files.create(
+      {
+        requestBody: {
+          name: `OCR-temp-${fileId}`,
+          mimeType: "application/vnd.google-apps.document",
+          ...(b.driveRootFolderId ? { parents: [b.driveRootFolderId] } : {}),
+        },
+        media: {
+          mimeType: meta.data.mimeType!,
+          body: Readable.from(Buffer.from(content.data as ArrayBuffer)),
+        },
+        ocrLanguage: "th",
+        fields: "id",
+      },
+      { timeout: 20000 }
+    );
+    temporaryId = converted.data.id ?? undefined;
+    if (!temporaryId) throw new Error("สร้างเอกสารอ่านข้อความไม่สำเร็จ");
+    const exported = await drive.files.export(
+      { fileId: temporaryId, mimeType: "text/plain" },
+      { responseType: "text", timeout: 10000 }
+    );
+    return String(exported.data).slice(0, 16000);
+  } finally {
+    if (temporaryId)
+      await drive.files
+        .update(
+          { fileId: temporaryId, requestBody: { trashed: true } },
+          { timeout: 5000 }
+        )
+        .catch(() => {});
+  }
+}

@@ -10,6 +10,7 @@ import { requireBusiness } from "@/lib/business";
 function revalidateBankCosts() {
   for (const path of [
     "/bank",
+    "/bank/evidence",
     "/cost-setup",
     "/",
     "/daily-pl",

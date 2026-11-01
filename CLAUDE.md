@@ -57,3 +57,11 @@ Deploy บน Vercel, ฐานข้อมูล Neon Postgres. UI ภาษา
 - Cost Setup / Dashboard / Daily P&L / Monthly P&L / breakdown ปิดงบใช้หลักเดียวกัน. Daily P&L ยังเฉลี่ยรายจ่ายทั้งเดือนตามจำนวนวัน ไม่ใช่เงินออกจริงในวันนั้น.
 - อ่านคำนวณโดยตรง ไม่คัดลอก Statement ไปสร้าง payroll/purchase/fixed-cost rows. ไม่เขียนทับ snapshot ปิดงบเดิม.
 - `npm run test:costs` ตรวจต้นทุนและการเชื่อม P&L ด้วยข้อมูลจำลอง ไม่ใช้ฐานข้อมูล.
+
+## จับคู่หลักฐาน
+
+- `/bank/evidence?month=...&account=...` ใช้ DriveFile เดิมในเดือน/ธุรกิจเดียวกัน. `refType=BANK_TX`, `refId=transaction.id` คือคู่ที่ผู้ใช้ยืนยันแล้ว; ไม่มีการสร้าง/แก้ยอด BankTransaction หรือค่าใช้จ่าย.
+- อ่านภาพด้วย Drive OCR (image/PDF → Google Docs → plain text) ผ่านสิทธิ์ drive.file เดิม; ย้ายเฉพาะเอกสารชั่วคราวที่เพิ่งสร้างเข้าถังขยะใน finally ไม่แตะต้นฉบับ.
+- OCR cache ต่อท้าย DriveFile.note ด้วย marker `EVIDENCE_OCR_V1` โดยรักษาข้อความ/WEB_UPLOAD marker เดิม. ยอดหรือวันที่ไม่ชัดให้ผู้ใช้กรอกเอง.
+- แนะนำคู่จากยอด+วันตรงและเรียงตามเวลา; ต้องให้ผู้ใช้ตรวจบัญชี/ผู้รับและยืนยันทุกคู่. ใบเสร็จและสลิปหลายไฟล์แนบรายการเดียวกันได้.
+- `npm run test:matching` ใช้ข้อมูลจำลอง ตรวจ parser/scoping/matching/metadata และ lifecycle OCR โดยไม่แก้ production.

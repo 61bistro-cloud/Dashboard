@@ -147,19 +147,28 @@ export default async function BankPage({
     accounts.find((a) => a.code === requestedAccount) ?? accounts[0];
 
   // Load data for ALL accounts in this month (for summary cards) + selected account detail
-  const [allAccountData, selectedData, catSummary, recon] = await Promise.all([
-    Promise.all(
-      accounts.map((a) =>
-        getBankMonth(currentMonth.id, a.id, business.id).then((d) => ({
-          account: a,
-          ...d,
-        }))
-      )
-    ),
-    getBankMonth(currentMonth.id, currentAccount.id, business.id),
-    getCategorySummary(currentMonth.id, business.id),
-    getReconciliation(currentMonth.id, business.id),
-  ]);
+  const [allAccountData, selectedData, catSummary, recon, linkedEvidence] =
+    await Promise.all([
+      Promise.all(
+        accounts.map((a) =>
+          getBankMonth(currentMonth.id, a.id, business.id).then((d) => ({
+            account: a,
+            ...d,
+          }))
+        )
+      ),
+      getBankMonth(currentMonth.id, currentAccount.id, business.id),
+      getCategorySummary(currentMonth.id, business.id),
+      getReconciliation(currentMonth.id, business.id),
+      prisma.driveFile.findMany({
+        where: {
+          businessId: business.id,
+          fiscalMonthId: currentMonth.id,
+          refType: "BANK_TX",
+        },
+        select: { id: true, name: true, webViewLink: true, refId: true },
+      }),
+    ]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
@@ -434,6 +443,18 @@ export default async function BankPage({
           />
         </header>
 
+        <div className="border-b border-hairline-soft px-5 py-3 text-xs">
+          <Link
+            className="underline font-medium"
+            href={`/bank/evidence?month=${currentMonth.id}&account=${encodeURIComponent(currentAccount.code)}`}
+          >
+            จับคู่สลิป / ใบเสร็จกับ Statement เดือนนี้ →
+          </Link>
+          <p className="mt-1 text-muted">
+            อ่านข้อความจากหลักฐาน แล้วตรวจและยืนยันคู่เพื่อแนบกับรายการด้านล่าง
+          </p>
+        </div>
+
         <StatementUpload
           fiscalMonthId={currentMonth.id}
           accountId={currentAccount.id}
@@ -468,6 +489,9 @@ export default async function BankPage({
           rows={selectedData.rows.map((row) => ({
             ...row,
             date: row.date.toISOString(),
+            evidence: linkedEvidence.filter(
+              (file) => file.refId === String(row.id)
+            ),
           }))}
           categories={categories.map((c) => ({
             id: c.id,

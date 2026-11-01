@@ -14,7 +14,12 @@ type Props = {
   accountName: string;
   monthLabel: string;
   accountType: string;
-  rows: Array<Omit<BankMonthData["rows"][number], "date"> & { date: string }>;
+  rows: Array<
+    Omit<BankMonthData["rows"][number], "date"> & {
+      date: string;
+      evidence?: Array<{ id: number; name: string; webViewLink: string }>;
+    }
+  >;
   categories: Array<{ id: number; name: string; kind: string }>;
 };
 
@@ -242,6 +247,7 @@ export function TransactionTable({
                 </th>
                 <th className="px-3 py-2 font-medium">ช่องทาง</th>
                 <th className="px-3 py-2 font-medium">หมวด</th>
+                <th className="px-3 py-2 font-medium">หลักฐาน</th>
                 <th className="px-3 py-2 font-medium"></th>
               </tr>
             </thead>
@@ -295,6 +301,24 @@ export function TransactionTable({
                       categoryId={r.categoryId}
                       categories={categories}
                     />
+                  </td>
+                  <td className="px-3 py-1.5">
+                    {r.evidence?.length ? (
+                      r.evidence.map((file, index) => (
+                        <a
+                          key={file.id}
+                          href={file.webViewLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={file.name}
+                          className="block underline whitespace-nowrap"
+                        >
+                          หลักฐาน {index + 1} ↗
+                        </a>
+                      ))
+                    ) : (
+                      <span className="text-muted">—</span>
+                    )}
                   </td>
                   <td className="px-3 py-1.5 text-right">
                     {!editing && <DeleteButton id={r.id} />}

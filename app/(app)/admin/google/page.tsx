@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   CloudCog,
@@ -136,6 +137,15 @@ export default async function GoogleAdminPage() {
         </div>
       </section>
 
+      <div className="rounded-card border border-hairline p-4 text-sm">
+        <Link href="/bank/evidence" className="underline font-medium">
+          ขั้นต่อไป: จับคู่หลักฐานกับ Statement →
+        </Link>
+        <p className="text-xs text-muted mt-1">
+          เลือกเดือนที่อัปโหลดไว้ อ่านข้อมูลจากรูป แล้วตรวจและยืนยันคู่ใน Bank &
+          Reconcile
+        </p>
+      </div>
       <LineConfig configured={lineConfigured} webhookUrl={webhookUrl} />
 
       {/* Recent uploads */}
@@ -165,6 +175,14 @@ export default async function GoogleAdminPage() {
                 >
                   {f.name}
                 </a>
+                {f.fiscalMonthId && (
+                  <Link
+                    className="underline whitespace-nowrap"
+                    href={`/bank/evidence?month=${f.fiscalMonthId}`}
+                  >
+                    จับคู่
+                  </Link>
+                )}
                 <span className="text-muted whitespace-nowrap">
                   {f.createdAt.toLocaleDateString("th-TH")} ·{" "}
                   {f.uploadedByName ?? "—"}
