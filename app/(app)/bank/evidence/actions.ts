@@ -1,5 +1,6 @@
 "use server";
 
+import { mergeConfirmedRemark } from "@/lib/evidence-category";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { requireBusiness } from "@/lib/business";
@@ -32,9 +33,19 @@ async function scope(input: unknown) {
   return { data, file, business };
 }
 function refresh() {
-  revalidatePath("/bank");
-  revalidatePath("/bank/evidence");
-  revalidatePath("/admin/google");
+  for (const path of [
+    "/bank",
+    "/bank/evidence",
+    "/admin/google",
+    "/cost-setup",
+    "/",
+    "/daily-pl",
+    "/monthly-pl",
+    "/daily-recon",
+    "/closing",
+    "/closing-print",
+  ])
+    revalidatePath(path);
 }
 export async function readEvidence(input: z.infer<typeof scopeSchema>) {
   try {
@@ -145,5 +156,77 @@ export async function unlinkEvidence(input: z.infer<typeof confirmSchema>) {
     return { ok: true as const };
   } catch {
     return { ok: false as const, message: "ยกเลิกคู่ไม่สำเร็จ" };
+  }
+}
+
+const categorySchema = confirmSchema.extend({
+  categoryId: z.number().int().positive().nullable(),
+  expectedCategoryId: z.number().int().positive().nullable(),
+  remark: z.string().trim().max(1000),
+});
+/** Only an explicitly confirmed link may change the linked transaction category. */
+export async function saveEvidenceCategory(
+  input: z.infer<typeof categorySchema>
+) {
+  try {
+    const data = categorySchema.parse(input);
+    const { file, business } = await scope(data);
+    if (file.refType !== "BANK_TX" || file.refId !== String(data.transactionId))
+      return {
+        ok: false as const,
+        message: "ยืนยันคู่หลักฐานกับรายการนี้ก่อนบันทึกหมวด",
+      };
+    const transaction = await prisma.bankTransaction.findFirst({
+      where: {
+        id: data.transactionId,
+        businessId: business.id,
+        fiscalMonthId: data.monthId,
+      },
+      select: { id: true, categoryId: true, note: true },
+    });
+    if (!transaction || transaction.categoryId !== data.expectedCategoryId)
+      return {
+        ok: false as const,
+        message: "รายการหรือหมวดเปลี่ยนไปแล้ว กรุณารีเฟรชและตรวจใหม่",
+      };
+    if (data.categoryId !== null) {
+      const category = await prisma.transactionCategory.findFirst({
+        where: {
+          id: data.categoryId,
+          businessId: business.id,
+          ...(data.categoryId === transaction.categoryId
+            ? {}
+            : { active: true }),
+        },
+        select: { id: true },
+      });
+      if (!category)
+        return { ok: false as const, message: "ไม่พบหมวดที่เลือกในธุรกิจนี้" };
+    }
+    const updated = await prisma.bankTransaction.updateMany({
+      where: {
+        id: transaction.id,
+        businessId: business.id,
+        fiscalMonthId: data.monthId,
+        categoryId: data.expectedCategoryId,
+        note: transaction.note,
+      },
+      data: {
+        categoryId: data.categoryId,
+        note: mergeConfirmedRemark(transaction.note, file.id, data.remark),
+      },
+    });
+    if (!updated.count)
+      return {
+        ok: false as const,
+        message: "ข้อมูลเปลี่ยนไประหว่างบันทึก กรุณารีเฟรชและตรวจใหม่",
+      };
+    refresh();
+    return { ok: true as const };
+  } catch {
+    return {
+      ok: false as const,
+      message: "บันทึกหมวดไม่สำเร็จ โปรดตรวจสิทธิ์และธุรกิจที่เลือก",
+    };
   }
 }

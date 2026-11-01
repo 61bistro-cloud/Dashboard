@@ -1,3 +1,5 @@
+import { extractEvidenceRemark } from "@/lib/evidence-category";
+
 /** Suggestions only: no expense/transaction is created by matching evidence. */
 export type EvidenceFields = {
   amount: number | null;
@@ -12,6 +14,9 @@ export type MatchTransaction = {
   withdraw: number;
   accountName: string;
   accountId: number;
+  categoryId?: number | null;
+  categoryName?: string | null;
+  note?: string | null;
 };
 export type EvidenceCandidate = {
   transactionId: number;
@@ -19,7 +24,11 @@ export type EvidenceCandidate = {
   reasons: string[];
 };
 const MARKER = "\nEVIDENCE_OCR_V1:";
-export type EvidenceOcr = EvidenceFields & { text: string; readAt: string };
+export type EvidenceOcr = EvidenceFields & {
+  text: string;
+  readAt: string;
+  remark: string | null;
+};
 export function readEvidenceOcr(note: string | null): EvidenceOcr | null {
   if (!note) return null;
   const index = note.lastIndexOf(MARKER);
@@ -31,6 +40,7 @@ export function readEvidenceOcr(note: string | null): EvidenceOcr | null {
     return {
       text: parsed.text,
       readAt: parsed.readAt,
+      remark: extractEvidenceRemark(parsed.text),
       ...extractEvidenceFields(parsed.text),
     };
   } catch {

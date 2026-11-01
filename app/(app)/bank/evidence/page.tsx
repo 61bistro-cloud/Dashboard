@@ -22,7 +22,7 @@ export default async function EvidencePage({
   const business = await getCurrentBusiness();
   if (!business) return <p className="p-8">ไม่มีสิทธิ์เข้าถึงธุรกิจ</p>;
   const sp = await searchParams;
-  const [months, accounts] = await Promise.all([
+  const [months, accounts, categories] = await Promise.all([
     prisma.fiscalMonth.findMany({
       orderBy: [{ year: { yearBE: "desc" } }, { monthIndex: "asc" }],
       include: { year: true },
@@ -30,6 +30,11 @@ export default async function EvidencePage({
     prisma.bankAccount.findMany({
       where: { businessId: business.id },
       orderBy: { sortOrder: "asc" },
+    }),
+    prisma.transactionCategory.findMany({
+      where: { businessId: business.id, active: true },
+      orderBy: [{ kind: "asc" }, { sortOrder: "asc" }],
+      select: { id: true, name: true, kind: true },
     }),
   ]);
   const month =
@@ -61,7 +66,10 @@ export default async function EvidencePage({
         fiscalMonthId: month.id,
         ...(account ? { accountId: account.id } : {}),
       },
-      include: { account: { select: { name: true } } },
+      include: {
+        account: { select: { name: true } },
+        category: { select: { name: true } },
+      },
       orderBy: [{ date: "asc" }, { id: "asc" }],
     }),
     prisma.driveFile.findMany({
@@ -137,6 +145,7 @@ export default async function EvidencePage({
         key={`${business.id}:${month.id}:${account?.id ?? "all"}:${page}`}
         businessId={business.id}
         monthId={month.id}
+        categories={categories}
         files={files.map((file) => {
           const ocr = readEvidenceOcr(file.note);
           return {
@@ -147,7 +156,12 @@ export default async function EvidencePage({
             refType: file.refType,
             refId: file.refId,
             ocr: ocr
-              ? { amount: ocr.amount, date: ocr.date, time: ocr.time }
+              ? {
+                  amount: ocr.amount,
+                  date: ocr.date,
+                  time: ocr.time,
+                  remark: ocr.remark,
+                }
               : null,
           };
         })}
@@ -159,6 +173,9 @@ export default async function EvidencePage({
           withdraw: tx.withdraw,
           accountName: tx.account.name,
           accountId: tx.accountId,
+          categoryId: tx.categoryId,
+          categoryName: tx.category?.name ?? null,
+          note: tx.note,
         }))}
         linkedTransactionIds={linked
           .map((file) => Number(file.refId))

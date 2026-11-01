@@ -17,7 +17,7 @@
     "test:costs": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/statement-costs.test.mts",
     "test:line": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/line-webhook.test.mts",
     "test:evidence": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/evidence-upload.test.mts",
-    "test:matching": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/evidence-match.test.mts"
+    "test:matching": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/evidence-match.test.mts tests/evidence-category.test.mts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -65,3 +65,6 @@ Deploy บน Vercel, ฐานข้อมูล Neon Postgres. UI ภาษา
 - OCR cache ต่อท้าย DriveFile.note ด้วย marker `EVIDENCE_OCR_V1` โดยรักษาข้อความ/WEB_UPLOAD marker เดิม. ยอดหรือวันที่ไม่ชัดให้ผู้ใช้กรอกเอง.
 - แนะนำคู่จากยอด+วันตรงและเรียงตามเวลา; ต้องให้ผู้ใช้ตรวจบัญชี/ผู้รับและยืนยันทุกคู่. ใบเสร็จและสลิปหลายไฟล์แนบรายการเดียวกันได้.
 - `npm run test:matching` ใช้ข้อมูลจำลอง ตรวจ parser/scoping/matching/metadata และ lifecycle OCR โดยไม่แก้ production.
+
+- Remark: `lib/evidence-category.ts` อ่านเฉพาะช่อง Remark/หมายเหตุจาก OCR เดิม แล้วแนะนำจากคำและหมวดที่มีจริงในธุรกิจ โดยพิจารณาเงินเข้า/ออก; ไม่ตั้งหมวดอัตโนมัติ.
+- `saveEvidenceCategory` ใช้ได้หลังยืนยันคู่แล้วเท่านั้น ตรวจ business/month/category และ compare-and-set หมวด+note เดิมก่อนบันทึก. เปลี่ยนเฉพาะ categoryId + บันทึก Remark รายหลักฐาน โดยรักษา note เดิม/หลักฐานอื่น; revalidate ทุกหน้าต้นทุน/P&L.

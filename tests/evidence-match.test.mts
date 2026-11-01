@@ -1,3 +1,4 @@
+import { mergeConfirmedRemark } from "../lib/evidence-category.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { readFileSync } from "node:fs";
@@ -196,6 +197,7 @@ async function actions(
         revalidatePath: (path: string) => invalidations.push(path),
       },
       "@/lib/evidence-match": helpers,
+      "@/lib/evidence-category": { mergeConfirmedRemark },
     },
     async (name) => {
       assert.equal(name, "@/lib/google");

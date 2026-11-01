@@ -279,7 +279,17 @@ export function TransactionTable({
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-1.5">{r.description}</td>
+                  <td className="px-3 py-1.5">
+                    {r.description}
+                    {r.note && (
+                      <details className="mt-1 text-muted">
+                        <summary className="cursor-pointer text-[10px]">
+                          Remark / บันทึก
+                        </summary>
+                        <p className="whitespace-pre-line mt-1">{r.note}</p>
+                      </details>
+                    )}
+                  </td>
                   <td className="px-3 py-1.5 text-right tabular-nums text-emerald-700">
                     {r.deposit > 0 ? fmtTHB(r.deposit) : ""}
                   </td>
