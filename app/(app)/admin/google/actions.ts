@@ -1,5 +1,6 @@
 "use server";
 
+import { MAX_EVIDENCE_BYTES } from "@/lib/evidence-upload";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
@@ -87,8 +88,10 @@ export async function disconnectGoogle() {
 }
 
 const uploadSchema = z.object({
+  businessId: z.coerce.number().int().positive(),
+  uploadId: z.uuid(),
   kind: z.enum(["SLIP", "BILL"]),
-  fiscalMonthId: z.coerce.number().int().positive().optional(),
+  fiscalMonthId: z.coerce.number().int().positive(),
   note: z.string().max(200).optional(),
 });
 
@@ -105,10 +108,14 @@ export async function uploadEvidenceFile(formData: FormData) {
     if (!(file instanceof File) || file.size === 0) {
       return { ok: false, message: "ไม่มีไฟล์" };
     }
-    if (file.size > 15 * 1024 * 1024) {
-      return { ok: false, message: "ไฟล์ใหญ่เกิน 15MB" };
+    if (file.size > MAX_EVIDENCE_BYTES) {
+      return { ok: false, message: "ไฟล์ใหญ่เกิน 4 MB" };
     }
+    if (!file.type.startsWith("image/") && file.type !== "application/pdf")
+      return { ok: false, message: "รองรับไฟล์รูปภาพหรือ PDF เท่านั้น" };
     const parsed = uploadSchema.safeParse({
+      businessId: formData.get("businessId"),
+      uploadId: formData.get("uploadId"),
       kind: formData.get("kind"),
       fiscalMonthId: formData.get("fiscalMonthId") || undefined,
       note: formData.get("note") || undefined,
@@ -116,7 +123,27 @@ export async function uploadEvidenceFile(formData: FormData) {
     if (!parsed.success) {
       return { ok: false, message: "ข้อมูลไม่ถูกต้อง" };
     }
-    const { kind, fiscalMonthId, note } = parsed.data;
+    const { kind, fiscalMonthId, note, businessId, uploadId } = parsed.data;
+    if (businessId !== biz.id)
+      return {
+        ok: false,
+        message:
+          "ธุรกิจที่เลือกเปลี่ยนไปแล้ว กรุณากลับไปเลือกธุรกิจเดิมก่อนอัปโหลดต่อ",
+      };
+    const marker = `WEB_UPLOAD:${uploadId}`;
+    const existing = await prisma.driveFile.findFirst({
+      where: { businessId: biz.id, note: { startsWith: marker } },
+      select: { webViewLink: true, kind: true, fiscalMonthId: true },
+    });
+    if (existing) {
+      if (existing.kind !== kind || existing.fiscalMonthId !== fiscalMonthId)
+        return {
+          ok: false,
+          message:
+            "ไฟล์นี้เคยอัปโหลดด้วยเดือนหรือประเภทอื่นแล้ว กรุณาตรวจรายการก่อน",
+        };
+      return { ok: true, webViewLink: existing.webViewLink };
+    }
 
     // month folder name = "YYYY-MM" (calendar) for tidy grouping
     let monthFolder: string | null = null;
@@ -125,6 +152,11 @@ export async function uploadEvidenceFile(formData: FormData) {
         where: { id: fiscalMonthId },
         select: { calendarYear: true, calendarMonth: true },
       });
+      if (!fm)
+        return {
+          ok: false,
+          message: "ไม่พบเดือนที่เลือก กรุณารีเฟรชหน้าแล้วเลือกใหม่",
+        };
       if (fm) {
         monthFolder = `${fm.calendarYear}-${String(fm.calendarMonth).padStart(2, "0")}`;
       }
@@ -151,7 +183,7 @@ export async function uploadEvidenceFile(formData: FormData) {
         name: file.name || "evidence",
         mimeType,
         uploadedByName: session.user.name || session.user.email || null,
-        note: note || null,
+        note: note ? `${marker} ${note}` : marker,
       },
     });
 

@@ -128,6 +128,7 @@ export default async function GoogleAdminPage() {
 
         <div className="pt-2">
           <GooglePanel
+            businessId={biz.id}
             connected={connected}
             structureReady={structureReady}
             months={monthOpts}
