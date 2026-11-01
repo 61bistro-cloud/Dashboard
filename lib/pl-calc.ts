@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { getStatementCostSummaries } from "@/lib/statement-cost-data";
+import { resolveCostAmounts } from "@/lib/statement-costs";
 
 // ─────────────── Types ───────────────
 
@@ -30,6 +32,9 @@ export type MonthlyTotals = {
   posNetSum: number;
   override: number;
   netRevenue: number; // max(posNetSum, override)
+
+  costSource: "statement" | "manual" | "mixed";
+  pendingStatementCost: number;
 
   food: number;
   bev: number;
@@ -119,35 +124,43 @@ export async function getYearlyPL(
   }
 
   // Batch queries for costs
-  const [purchases, suppliers, payrolls, extras, fixedCosts, overrides] =
-    await Promise.all([
-      prisma.supplierPurchase.findMany({
-        where: { businessId, fiscalMonthId: { in: monthIds } },
-        select: { fiscalMonthId: true, amount: true, supplierId: true },
-      }),
-      prisma.supplier.findMany({
-        where: { businessId },
-        select: { id: true, category: true },
-      }),
-      prisma.employeePayroll.groupBy({
-        by: ["fiscalMonthId"],
-        where: { businessId, fiscalMonthId: { in: monthIds } },
-        _sum: { amount: true },
-      }),
-      prisma.payrollExtra.groupBy({
-        by: ["fiscalMonthId"],
-        where: { businessId, fiscalMonthId: { in: monthIds } },
-        _sum: { amount: true },
-      }),
-      prisma.fixedCost.groupBy({
-        by: ["fiscalMonthId"],
-        where: { businessId, fiscalMonthId: { in: monthIds } },
-        _sum: { amount: true },
-      }),
-      prisma.monthlyRevenueOverride.findMany({
-        where: { businessId, fiscalMonthId: { in: monthIds } },
-      }),
-    ]);
+  const [
+    purchases,
+    suppliers,
+    payrolls,
+    extras,
+    fixedCosts,
+    overrides,
+    statementCosts,
+  ] = await Promise.all([
+    prisma.supplierPurchase.findMany({
+      where: { businessId, fiscalMonthId: { in: monthIds } },
+      select: { fiscalMonthId: true, amount: true, supplierId: true },
+    }),
+    prisma.supplier.findMany({
+      where: { businessId },
+      select: { id: true, category: true },
+    }),
+    prisma.employeePayroll.groupBy({
+      by: ["fiscalMonthId"],
+      where: { businessId, fiscalMonthId: { in: monthIds } },
+      _sum: { amount: true },
+    }),
+    prisma.payrollExtra.groupBy({
+      by: ["fiscalMonthId"],
+      where: { businessId, fiscalMonthId: { in: monthIds } },
+      _sum: { amount: true },
+    }),
+    prisma.fixedCost.groupBy({
+      by: ["fiscalMonthId"],
+      where: { businessId, fiscalMonthId: { in: monthIds } },
+      _sum: { amount: true },
+    }),
+    prisma.monthlyRevenueOverride.findMany({
+      where: { businessId, fiscalMonthId: { in: monthIds } },
+    }),
+    getStatementCostSummaries(monthIds, businessId),
+  ]);
 
   const supplierCat = new Map(suppliers.map((s) => [s.id, s.category]));
   const costByMonth = new Map<
@@ -181,11 +194,20 @@ export async function getYearlyPL(
 
   const months: MonthlyTotals[] = year.months.map((m) => {
     const pos = posByMonth.get(m.id) ?? { net: 0, count: 0 };
-    const c = costByMonth.get(m.id) ?? { food: 0, bev: 0, pack: 0 };
-    const laborBase = laborBaseByMonth.get(m.id) ?? 0;
-    const laborExtra = laborExtraByMonth.get(m.id) ?? 0;
+    const statement = statementCosts.get(m.id);
+    const c = resolveCostAmounts(
+      {
+        ...(costByMonth.get(m.id) ?? { food: 0, bev: 0, pack: 0 }),
+        laborBase: laborBaseByMonth.get(m.id) ?? 0,
+        laborExtra: laborExtraByMonth.get(m.id) ?? 0,
+        fixed: fixedByMonth.get(m.id) ?? 0,
+      },
+      statement
+    );
+    const laborBase = c.laborBase;
+    const laborExtra = c.laborExtra;
     const labor = laborBase + laborExtra;
-    const fixed = fixedByMonth.get(m.id) ?? 0;
+    const fixed = c.fixed;
     const override = overrideByMonth.get(m.id) ?? 0;
 
     const cogs = c.food + c.bev + c.pack;
@@ -205,6 +227,8 @@ export async function getYearlyPL(
       override,
       netRevenue,
 
+      costSource: statement?.hasTransactions ? "statement" : "manual",
+      pendingStatementCost: statement?.pendingTotal ?? 0,
       food: c.food,
       bev: c.bev,
       pack: c.pack,
@@ -253,6 +277,12 @@ export async function getYearlyPL(
     posNetSum: sum((m) => m.posNetSum),
     override: sum((m) => m.override),
     netRevenue: totalRevenue,
+    costSource: months.every((m) => m.costSource === "manual")
+      ? "manual"
+      : months.every((m) => m.costSource === "statement")
+        ? "statement"
+        : "mixed",
+    pendingStatementCost: sum((m) => m.pendingStatementCost),
     food: totalFood,
     bev: totalBev,
     pack: totalPack,

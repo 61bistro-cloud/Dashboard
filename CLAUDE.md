@@ -47,3 +47,13 @@ Deploy บน Vercel, ฐานข้อมูล Neon Postgres. UI ภาษา
 ## เมนูหลัก
 
 `/` Dashboard · `/daily-pl` · `/monthly-pl` · `/closing` (ปิดงบ) · `/cost-setup` · `/pos-sales` · `/bank` (กระทบยอด) · `/admin/businesses` · `/admin/users`
+
+## Cost Setup / Statement → P&L
+
+- `lib/statement-costs.ts` เป็น classifier/aggregation กลาง; `lib/statement-cost-data.ts` อ่าน BankTransaction แบบแยก business + fiscalMonth.
+- เดือนที่มีรายการ Bank & Reconcile ใช้รายจ่ายที่จัดหมวด EXPENSE จากทุกบัญชี (รวมเงินสด/บัตร) แทนยอดกรอกเองทั้งเดือน; ไม่บวกซ้ำ. เดือนที่ยังไม่มีรายการใช้ยอดกรอกเองเดิม.
+- TRANSFER, ชำระบัตรเครดิต, เงินเบิกผู้บริหาร และเงินเบิกล่วงหน้าไม่นับ P&L. เงินออกที่ไม่มีหมวดหรืออยู่หมวด INCOME แสดงเป็นรอตรวจสอบ ยังไม่นับต้นทุน.
+- หมวดวัตถุดิบ/จัดซื้อ → Food, เครื่องดื่ม → Bev, แพ็คเกจจิ้ง → Pack, เงินเดือน → Labor Base, ค่าจ้าง/OT → Labor Extra, EXPENSE อื่น → Fixed/Operating. แสดง mapping ใน Cost Setup.
+- Cost Setup / Dashboard / Daily P&L / Monthly P&L / breakdown ปิดงบใช้หลักเดียวกัน. Daily P&L ยังเฉลี่ยรายจ่ายทั้งเดือนตามจำนวนวัน ไม่ใช่เงินออกจริงในวันนั้น.
+- อ่านคำนวณโดยตรง ไม่คัดลอก Statement ไปสร้าง payroll/purchase/fixed-cost rows. ไม่เขียนทับ snapshot ปิดงบเดิม.
+- `npm run test:costs` ตรวจต้นทุนและการเชื่อม P&L ด้วยข้อมูลจำลอง ไม่ใช้ฐานข้อมูล.

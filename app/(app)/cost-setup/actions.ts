@@ -6,6 +6,18 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireBusiness } from "@/lib/business";
 
+function revalidateCostViews() {
+  for (const path of [
+    "/cost-setup",
+    "/",
+    "/daily-pl",
+    "/monthly-pl",
+    "/closing",
+    "/closing-print",
+  ])
+    revalidatePath(path);
+}
+
 async function requireAccess() {
   const session = await auth();
   if (!session) throw new Error("unauthorized");
@@ -114,7 +126,7 @@ export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
     }
   });
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 // ───── SUPPLIERS ─────
@@ -168,7 +180,7 @@ export async function saveSuppliers(
     })
   );
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 // ───── FIXED COSTS ─────
@@ -216,7 +228,7 @@ export async function saveFixed(input: z.input<typeof saveFixedSchema>) {
     )
   );
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 // ───── REVENUE OVERRIDE ─────
@@ -256,7 +268,7 @@ export async function saveRevenueOverride(
     });
   }
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 // ───── FIXED CATEGORY CRUD ─────
@@ -300,7 +312,7 @@ export async function addFixedCategory(
     });
   }
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 export async function deleteFixedCategory(id: number) {
@@ -325,7 +337,7 @@ export async function deleteFixedCategory(id: number) {
     });
   }
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 // ───── EMPLOYEE CRUD ─────
@@ -367,7 +379,7 @@ export async function addEmployee(input: z.input<typeof addEmployeeSchema>) {
     });
   }
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 export async function deleteEmployee(id: number) {
@@ -392,7 +404,7 @@ export async function deleteEmployee(id: number) {
     });
   }
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 // ───── SUPPLIER CRUD ─────
@@ -441,7 +453,7 @@ export async function addSupplier(input: z.input<typeof addSupplierSchema>) {
     });
   }
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 export async function deleteSupplier(id: number) {
@@ -466,7 +478,7 @@ export async function deleteSupplier(id: number) {
     });
   }
 
-  revalidatePath("/cost-setup");
+  revalidateCostViews();
 }
 
 // ───── REORDER (drag & drop → persist new order) ─────

@@ -7,6 +7,20 @@ import { revalidatePath } from "next/cache";
 import { parseKbankPdf, suggestCategoryName } from "@/lib/kbank-parser";
 import { requireBusiness } from "@/lib/business";
 
+function revalidateBankCosts() {
+  for (const path of [
+    "/bank",
+    "/cost-setup",
+    "/",
+    "/daily-pl",
+    "/monthly-pl",
+    "/daily-recon",
+    "/closing",
+    "/closing-print",
+  ])
+    revalidatePath(path);
+}
+
 async function requireAccess() {
   const session = await auth();
   if (!session) throw new Error("unauthorized");
@@ -73,7 +87,7 @@ export async function addTransaction(input: z.input<typeof addTxSchema>) {
     },
   });
 
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 export async function deleteTransaction(id: number) {
@@ -83,7 +97,7 @@ export async function deleteTransaction(id: number) {
   await prisma.bankTransaction.deleteMany({
     where: { id, businessId: biz.id },
   });
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 const bulkDeleteSchema = z.object({
@@ -139,9 +153,7 @@ export async function bulkDeleteTransactions(
       }
       return result.count;
     });
-    revalidatePath("/bank");
-    revalidatePath("/cost-setup");
-    revalidatePath("/daily-recon");
+    revalidateBankCosts();
     return { ok: true as const, deleted, resetOpening: data.resetOpening };
   } catch (error) {
     const message =
@@ -183,7 +195,7 @@ export async function setOpeningBalance(input: z.input<typeof openingSchema>) {
       create: { ...data, businessId: biz.id },
     });
   }
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 // ───── BANK ACCOUNT / CHANNEL CRUD ─────
@@ -233,7 +245,7 @@ export async function addBankAccount(input: z.input<typeof addAccountSchema>) {
     },
   });
 
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 export async function deleteBankAccount(id: number) {
@@ -258,7 +270,7 @@ export async function deleteBankAccount(id: number) {
     await prisma.bankAccount.update({ where: { id }, data: { active: false } });
   }
 
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 // ───── TRANSACTION CATEGORY CRUD + REORDER ─────
@@ -300,7 +312,7 @@ export async function addTxCategory(input: z.input<typeof addCatSchema>) {
       },
     });
   }
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 const updateCatSchema = z.object({
@@ -330,7 +342,7 @@ export async function updateTxCategory(input: z.input<typeof updateCatSchema>) {
     where: { id: data.id },
     data: { name: data.name, kind: data.kind },
   });
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 export async function deleteTxCategory(id: number) {
@@ -354,7 +366,7 @@ export async function deleteTxCategory(id: number) {
       data: { active: false },
     });
   }
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 export async function moveTxCategory(id: number, dir: "up" | "down") {
@@ -385,7 +397,7 @@ export async function moveTxCategory(id: number, dir: "up" | "down") {
       data: { sortOrder: cat.sortOrder },
     }),
   ]);
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 const setTxCatSchema = z.object({
@@ -422,7 +434,7 @@ export async function setTransactionCategory(
     where: { id: data.txId },
     data: { categoryId: data.categoryId },
   });
-  revalidatePath("/bank");
+  revalidateBankCosts();
 }
 
 // ───── PDF STATEMENT IMPORT (KBANK) ─────
@@ -777,7 +789,7 @@ export async function importStatementRows(
       });
     }
 
-    revalidatePath("/bank");
+    revalidateBankCosts();
     return {
       ok: true,
       inserted,

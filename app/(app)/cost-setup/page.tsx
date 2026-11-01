@@ -11,6 +11,12 @@ import { SupplierSection } from "./_components/supplier-section";
 import { FixedCostSection } from "./_components/fixed-section";
 import { RevenueOverrideSection } from "./_components/override-section";
 import { StatementExpensesPanel } from "./_components/statement-expenses-panel";
+import {
+  COST_BUCKET_LABELS,
+  resolveCostAmounts,
+  type CostBucket,
+} from "@/lib/statement-costs";
+import { fmtTHB } from "@/lib/fiscal";
 import { PageHeader } from "@/components/page-header";
 
 type SearchParams = Promise<{ month?: string }>;
@@ -90,6 +96,7 @@ export default async function CostSetupPage({
     }),
     prisma.supplierPurchase.findMany({
       where: { businessId: business.id, fiscalMonthId: currentMonth.id },
+      include: { supplier: { select: { category: true } } },
     }),
     prisma.fixedCostCategory.findMany({
       where: { active: true, businessId: business.id },
@@ -128,12 +135,30 @@ export default async function CostSetupPage({
   );
   const fixedByCat = new Map(fixedCosts.map((f) => [f.categoryId, f.amount]));
 
+  const manualAmounts = {
+    food: purchases
+      .filter((p) => p.supplier.category === "FOOD")
+      .reduce((s, p) => s + p.amount, 0),
+    bev: purchases
+      .filter((p) => p.supplier.category === "BEVERAGE")
+      .reduce((s, p) => s + p.amount, 0),
+    pack: purchases
+      .filter((p) => p.supplier.category === "PACKAGING")
+      .reduce((s, p) => s + p.amount, 0),
+    laborBase: payrollRows.reduce((s, p) => s + p.amount, 0),
+    laborExtra: extras.reduce((s, p) => s + p.amount, 0),
+    fixed: fixedCosts.reduce((s, p) => s + p.amount, 0),
+  };
+  const effectiveCosts = resolveCostAmounts(manualAmounts, statementExpenses);
+  const manualTotal = Object.values(manualAmounts).reduce((s, v) => s + v, 0);
+  const totalCost = Object.values(effectiveCosts).reduce((s, v) => s + v, 0);
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       <PageHeader
         icon={Settings}
         title="Cost Setup"
-        description="ตั้งค่าต้นทุนรายเดือน — กรอกตัวเลขแล้วบันทึกได้เลย ระบบจะคำนวณ P&L อัตโนมัติ"
+        description="สรุปค่าใช้จ่ายรายเดือนจาก Bank & Reconcile — ใช้ยอดเดียวกันใน Dashboard และ P&L"
         action={
           <MonthPicker
             months={allMonths.map((m) => ({
@@ -147,7 +172,7 @@ export default async function CostSetupPage({
 
       <div className="rounded-input border border-hairline bg-canvas p-4">
         <div className="text-sm">
-          <span className="text-muted">เดือนที่กำลังกรอก:</span>{" "}
+          <span className="text-muted">เดือนที่กำลังดู:</span>{" "}
           <span className="font-semibold">{currentMonth.fullLabel}</span>{" "}
           <span className="text-muted">
             • จำนวนวัน {currentMonth.daysInMonth} วัน
@@ -155,55 +180,106 @@ export default async function CostSetupPage({
         </div>
       </div>
 
-      <PayrollSection
-        fiscalMonthId={currentMonth.id}
-        employees={employees.map((e) => {
-          const row = payrollByEmp.get(e.id);
-          return {
-            id: e.id,
-            name: e.name,
-            shortName: e.shortName,
-            amount: row?.amount ?? 0,
-            nameOverride: row?.nameOverride ?? null,
-          };
-        })}
-        extras={(["OT", "BONUS", "EXTRA", "SERVICE_CHARGE"] as const).map(
-          (t) => ({ type: t, amount: extraByType.get(t) ?? 0 })
-        )}
+      <section className="rounded-card border border-hairline bg-canvas p-5 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold">
+              ค่าใช้จ่ายที่ใช้คำนวณ P&L — {currentMonth.fullLabel}
+            </h2>
+            <p className="mt-1 text-xs text-muted">
+              {statementExpenses.hasTransactions
+                ? "ใช้รายจ่ายที่จัดหมวดใน Bank & Reconcile เป็นหลัก • ไม่บวกยอดกรอกเดิมซ้ำ"
+                : "ยังไม่มีรายการใน Bank & Reconcile • ใช้ยอดกรอกเองด้านล่างชั่วคราว"}
+            </p>
+          </div>
+          <strong className="text-xl tabular-nums">{fmtTHB(totalCost)}</strong>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {(Object.keys(COST_BUCKET_LABELS) as CostBucket[]).map((bucket) => (
+            <div
+              key={bucket}
+              className="rounded-input border border-hairline p-3"
+            >
+              <div className="text-xs text-muted">
+                {COST_BUCKET_LABELS[bucket]}
+              </div>
+              <div className="mt-1 font-semibold tabular-nums">
+                {fmtTHB(effectiveCosts[bucket])}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <StatementExpensesPanel
+        summary={statementExpenses}
+        manualTotal={manualTotal}
+        monthId={currentMonth.id}
       />
+      <details
+        className="rounded-card border border-hairline p-4"
+        open={!statementExpenses.hasTransactions}
+      >
+        <summary className="cursor-pointer text-sm font-medium">
+          ยอดกรอกเองเดิม — {fmtTHB(manualTotal)}{" "}
+          {statementExpenses.hasTransactions
+            ? "(เก็บไว้เทียบ ไม่นับซ้ำใน P&L)"
+            : "(ใช้ใน P&L จนกว่าจะมีรายการธนาคาร)"}
+        </summary>
+        <p className="text-xs text-muted mt-3 mb-4">
+          {statementExpenses.hasTransactions
+            ? "เดือนนี้ใช้ยอดจาก Bank & Reconcile แล้ว หากมีรายจ่ายเงินสดให้บันทึกในบัญชีเงินสดของ Bank & Reconcile และจัดหมวด เพื่อรวมในสรุปเดียวกัน"
+            : "กรอกค่าใช้จ่ายได้เมื่อยังไม่มีข้อมูลธนาคาร เมื่อเริ่มลง Bank & Reconcile ระบบจะเปลี่ยนมาใช้ยอดธนาคารทั้งเดือน กรุณาลงให้ครบทุกบัญชีรวมถึงเงินสด"}
+        </p>
+        <fieldset
+          disabled={statementExpenses.hasTransactions}
+          className="space-y-6 disabled:opacity-60"
+        >
+          <PayrollSection
+            fiscalMonthId={currentMonth.id}
+            employees={employees.map((e) => {
+              const row = payrollByEmp.get(e.id);
+              return {
+                id: e.id,
+                name: e.name,
+                shortName: e.shortName,
+                amount: row?.amount ?? 0,
+                nameOverride: row?.nameOverride ?? null,
+              };
+            })}
+            extras={(["OT", "BONUS", "EXTRA", "SERVICE_CHARGE"] as const).map(
+              (t) => ({ type: t, amount: extraByType.get(t) ?? 0 })
+            )}
+          />
 
-      <SupplierSection
-        fiscalMonthId={currentMonth.id}
-        suppliers={suppliers.map((s) => {
-          const row = purchaseBySupplier.get(s.id);
-          return {
-            id: s.id,
-            name: s.name,
-            category: s.category,
-            amount: row?.amount ?? 0,
-            nameOverride: row?.nameOverride ?? null,
-          };
-        })}
-      />
+          <SupplierSection
+            fiscalMonthId={currentMonth.id}
+            suppliers={suppliers.map((s) => {
+              const row = purchaseBySupplier.get(s.id);
+              return {
+                id: s.id,
+                name: s.name,
+                category: s.category,
+                amount: row?.amount ?? 0,
+                nameOverride: row?.nameOverride ?? null,
+              };
+            })}
+          />
 
-      <FixedCostSection
-        fiscalMonthId={currentMonth.id}
-        categories={fixedCats.map((c) => ({
-          id: c.id,
-          name: c.name,
-          amount: fixedByCat.get(c.id) ?? 0,
-        }))}
-      />
+          <FixedCostSection
+            fiscalMonthId={currentMonth.id}
+            categories={fixedCats.map((c) => ({
+              id: c.id,
+              name: c.name,
+              amount: fixedByCat.get(c.id) ?? 0,
+            }))}
+          />
+        </fieldset>
+      </details>
 
       <RevenueOverrideSection
         fiscalMonthId={currentMonth.id}
         amount={override?.amount ?? 0}
         note={override?.note ?? ""}
-      />
-
-      <StatementExpensesPanel
-        summary={statementExpenses}
-        manualFixed={Array.from(fixedByCat.values()).reduce((s, v) => s + v, 0)}
       />
     </div>
   );

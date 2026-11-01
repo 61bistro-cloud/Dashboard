@@ -1,3 +1,4 @@
+import { CostSourceNotice } from "@/components/cost-source-notice";
 import { redirect } from "next/navigation";
 import { TrendingUp, ChefHat, Users, Zap, Home, Percent } from "lucide-react";
 import { auth } from "@/auth";
@@ -95,6 +96,11 @@ export default async function MonthlyPLPage({
             </form>
           ) : undefined
         }
+      />
+
+      <CostSourceNotice
+        source={data.total.costSource}
+        pending={data.total.pendingStatementCost}
       />
 
       {/* KPI cards */}
@@ -303,6 +309,19 @@ function PLMatrix({
             </tr>
           </thead>
           <tbody className="divide-y divide-hairline-soft">
+            <tr className="text-muted">
+              <td className="px-3 py-2 sticky left-0 bg-canvas">แหล่งต้นทุน</td>
+              {months.map((m) => (
+                <td
+                  key={m.fiscalMonthId}
+                  className="px-2 py-2 text-right text-[10px]"
+                >
+                  {m.costSource === "statement" ? "Statement" : "กรอกเอง"}
+                </td>
+              ))}
+              <td colSpan={2} />
+            </tr>
+
             {rows.map((r, idx) => {
               if (r.section) {
                 return (

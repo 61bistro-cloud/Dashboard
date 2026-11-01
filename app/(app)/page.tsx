@@ -1,3 +1,4 @@
+import { CostSourceNotice } from "@/components/cost-source-notice";
 import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
@@ -92,6 +93,11 @@ export default async function DashboardPage() {
         icon={LayoutDashboard}
         title="Dashboard"
         description={`${business.name} — ปีงบ ${latestYear.label}`}
+      />
+
+      <CostSourceNotice
+        source={total.costSource}
+        pending={total.pendingStatementCost}
       />
 
       <SectionTitle

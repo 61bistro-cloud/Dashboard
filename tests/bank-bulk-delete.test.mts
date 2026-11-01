@@ -116,7 +116,15 @@ test("select all deletes only the selected business/account/month, retaining ope
     [3, 4, 5]
   );
   assert.equal(h.openings().length, 4);
-  assert.ok(h.invalidated.includes("/bank"));
+  for (const path of [
+    "/bank",
+    "/cost-setup",
+    "/",
+    "/daily-pl",
+    "/monthly-pl",
+    "/closing",
+  ])
+    assert.ok(h.invalidated.includes(path));
 });
 test("partial selection and repeated IDs delete only those rows", async () => {
   const h = await harness();

@@ -1,3 +1,4 @@
+import { CostSourceNotice } from "@/components/cost-source-notice";
 import { redirect } from "next/navigation";
 import {
   Calendar,
@@ -92,6 +93,12 @@ export default async function DailyPLPage({
             currentId={currentMonth.id}
           />
         }
+      />
+
+      <CostSourceNotice
+        source={totals.costSource}
+        pending={totals.pendingStatementCost}
+        monthId={month.id}
       />
 
       {/* Month summary */}

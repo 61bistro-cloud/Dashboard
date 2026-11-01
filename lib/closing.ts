@@ -1,3 +1,4 @@
+import { getStatementCostSummaries } from "@/lib/statement-cost-data";
 import { prisma } from "@/lib/prisma";
 import { getYearlyPL, getDataQuality, type MonthlyTotals } from "@/lib/pl-calc";
 import { getReconciliation, type ReconRow } from "@/lib/bank-calc";
@@ -42,35 +43,43 @@ export async function computeBreakdown(
   const monthStart = `${month.calendarYear}-${mm}-01`;
   const monthEnd = `${month.calendarYear}-${mm}-${String(month.daysInMonth).padStart(2, "0")}`;
 
-  const [posByPay, override, purchases, payrolls, extras, fixedCosts] =
-    await Promise.all([
-      prisma.posBill.groupBy({
-        by: ["paymentType"],
-        where: {
-          businessId,
-          businessDate: { gte: monthStart, lte: monthEnd },
-        },
-        _sum: { netAmount: true },
-      }),
-      prisma.monthlyRevenueOverride.findUnique({
-        where: { businessId_fiscalMonthId: { businessId, fiscalMonthId } },
-      }),
-      prisma.supplierPurchase.findMany({
-        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
-        include: { supplier: { select: { name: true, category: true } } },
-      }),
-      prisma.employeePayroll.findMany({
-        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
-        include: { employee: { select: { name: true } } },
-      }),
-      prisma.payrollExtra.findMany({
-        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
-      }),
-      prisma.fixedCost.findMany({
-        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
-        include: { category: { select: { name: true } } },
-      }),
-    ]);
+  const [
+    posByPay,
+    override,
+    purchases,
+    payrolls,
+    extras,
+    fixedCosts,
+    statements,
+  ] = await Promise.all([
+    prisma.posBill.groupBy({
+      by: ["paymentType"],
+      where: {
+        businessId,
+        businessDate: { gte: monthStart, lte: monthEnd },
+      },
+      _sum: { netAmount: true },
+    }),
+    prisma.monthlyRevenueOverride.findUnique({
+      where: { businessId_fiscalMonthId: { businessId, fiscalMonthId } },
+    }),
+    prisma.supplierPurchase.findMany({
+      where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+      include: { supplier: { select: { name: true, category: true } } },
+    }),
+    prisma.employeePayroll.findMany({
+      where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+      include: { employee: { select: { name: true } } },
+    }),
+    prisma.payrollExtra.findMany({
+      where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+    }),
+    prisma.fixedCost.findMany({
+      where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+      include: { category: { select: { name: true } } },
+    }),
+    getStatementCostSummaries([fiscalMonthId], businessId),
+  ]);
 
   // Revenue — POS by payment type, then reconcile to override if it's higher
   const posSum = posByPay.reduce((s, r) => s + (r._sum.netAmount ?? 0), 0);
@@ -86,6 +95,23 @@ export async function computeBreakdown(
       label: "ปรับยอดรายได้ (กรอกเอง / Override)",
       amount: override.amount - posSum,
     });
+  }
+
+  const statement = statements.get(fiscalMonthId);
+  if (statement?.hasTransactions) {
+    const lines = (bucket: string) =>
+      statement.rows
+        .filter((row) => row.status === bucket)
+        .map((row) => ({ label: row.name, amount: row.total }));
+    return {
+      revenue,
+      cogsFood: lines("food"),
+      cogsBev: lines("bev"),
+      cogsPack: lines("pack"),
+      laborSalary: lines("laborBase"),
+      laborExtra: lines("laborExtra"),
+      fixed: lines("fixed"),
+    };
   }
 
   const cogsFood: BreakdownLine[] = [];
@@ -389,26 +415,44 @@ function buildChecks(
   // 3) COGS
   checks.push({
     key: "cogs",
-    label: "กรอกต้นทุนวัตถุดิบ (COGS)",
+    label: "มีต้นทุนวัตถุดิบ (COGS)",
     status: live.cogs > 0 ? "pass" : "warn",
-    detail: live.cogs > 0 ? "กรอกแล้ว" : "ยังไม่ได้กรอกใน Cost Setup",
+    detail:
+      live.cogs > 0
+        ? "มีข้อมูลแล้ว"
+        : "ยังไม่มีต้นทุนใน Cost Setup / Statement",
   });
 
   // 4) Labor
   checks.push({
     key: "labor",
-    label: "กรอกค่าแรงพนักงาน (Labor)",
+    label: "มีค่าแรงพนักงาน (Labor)",
     status: live.labor > 0 ? "pass" : "warn",
-    detail: live.labor > 0 ? "กรอกแล้ว" : "ยังไม่ได้กรอกใน Cost Setup",
+    detail:
+      live.labor > 0
+        ? "มีข้อมูลแล้ว"
+        : "ยังไม่มีต้นทุนใน Cost Setup / Statement",
   });
 
   // 5) Fixed
   checks.push({
     key: "fixed",
-    label: "กรอกค่าใช้จ่ายประจำ (Fixed)",
+    label: "มีค่าใช้จ่ายดำเนินงาน (Fixed)",
     status: live.fixed > 0 ? "pass" : "warn",
-    detail: live.fixed > 0 ? "กรอกแล้ว" : "ยังไม่ได้กรอกใน Cost Setup",
+    detail:
+      live.fixed > 0
+        ? "มีข้อมูลแล้ว"
+        : "ยังไม่มีต้นทุนใน Cost Setup / Statement",
   });
+
+  if (live.pendingStatementCost > 0) {
+    checks.push({
+      key: "statement_pending",
+      label: "จัดหมวดรายจ่าย Statement ครบ",
+      status: "warn",
+      detail: `มีเงินออก ${live.pendingStatementCost.toLocaleString("th-TH", { minimumFractionDigits: 2 })} บาทรอตรวจสอบ ยังไม่รวมในต้นทุน`,
+    });
+  }
 
   // 6) Margin sanity
   const m = live.marginPct;
