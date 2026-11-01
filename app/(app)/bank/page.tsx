@@ -28,10 +28,9 @@ import { MonthPicker } from "../cost-setup/_components/month-picker";
 import { AccountTabs } from "./_components/account-tabs";
 import { AccountManager } from "./_components/account-manager";
 import { CategoryManager } from "./_components/category-manager";
-import { TxCategorySelect } from "./_components/tx-category-select";
+import { TransactionTable } from "./_components/transaction-table";
 import { AddTransactionForm } from "./_components/add-transaction-form";
 import { OpeningBalanceForm } from "./_components/opening-balance-form";
-import { DeleteButton } from "./_components/delete-button";
 import { StatementUpload } from "./_components/statement-upload";
 import { PageHeader } from "@/components/page-header";
 import { BankLogo } from "@/components/bank-logo";
@@ -459,86 +458,23 @@ export default async function BankPage({
           }))}
         />
 
-        {selectedData.rows.length === 0 ? (
-          <div className="p-10 text-center text-sm text-muted">
-            ยังไม่มีรายการในเดือนนี้ — เพิ่มรายการด้านบน
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="bg-surface text-left">
-                <tr>
-                  <th className="px-3 py-2 font-medium">วันที่</th>
-                  <th className="px-3 py-2 font-medium">รายการ</th>
-                  <th className="px-3 py-2 font-medium text-right">
-                    {currentAccount.accountType === "CREDIT_CARD"
-                      ? "ชำระคืน"
-                      : "ฝาก"}
-                  </th>
-                  <th className="px-3 py-2 font-medium text-right">
-                    {currentAccount.accountType === "CREDIT_CARD"
-                      ? "ใช้จ่าย"
-                      : "ถอน"}
-                  </th>
-                  <th className="px-3 py-2 font-medium text-right">
-                    {currentAccount.accountType === "CREDIT_CARD"
-                      ? "ค้างชำระสะสม"
-                      : "คงเหลือ"}
-                  </th>
-                  <th className="px-3 py-2 font-medium">ช่องทาง</th>
-                  <th className="px-3 py-2 font-medium">หมวด</th>
-                  <th className="px-3 py-2 font-medium"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-hairline-soft">
-                {selectedData.rows.map((r) => (
-                  <tr key={r.id} className="hover:bg-surface">
-                    <td className="px-3 py-1.5 whitespace-nowrap">
-                      {r.date.toISOString().slice(0, 10)}
-                      {r.date.toISOString().slice(11, 16) !== "00:00" && (
-                        <span className="ml-1.5 text-muted-soft">
-                          {r.date.toISOString().slice(11, 16)}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-3 py-1.5">{r.description}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums text-emerald-700">
-                      {r.deposit > 0 ? fmtTHB(r.deposit) : ""}
-                    </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums text-red-700">
-                      {r.withdraw > 0 ? fmtTHB(r.withdraw) : ""}
-                    </td>
-                    <td
-                      className={
-                        "px-3 py-1.5 text-right tabular-nums " +
-                        (r.runningBalance < 0 ? "text-red-700" : "")
-                      }
-                    >
-                      {fmtTHB(r.runningBalance)}
-                    </td>
-                    <td className="px-3 py-1.5 text-muted">
-                      {r.channel ?? "-"}
-                    </td>
-                    <td className="px-3 py-1.5">
-                      <TxCategorySelect
-                        txId={r.id}
-                        categoryId={r.categoryId}
-                        categories={categories.map((c) => ({
-                          id: c.id,
-                          name: c.name,
-                          kind: c.kind,
-                        }))}
-                      />
-                    </td>
-                    <td className="px-3 py-1.5 text-right">
-                      <DeleteButton id={r.id} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <TransactionTable
+          key={`${currentAccount.id}:${currentMonth.id}`}
+          fiscalMonthId={currentMonth.id}
+          accountId={currentAccount.id}
+          accountName={currentAccount.name}
+          monthLabel={currentMonth.fullLabel}
+          accountType={currentAccount.accountType}
+          rows={selectedData.rows.map((row) => ({
+            ...row,
+            date: row.date.toISOString(),
+          }))}
+          categories={categories.map((c) => ({
+            id: c.id,
+            name: c.name,
+            kind: c.kind,
+          }))}
+        />
       </section>
 
       {/* Category summary */}

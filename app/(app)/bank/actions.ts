@@ -86,6 +86,73 @@ export async function deleteTransaction(id: number) {
   revalidatePath("/bank");
 }
 
+const bulkDeleteSchema = z.object({
+  fiscalMonthId: z.number().int().positive(),
+  accountId: z.number().int().positive(),
+  ids: z.array(z.number().int().positive()).min(1).max(10000),
+  password: z.string().min(1),
+  resetOpening: z.boolean().default(false),
+});
+
+/** Delete only explicitly selected transactions in the active business/account/month. */
+export async function bulkDeleteTransactions(
+  input: z.input<typeof bulkDeleteSchema>
+) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const parsed = bulkDeleteSchema.safeParse(input);
+  if (!parsed.success)
+    return {
+      ok: false as const,
+      message: "กรุณาเลือกรายการและระบุรหัสอนุมัติให้ถูกต้อง",
+    };
+  const data = parsed.data;
+  const approvalPassword =
+    process.env.APPROVE_PASSWORD || process.env.DELETE_PASSWORD || "Owner123";
+  if (data.password !== approvalPassword)
+    return {
+      ok: false as const,
+      message: "รหัสอนุมัติไม่ถูกต้อง (ต้องใช้รหัสเจ้าของ)",
+    };
+
+  const ids = [...new Set(data.ids)];
+  const scope = {
+    businessId: biz.id,
+    accountId: data.accountId,
+    fiscalMonthId: data.fiscalMonthId,
+  };
+  try {
+    const deleted = await prisma.$transaction(async (tx) => {
+      const result = await tx.bankTransaction.deleteMany({
+        where: { ...scope, id: { in: ids } },
+      });
+      // Roll back the entire batch if IDs are stale or outside the current scope.
+      if (result.count !== ids.length)
+        throw new Error("รายการเปลี่ยนไปแล้ว กรุณารีเฟรชหน้าและเลือกใหม่");
+      if (data.resetOpening) {
+        const remaining = await tx.bankTransaction.count({ where: scope });
+        if (remaining > 0)
+          throw new Error(
+            "ต้องเลือกทุกรายการในบัญชีและเดือนนี้ก่อนล้างยอดยกมา"
+          );
+        await tx.accountOpening.deleteMany({ where: scope });
+      }
+      return result.count;
+    });
+    revalidatePath("/bank");
+    revalidatePath("/cost-setup");
+    revalidatePath("/daily-recon");
+    return { ok: true as const, deleted, resetOpening: data.resetOpening };
+  } catch (error) {
+    const message =
+      error instanceof Error &&
+      /รายการเปลี่ยนไปแล้ว|ต้องเลือกทุกรายการ/.test(error.message)
+        ? error.message
+        : "ลบไม่สำเร็จ กรุณาลองอีกครั้ง";
+    return { ok: false as const, message };
+  }
+}
+
 const openingSchema = z.object({
   fiscalMonthId: z.coerce.number().int().positive(),
   accountId: z.coerce.number().int().positive(),

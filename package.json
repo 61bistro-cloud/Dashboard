@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
     "prepare": "husky",
-    "test:bank": "node --import tsx --test --test-isolation=none tests/bank-parser.test.mts"
+    "test:bank": "node --import tsx --test --test-isolation=none tests/bank-parser.test.mts",
+    "test:bank-delete": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/bank-bulk-delete.test.mts tests/bank-selection.test.mts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
