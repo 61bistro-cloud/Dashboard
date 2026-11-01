@@ -230,3 +230,58 @@ export async function saveEvidenceCategory(
     };
   }
 }
+
+const automaticSchema = scopeSchema.extend({
+  accountId: z.number().int().positive().optional(),
+});
+export async function runEvidenceAutomatically(
+  input: z.infer<typeof automaticSchema>
+) {
+  try {
+    const data = automaticSchema.parse(input);
+    await scope(data);
+    // Use server OCR data, never browser-supplied amounts/categories.
+    await readEvidence(data);
+    const { applyEvidenceAutomation } =
+      await import("@/lib/evidence-auto-service");
+    const result = await applyEvidenceAutomation(
+      data.businessId,
+      data.monthId,
+      data.fileId,
+      data.accountId
+    );
+    if (result.status === "applied") refresh();
+    return result;
+  } catch {
+    return {
+      status: "review" as const,
+      message:
+        "ตรวจอัตโนมัติไม่สำเร็จ หรือข้อมูลเปลี่ยนไประหว่างทำรายการ กรุณาตรวจใหม่",
+    };
+  }
+}
+export async function listAutomaticEvidence(input: {
+  businessId: number;
+  monthId: number;
+}) {
+  const session = await auth();
+  if (!session || !["OWNER", "ACCOUNTANT"].includes(session.user.role))
+    throw new Error("ไม่มีสิทธิ์");
+  const data = z
+    .object({
+      businessId: z.number().int().positive(),
+      monthId: z.number().int().positive(),
+    })
+    .parse(input);
+  const business = await requireBusiness();
+  if (business.id !== data.businessId) throw new Error("ธุรกิจเปลี่ยนไปแล้ว");
+  return prisma.driveFile.findMany({
+    where: {
+      businessId: business.id,
+      fiscalMonthId: data.monthId,
+      kind: { in: ["SLIP", "BILL"] },
+    },
+    select: { id: true, name: true },
+    orderBy: { id: "asc" },
+  });
+}

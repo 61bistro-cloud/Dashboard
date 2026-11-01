@@ -34,7 +34,7 @@ export function readEvidenceOcr(note: string | null): EvidenceOcr | null {
   const index = note.lastIndexOf(MARKER);
   if (index < 0) return null;
   try {
-    const parsed = JSON.parse(note.slice(index + MARKER.length));
+    const parsed = JSON.parse(note.slice(index + MARKER.length).split("\n")[0]);
     if (typeof parsed.text !== "string" || typeof parsed.readAt !== "string")
       return null;
     return {
@@ -48,8 +48,11 @@ export function readEvidenceOcr(note: string | null): EvidenceOcr | null {
   }
 }
 export function writeEvidenceOcr(note: string | null, text: string): string {
-  const index = note?.lastIndexOf(MARKER) ?? -1;
-  const original = index >= 0 ? note!.slice(0, index) : (note ?? "");
+  const original = (note ?? "")
+    .split("\n")
+    .filter((line) => !line.startsWith("EVIDENCE_OCR_V1:"))
+    .join("\n")
+    .replace(/\n+$/, "");
   return (
     original +
     MARKER +

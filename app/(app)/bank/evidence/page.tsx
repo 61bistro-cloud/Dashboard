@@ -1,3 +1,4 @@
+import { readAutoEvidenceStatus } from "@/lib/evidence-auto";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Paperclip } from "lucide-react";
@@ -107,14 +108,14 @@ export default async function EvidencePage({
       </div>
       <div className="rounded-card border border-hairline bg-surface p-4 text-xs space-y-2">
         <p>
-          1. เลือกเดือนให้ตรงกับหลักฐานและ Statement → 2. กดอ่านข้อความ → 3.
-          ตรวจรูปและเลือกคู่ → 4. กดยืนยันคู่
+          เลือกเดือนและบัญชี แล้วกด “ตรวจและจัดหมวดอัตโนมัติทั้งเดือน”
+          ระบบจะอ่านสลิป จับคู่ และลงหมวดให้รายการที่ชัดเจน
+          ส่วนที่กำกวมจะอยู่ในรายการรอตรวจ
         </p>
         <p className="text-muted">
-          ระบบแนะนำจากยอดเงิน วันที่ และเวลา ต้องตรวจผู้รับ /
-          บัญชีในรูปก่อนยืนยันเสมอ ภาพอ่านไม่ชัดให้กรอกยอดและวันที่เองได้
-          การจับคู่เป็นการแนบหลักฐาน ไม่เพิ่มรายรับหรือรายจ่าย
-          และไม่ได้ตรวจว่าสลิปแท้
+          ลงอัตโนมัติเฉพาะคู่เดียวที่ยอดและวันตรง พร้อมเวลาและข้อมูลคู่โอน
+          หรือเลขอ้างอิงที่ตรงกัน และ Remark ระบุหมวดได้หมวดเดียว
+          กรณีอื่นให้ตรวจเอง ระบบไม่ตรวจว่าสลิปแท้และไม่สร้างรายจ่ายซ้ำ
         </p>
       </div>
       <form className="flex flex-wrap gap-3 items-end text-xs">
@@ -146,6 +147,7 @@ export default async function EvidencePage({
         businessId={business.id}
         monthId={month.id}
         categories={categories}
+        accountId={account?.id}
         files={files.map((file) => {
           const ocr = readEvidenceOcr(file.note);
           return {
@@ -155,6 +157,7 @@ export default async function EvidencePage({
             kind: file.kind,
             refType: file.refType,
             refId: file.refId,
+            automatic: readAutoEvidenceStatus(file.note),
             ocr: ocr
               ? {
                   amount: ocr.amount,

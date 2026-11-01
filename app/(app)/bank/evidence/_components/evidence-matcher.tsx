@@ -7,19 +7,22 @@ import {
 } from "@/lib/evidence-category";
 import { classifyExpense, COST_BUCKET_LABELS } from "@/lib/statement-costs";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   readEvidence,
   confirmEvidenceMatch,
   unlinkEvidence,
   saveEvidenceCategory,
+  runEvidenceAutomatically,
+  listAutomaticEvidence,
 } from "../actions";
 import {
   suggestEvidenceMatches,
   type EvidenceFields,
   type MatchTransaction,
 } from "@/lib/evidence-match";
+import type { AutoEvidenceStatus } from "@/lib/evidence-auto";
 import { fmtTHB } from "@/lib/fiscal";
 
 export type EvidenceRow = {
@@ -29,6 +32,7 @@ export type EvidenceRow = {
   kind: string;
   refType: string | null;
   refId: string | null;
+  automatic?: AutoEvidenceStatus | null;
   ocr: (EvidenceFields & { remark?: string | null }) | null;
 };
 export function EvidenceMatcher({
@@ -38,7 +42,9 @@ export function EvidenceMatcher({
   transactions,
   linkedTransactionIds,
   categories,
+  accountId,
 }: {
+  accountId?: number;
   businessId: number;
   monthId: number;
   files: EvidenceRow[];
@@ -46,7 +52,49 @@ export function EvidenceMatcher({
   linkedTransactionIds: number[];
   categories: EvidenceCategory[];
 }) {
-  const [reading, setReading] = useState<number | "all" | null>(null);
+  const router = useRouter();
+  const [reading, setReading] = useState<number | "all" | "auto" | null>(null);
+  const [autoResults, setAutoResults] = useState<
+    Array<{ id: number; name: string; status: string; message: string }>
+  >([]);
+  const [autoError, setAutoError] = useState<string | null>(null);
+  const [autoTotal, setAutoTotal] = useState(0);
+  const automaticRunning = useRef(false);
+  async function automaticMonth() {
+    if (reading !== null || automaticRunning.current) return;
+    automaticRunning.current = true;
+    setReading("auto");
+    setAutoResults([]);
+    setAutoError(null);
+    setAutoTotal(0);
+    try {
+      const queue = await listAutomaticEvidence({ businessId, monthId });
+      setAutoTotal(queue.length);
+      for (const file of queue) {
+        let result: { status: string; message: string };
+        try {
+          result = await runEvidenceAutomatically({
+            businessId,
+            monthId,
+            fileId: file.id,
+            accountId,
+          });
+        } catch {
+          result = {
+            status: "review",
+            message: "การเชื่อมต่อขัดข้อง กรุณาตรวจใหม่",
+          };
+        }
+        setAutoResults((previous) => [...previous, { ...file, ...result }]);
+      }
+      router.refresh();
+    } catch {
+      setAutoError("เริ่มตรวจทั้งเดือนไม่สำเร็จ โปรดตรวจธุรกิจและสิทธิ์");
+    } finally {
+      automaticRunning.current = false;
+      setReading(null);
+    }
+  }
   const [results, setResults] = useState<
     Record<number, EvidenceFields & { remark?: string | null }>
   >({});
@@ -103,10 +151,60 @@ export function EvidenceMatcher({
   const visible = files.filter(
     (file) =>
       filter === "all" ||
-      (filter === "matched" ? matched(file) : !matched(file))
+      (filter === "review" || filter === "applied"
+        ? file.automatic?.status === filter
+        : filter === "matched"
+          ? matched(file)
+          : !matched(file))
   );
   return (
     <div className="space-y-4">
+      <section className="rounded-card border border-hairline bg-surface p-4 space-y-3 text-xs">
+        <h2 className="font-semibold text-sm">
+          อ่านสลิป → จับคู่ Statement → ลงหมวด → อัปเดต Dashboard
+        </h2>
+        <button
+          type="button"
+          onClick={() => void automaticMonth()}
+          disabled={reading !== null}
+          className="rounded-pill bg-ink text-canvas px-4 py-2 disabled:opacity-50"
+        >
+          {reading === "auto"
+            ? `กำลังตรวจ ${autoResults.length} / ${autoTotal} ไฟล์`
+            : "ตรวจและจัดหมวดอัตโนมัติทั้งเดือน"}
+        </button>
+        <p className="text-muted">
+          เริ่มครั้งเดียวสำหรับไฟล์ทุกหน้าในเดือนนี้ โปรดเปิดหน้าไว้จนเสร็จ
+          คู่หรือหมวดที่กำกวมจะไม่ลงอัตโนมัติ
+          หมวดเฉพาะเดิมที่ต่างจากคำแนะนำจะคงไว้ให้ตรวจ
+        </p>
+        {autoTotal > 0 && (
+          <p role="status">
+            ดำเนินการ {autoResults.length}/{autoTotal} • ลงอัตโนมัติ{" "}
+            {autoResults.filter((row) => row.status === "applied").length} •
+            รอตรวจ {autoResults.filter((row) => row.status === "review").length}{" "}
+            • คงข้อมูลเดิม{" "}
+            {autoResults.filter((row) => row.status === "skipped").length}
+          </p>
+        )}
+        {autoError && (
+          <p role="alert" className="text-red-600">
+            {autoError}
+          </p>
+        )}
+        {autoResults.length > 0 && (
+          <details>
+            <summary className="cursor-pointer">ดูผลรายไฟล์</summary>
+            <ul className="max-h-64 overflow-y-auto divide-y divide-hairline">
+              {autoResults.map((row) => (
+                <li key={row.id} className="py-2">
+                  {row.name} • {row.message}
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </section>
       <div className="flex flex-wrap items-center gap-3 text-xs">
         <button
           type="button"
@@ -128,11 +226,13 @@ export function EvidenceMatcher({
             <option value="all">ทั้งหมด</option>
             <option value="unmatched">ยังไม่จับคู่</option>
             <option value="matched">ยืนยันคู่แล้ว</option>
+            <option value="review">อัตโนมัติ: รอตรวจ</option>
+            <option value="applied">อัตโนมัติ: ลงหมวดแล้ว</option>
           </select>
         </label>
         <span className="text-muted">
           เปิดหน้านี้ไว้ขณะอ่านรูป • อ่าน JPG / PNG / PDF ผ่าน Google Drive •
-          ไม่มีการยืนยันคู่อัตโนมัติ
+          ปุ่มอ่านข้อความอย่างเดียวจะไม่เปลี่ยนหมวด
         </span>
       </div>
       {visible.length === 0 && (
@@ -279,6 +379,17 @@ function EvidenceCard({
           {file.kind === "SLIP" ? "สลิป" : "ใบเสร็จ"}
         </span>
       </div>
+      {file.automatic && (
+        <p
+          className={
+            file.automatic.status === "applied"
+              ? "text-emerald-700"
+              : "text-amber-700"
+          }
+        >
+          ผลตรวจอัตโนมัติล่าสุด: {file.automatic.message}
+        </p>
+      )}
       <div className="flex flex-wrap gap-3 items-end rounded-input bg-surface p-3">
         <button
           type="button"
