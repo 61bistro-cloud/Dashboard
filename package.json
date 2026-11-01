@@ -14,7 +14,8 @@
     "prepare": "husky",
     "test:bank": "node --import tsx --test --test-isolation=none tests/bank-parser.test.mts",
     "test:bank-delete": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/bank-bulk-delete.test.mts tests/bank-selection.test.mts",
-    "test:costs": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/statement-costs.test.mts"
+    "test:costs": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/statement-costs.test.mts",
+    "test:line": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/line-webhook.test.mts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
