@@ -273,3 +273,22 @@ test("unconfirmed links, wrong business/month/category, permissions and stale ca
   assert.equal((await h.save(input)).ok, false);
   assert.equal(h.paths.length, 0);
 });
+
+test("missing advance/transfer categories do not fall back to ordinary expenses", () => {
+  assert.deepEqual(
+    suggestRemarkCategories(
+      "เบิกล่วงหน้าเงินเดือน",
+      out,
+      categories.filter((category) => category.id !== 4)
+    ),
+    []
+  );
+  assert.deepEqual(
+    suggestRemarkCategories(
+      "โอนระหว่างบัญชี ค่าผัก",
+      out,
+      categories.filter((category) => category.id !== 6)
+    ),
+    []
+  );
+});

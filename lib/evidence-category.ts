@@ -202,7 +202,7 @@ export function suggestRemarkCategories(
           reason: `Remark มีคำว่า “${keyword}”`,
         });
     }
-    if (rule.exclusive && matches.length) break;
+    if (rule.exclusive) break;
   }
   return Array.from(results.values());
 }
