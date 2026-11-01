@@ -22,8 +22,8 @@ Deploy บน Vercel, ฐานข้อมูล Neon Postgres. UI ภาษา
 
 ## Deploy
 
-- `git push origin main` → Vercel build (`prisma generate && prisma migrate deploy && next build`) แล้ว deploy เอง.
-- DB migration: เพิ่มโฟลเดอร์ใน `prisma/migrations/` — `prisma migrate deploy` จะรันตอน build.
+- `git push origin main` → Vercel build (`prisma generate && next build`) แล้ว deploy เอง.
+- Build/deploy ไม่รัน migrations หรือ seed อัตโนมัติ; การเปลี่ยน schema ต้องดำเนินการแยกต่างหากเมื่อได้รับอนุญาต.
 - **ทำงานหลายเครื่อง:** `git pull` ก่อนเริ่มทุกครั้ง และ push ให้เสร็จก่อนสลับเครื่อง (ใช้ DB + Vercel ตัวเดียวกัน).
 
 ## ก่อน push ต้องผ่าน
@@ -39,7 +39,7 @@ Deploy บน Vercel, ฐานข้อมูล Neon Postgres. UI ภาษา
 
 ## นำเข้า Statement ธนาคาร (จุดที่พลาดบ่อย)
 
-- Parser: `lib/kbank-parser.ts` รองรับ KBANK + SCB (PDF ติดรหัส = วันเกิดเจ้าของ `ddmmyyyy`).
+- Parser: `lib/kbank-parser.ts` รองรับ KBANK + SCB + กรุงศรี (PDF ติดรหัส = วันเกิดเจ้าของ `ddmmyyyy`).
 - **ยอดคงเหลือ = `AccountOpening + Σเงินเข้า − Σเงินออก`** (`lib/bank-calc.ts`).
   ⚠️ **ห้ามลง "ยอดยกมา" เป็นรายการเงินเข้า** ถ้าตั้งช่องยอดยกมา (`AccountOpening`) ไว้แล้ว — จะนับซ้ำ ยอดเพี้ยน.
 - กันรายการซ้ำตอน import: ยึด **timestamp (วันที่+เวลา) + ยอดคงเหลือ** เป็นหลัก, ใช้คำอธิบายเป็น fallback เฉพาะแถวที่ไม่มี balance (`app/(app)/bank/actions.ts`).

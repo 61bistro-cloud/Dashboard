@@ -1,5 +1,5 @@
 /**
- * Bank statement PDF parser (KBANK + SCB).
+ * Bank statement PDF parser (KBANK + SCB + Krungsri).
  *
  * Approach:
  *   1. Use unpdf (pdfjs) to open the password-protected PDF and pull every
@@ -191,8 +191,9 @@ async function extractRows(
 }
 
 /** Detect which bank issued the statement from its text. */
-function detectBank(rawText: string[]): "SCB" | "KBANK" {
+function detectBank(rawText: string[]): "SCB" | "KBANK" | "BAY" {
   const all = rawText.join(" ");
+  if (/ธนาคารกรุงศรีอยุธยา|KRUNGSRI|BANK OF AYUDHYA/i.test(all)) return "BAY";
   if (/ไทยพาณิชย์|SIAM COMMERCIAL/i.test(all)) return "SCB";
   return "KBANK"; // default
 }
@@ -235,19 +236,109 @@ export async function parseKbankPdf(
 
   const bank = detectBank(ex.rawText);
   const rows =
-    bank === "SCB"
-      ? parseScbRows(ex.rows)
-      : ex.rows
-          .map((r) => parseRow(r.cells.map((c) => c.text)))
-          .filter((x): x is ParsedTx => x !== null);
+    bank === "BAY"
+      ? parseKrungsriRows(ex.rows)
+      : bank === "SCB"
+        ? parseScbRows(ex.rows)
+        : ex.rows
+            .map((r) => parseRow(r.cells.map((c) => c.text)))
+            .filter((x): x is ParsedTx => x !== null);
 
-  const openingBalance = findOpeningBalance(ex.rows);
+  // Krungsri has no brought-forward row; recover it from the first printed
+  // balance and amount, without creating an extra transaction.
+  const first = rows[0];
+  const openingBalance =
+    findOpeningBalance(ex.rows) ??
+    (bank === "BAY" && first?.balance != null
+      ? round2(first.balance - first.deposit + first.withdraw)
+      : null);
 
   return { ok: true, rows, openingBalance, rawText: ex.rawText };
 }
 
 /** Alias with a clearer name for new call sites. */
 export const parseBankStatement = parseKbankPdf;
+
+/** Krungsri e-statements combine date, seconds and transaction label in one
+ * cell. Amount direction comes from the debit/credit column, including labels
+ * such as Mungmee App that cannot be classified by keywords.
+ */
+function parseKrungsriRows(rows: Row[]): ParsedTx[] {
+  const out: ParsedTx[] = [];
+  let detailsX = 468;
+  let balanceX = 350;
+  let channelX = 420;
+  let amountSplitX = 285;
+  let current: ParsedTx | null = null;
+  for (const row of rows) {
+    const header = row.cells.find((c) => c.text.trim() === "ถอน/ฝาก");
+    if (header) {
+      // Derive column boundaries from each page's table header.
+      const balance = row.cells.find((c) => c.text.trim() === "ยอดคงเหลือ");
+      const channel = row.cells.find((c) => c.text.trim() === "ช่องทาง");
+      const details = row.cells.find((c) => c.text.trim() === "รายละเอียด");
+      if (balance && channel && details) {
+        balanceX = balance.x - 10;
+        channelX = channel.x;
+        detailsX = details.x;
+        amountSplitX = header.x + 36;
+      }
+      current = null;
+      continue;
+    }
+    const leading = row.cells.find((c) => c.x < 100);
+    const m = leading?.text
+      .trim()
+      .match(/^(\d{2}\/\d{2}\/\d{4})\s+(\d{2}:\d{2}):\d{2}\s+(.+)$/);
+    if (m) {
+      current = null;
+      const date = normalizeDate(m[1]);
+      const amounts = row.cells.filter(
+        (c) => c.x >= 180 && c.x < balanceX && isNumeric(c.text)
+      );
+      const balance = row.cells.find(
+        (c) => c.x >= balanceX && c.x < channelX && isNumeric(c.text)
+      );
+      if (!date || !amounts.length || !balance) continue;
+      const deposit = round2(
+        amounts
+          .filter((c) => c.x >= amountSplitX)
+          .reduce((sum, c) => sum + num(c.text), 0)
+      );
+      const withdraw = round2(
+        amounts
+          .filter((c) => c.x < amountSplitX)
+          .reduce((sum, c) => sum + num(c.text), 0)
+      );
+      const detail = row.cells
+        .filter((c) => c.x >= detailsX)
+        .map((c) => c.text)
+        .join(" ");
+      current = {
+        date,
+        time: parseTime(m[2]),
+        description: [m[3], detail].filter(Boolean).join(" — "),
+        deposit,
+        withdraw,
+        balance: num(balance.text),
+        channel:
+          row.cells
+            .filter((c) => c.x >= channelX && c.x < detailsX)
+            .map((c) => c.text)
+            .join(" ") || null,
+      };
+      out.push(current);
+    } else if (current) {
+      const detail = row.cells
+        .filter((c) => c.x >= detailsX)
+        .map((c) => c.text)
+        .join(" ");
+      if (detail) current.description += ` — ${detail}`;
+      else current = null;
+    }
+  }
+  return out;
+}
 
 // ─────────────────────── SCB savings-account parser ───────────────────────
 
