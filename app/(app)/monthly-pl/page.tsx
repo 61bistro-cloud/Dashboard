@@ -302,7 +302,7 @@ function PLMatrix({
         <table className="w-full text-xs">
           <thead className="bg-surface text-right">
             <tr>
-              <th className="px-3 py-2 font-medium text-left sticky left-0 bg-surface min-w-[260px]">
+              <th className="px-3 py-2 font-medium text-left sticky left-0 z-20 bg-surface min-w-[260px]">
                 {ui("รายการ")}
               </th>
               {months.map((m) => (
@@ -323,7 +323,7 @@ function PLMatrix({
           </thead>
           <tbody className="divide-y divide-hairline-soft">
             <tr className="text-muted">
-              <td className="px-3 py-2 sticky left-0 bg-canvas">
+              <td className="px-3 py-2 sticky left-0 z-10 bg-canvas">
                 {ui("แหล่งต้นทุน")}
               </td>
               {months.map((m) => (
@@ -341,22 +341,23 @@ function PLMatrix({
               if (r.section) {
                 return (
                   <tr key={idx} className="bg-surface/60">
-                    <td
-                      colSpan={months.length + 3}
-                      className="px-3 py-1.5 text-xs font-semibold text-ink/90"
-                    >
+                    <td className="sticky left-0 z-10 bg-surface px-3 py-1.5 text-xs font-semibold text-ink/90">
                       {r.label}
                     </td>
+                    <td colSpan={months.length + 2} aria-hidden="true" />
                   </tr>
                 );
               }
               const totalVals = r.values(total);
               const indentCls = r.indent ? `pl-${r.indent * 4}` : "";
               return (
-                <tr key={idx} className={r.cls ?? "hover:bg-surface"}>
+                <tr key={idx} className={r.cls ?? "group hover:bg-surface"}>
                   <td
                     className={
-                      "px-3 py-1.5 sticky left-0 bg-inherit " +
+                      "px-3 py-1.5 sticky left-0 z-10 " +
+                      (r.cls
+                        ? "bg-surface "
+                        : "bg-canvas group-hover:bg-surface ") +
                       (r.bold ? "font-semibold " : "") +
                       indentCls
                     }
