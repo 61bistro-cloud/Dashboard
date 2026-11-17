@@ -1,5 +1,9 @@
-import { isPayrollExtraCategory } from "@/lib/flexible-costs";
-import { getStatementCostSummaries } from "@/lib/statement-cost-data";
+import {
+  categoryBucket,
+  supplierGroups,
+  supplierGroup,
+  groupBucket,
+} from "@/lib/cost-plan";
 import { prisma } from "@/lib/prisma";
 import { getYearlyPL, getDataQuality, type MonthlyTotals } from "@/lib/pl-calc";
 import { getReconciliation, type ReconRow } from "@/lib/bank-calc";
@@ -44,46 +48,40 @@ export async function computeBreakdown(
   const monthStart = `${month.calendarYear}-${mm}-01`;
   const monthEnd = `${month.calendarYear}-${mm}-${String(month.daysInMonth).padStart(2, "0")}`;
 
-  const [
-    posByPay,
-    override,
-    purchases,
-    payrolls,
-    extras,
-    fixedCosts,
-    statements,
-  ] = await Promise.all([
-    prisma.posBill.groupBy({
-      by: ["paymentType"],
-      where: {
-        businessId,
-        businessDate: { gte: monthStart, lte: monthEnd },
-      },
-      _sum: { netAmount: true },
-    }),
-    prisma.monthlyRevenueOverride.findUnique({
-      where: { businessId_fiscalMonthId: { businessId, fiscalMonthId } },
-    }),
-    prisma.supplierPurchase.findMany({
-      where: { businessId, fiscalMonthId, amount: { gt: 0 } },
-      include: { supplier: { select: { name: true, category: true } } },
-    }),
-    prisma.employeePayroll.findMany({
-      where: { businessId, fiscalMonthId, amount: { gt: 0 } },
-      include: { employee: { select: { name: true } } },
-    }),
-    prisma.payrollExtra.findMany({
-      where: { businessId, fiscalMonthId, amount: { gt: 0 } },
-    }),
-    prisma.fixedCost.findMany({
-      where: { businessId, fiscalMonthId, amount: { gt: 0 } },
-      include: { category: { select: { name: true, icon: true } } },
-    }),
-    getStatementCostSummaries([fiscalMonthId], businessId),
-  ]);
+  const [posByPay, purchases, payrolls, extras, fixedCosts, costCategories] =
+    await Promise.all([
+      prisma.posBill.groupBy({
+        by: ["paymentType"],
+        where: {
+          businessId,
+          businessDate: { gte: monthStart, lte: monthEnd },
+        },
+        _sum: { netAmount: true },
+      }),
+      prisma.supplierPurchase.findMany({
+        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+        include: {
+          supplier: { select: { id: true, name: true, category: true } },
+        },
+      }),
+      prisma.employeePayroll.findMany({
+        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+        include: { employee: { select: { name: true } } },
+      }),
+      prisma.payrollExtra.findMany({
+        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+      }),
+      prisma.fixedCost.findMany({
+        where: { businessId, fiscalMonthId, amount: { gt: 0 } },
+        include: { category: { select: { name: true, icon: true } } },
+      }),
+      prisma.fixedCostCategory.findMany({
+        where: { businessId },
+        select: { icon: true },
+      }),
+    ]);
 
-  // Revenue — POS by payment type, then reconcile to override if it's higher
-  const posSum = posByPay.reduce((s, r) => s + (r._sum.netAmount ?? 0), 0);
+  // Revenue is POS net sales only. Bank credits and legacy overrides are not sales.
   const revenue: BreakdownLine[] = posByPay
     .filter((r) => (r._sum.netAmount ?? 0) !== 0)
     .map((r) => ({
@@ -91,38 +89,28 @@ export async function computeBreakdown(
       amount: r._sum.netAmount ?? 0,
     }))
     .sort((a, b) => b.amount - a.amount);
-  if (override && override.amount > posSum + 0.01) {
-    revenue.push({
-      label: "ปรับยอดรายได้ (กรอกเอง / Override)",
-      amount: override.amount - posSum,
-    });
-  }
-
-  const statement = statements.get(fiscalMonthId);
-  if (statement?.hasTransactions) {
-    const lines = (bucket: string) =>
-      statement.rows
-        .filter((row) => row.status === bucket)
-        .map((row) => ({ label: row.name, amount: row.total }));
-    return {
-      revenue,
-      cogsFood: lines("food"),
-      cogsBev: lines("bev"),
-      cogsPack: lines("pack"),
-      laborSalary: lines("laborBase"),
-      laborExtra: lines("laborExtra"),
-      fixed: lines("fixed"),
-    };
-  }
-
   const cogsFood: BreakdownLine[] = [];
   const cogsBev: BreakdownLine[] = [];
   const cogsPack: BreakdownLine[] = [];
+  const supplierLabor: BreakdownLine[] = [],
+    supplierOpex: BreakdownLine[] = [];
+  const overrides = supplierGroups(costCategories);
   for (const p of purchases) {
     const line = { label: p.nameOverride ?? p.supplier.name, amount: p.amount };
-    if (p.supplier.category === "FOOD") cogsFood.push(line);
-    else if (p.supplier.category === "BEVERAGE") cogsBev.push(line);
-    else cogsPack.push(line);
+    const bucket = groupBucket(supplierGroup(p.supplier, overrides));
+    if (bucket === "food") cogsFood.push(line);
+    else if (bucket === "bev") cogsBev.push(line);
+    else if (bucket === "pack") cogsPack.push(line);
+    else if (bucket === "laborExtra") supplierLabor.push(line);
+    else supplierOpex.push(line);
+  }
+
+  for (const cost of fixedCosts) {
+    const bucket = categoryBucket(cost.category),
+      line = { label: cost.category.name, amount: cost.amount };
+    if (bucket === "food") cogsFood.push(line);
+    else if (bucket === "bev") cogsBev.push(line);
+    else if (bucket === "pack") cogsPack.push(line);
   }
 
   const laborSalary: BreakdownLine[] = payrolls.map((p) => ({
@@ -130,20 +118,21 @@ export async function computeBreakdown(
     amount: p.amount,
   }));
   const laborExtra: BreakdownLine[] = [
+    ...supplierLabor,
     ...extras.map((e) => ({
       label: PAYROLL_EXTRA_LABELS[e.type] ?? e.type,
       amount: e.amount,
     })),
     ...fixedCosts
-      .filter((f) => isPayrollExtraCategory(f.category.icon))
+      .filter((f) => categoryBucket(f.category) === "laborExtra")
       .map((f) => ({ label: f.category.name, amount: f.amount })),
   ];
-  const fixed: BreakdownLine[] = fixedCosts
-    .filter((f) => !isPayrollExtraCategory(f.category.icon))
-    .map((f) => ({
-      label: f.category.name,
-      amount: f.amount,
-    }));
+  const fixed: BreakdownLine[] = [
+    ...supplierOpex,
+    ...fixedCosts
+      .filter((f) => categoryBucket(f.category) === "fixed")
+      .map((f) => ({ label: f.category.name, amount: f.amount })),
+  ];
 
   return {
     revenue,
@@ -417,7 +406,7 @@ function buildChecks(
     detail:
       live.netRevenue > 0
         ? `รายได้ ${live.netRevenue.toLocaleString("th-TH", { minimumFractionDigits: 2 })} บาท`
-        : "ยังไม่มีรายได้ (POS หรือ Override)",
+        : "ยังไม่มีข้อมูลยอดขายหน้าร้าน",
   });
 
   // 3) COGS
@@ -425,10 +414,7 @@ function buildChecks(
     key: "cogs",
     label: "มีต้นทุนวัตถุดิบ (COGS)",
     status: live.cogs > 0 ? "pass" : "warn",
-    detail:
-      live.cogs > 0
-        ? "มีข้อมูลแล้ว"
-        : "ยังไม่มีต้นทุนใน Cost Setup / Statement",
+    detail: live.cogs > 0 ? "มีข้อมูลแล้ว" : "ยังไม่ได้กรอกต้นทุนในสรุปต้นทุน",
   });
 
   // 4) Labor
@@ -436,10 +422,7 @@ function buildChecks(
     key: "labor",
     label: "มีค่าแรงพนักงาน (Labor)",
     status: live.labor > 0 ? "pass" : "warn",
-    detail:
-      live.labor > 0
-        ? "มีข้อมูลแล้ว"
-        : "ยังไม่มีต้นทุนใน Cost Setup / Statement",
+    detail: live.labor > 0 ? "มีข้อมูลแล้ว" : "ยังไม่ได้กรอกต้นทุนในสรุปต้นทุน",
   });
 
   // 5) Fixed
@@ -447,10 +430,7 @@ function buildChecks(
     key: "fixed",
     label: "มีค่าใช้จ่ายดำเนินงาน (Fixed)",
     status: live.fixed > 0 ? "pass" : "warn",
-    detail:
-      live.fixed > 0
-        ? "มีข้อมูลแล้ว"
-        : "ยังไม่มีต้นทุนใน Cost Setup / Statement",
+    detail: live.fixed > 0 ? "มีข้อมูลแล้ว" : "ยังไม่ได้กรอกต้นทุนในสรุปต้นทุน",
   });
 
   if (live.pendingStatementCost > 0) {

@@ -167,7 +167,7 @@ test("transaction/evidence reads are scoped to current business, month, type and
     "1",
   ]);
 });
-test("receipt-only and empty months retain existing statement-first semantics without unnecessary evidence reads", async () => {
+test("receipt-only and empty months preserve payment comparison metadata without unnecessary evidence reads", async () => {
   for (const rows of [[], [transaction(1, 1, 0)]]) {
     const h = await setup(rows);
     const result = await h.read(7, 5);

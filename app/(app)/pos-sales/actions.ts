@@ -111,7 +111,18 @@ export async function importPosBills(
     data: { rowsInserted: inserted, rowsUpdated: updated },
   });
 
-  revalidatePath("/pos-sales");
+  for (const path of [
+    "/pos-sales",
+    "/cost-setup",
+    "/",
+    "/daily-pl",
+    "/monthly-pl",
+    "/bank",
+    "/daily-recon",
+    "/closing",
+    "/closing-print",
+  ])
+    revalidatePath(path);
 
   return {
     ok: true,
@@ -234,7 +245,18 @@ export async function deletePosBatch(input: {
     prisma.posImportBatch.delete({ where: { id: input.id } }),
   ]);
 
-  revalidatePath("/pos-sales");
+  for (const path of [
+    "/pos-sales",
+    "/cost-setup",
+    "/",
+    "/daily-pl",
+    "/monthly-pl",
+    "/bank",
+    "/daily-recon",
+    "/closing",
+    "/closing-print",
+  ])
+    revalidatePath(path);
 
   return { ok: true, deletedBills: result[0].count };
 }

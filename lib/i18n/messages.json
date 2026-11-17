@@ -3490,5 +3490,251 @@
   },
   "วันที่รายการไม่ตรงกับเดือนที่เลือก": {
     "en": "The transaction date does not match the selected month."
+  },
+  "ต้นทุนวัตถุดิบหลัก": {
+    "en": "Raw materials"
+  },
+  "เนื้อสัตว์ อาหารทะเล ผักผลไม้ ข้าว เส้น": {
+    "en": "Meat, seafood, vegetables, fruit, rice and noodles"
+  },
+  "เครื่องปรุงและของแห้ง": {
+    "en": "Condiments & dry goods"
+  },
+  "ซอส เครื่องเทศ น้ำมันพืช แป้ง วัตถุดิบผลิตเบสซอสหรือของตุ๋น": {
+    "en": "Sauces, spices, cooking oil, flour and ingredients for base sauces or braises"
+  },
+  "ต้นทุนเครื่องดื่ม": {
+    "en": "Beverage costs"
+  },
+  "น้ำดื่ม น้ำอัดลม ชา กาแฟ วัตถุดิบชงเครื่องดื่ม": {
+    "en": "Drinking water, soft drinks, tea, coffee and beverage ingredients"
+  },
+  "ต้นทุนบรรจุภัณฑ์": {
+    "en": "Packaging costs"
+  },
+  "กล่องอาหาร ถ้วยซุป ถุง ช้อนส้อม สติกเกอร์โลโก้": {
+    "en": "Food boxes, soup cups, bags, cutlery and logo stickers"
+  },
+  "ค่าขนส่งวัตถุดิบเข้า": {
+    "en": "Freight-in"
+  },
+  "ค่าส่งจากผู้จำหน่าย ค่าน้ำมันไปซื้อวัตถุดิบ": {
+    "en": "Supplier delivery charges and fuel used to collect ingredients"
+  },
+  "ค่าใช้จ่ายเกี่ยวกับพนักงาน": {
+    "en": "Labor costs"
+  },
+  "เงินเดือน พาร์ทไทม์ ล่วงเวลา เบี้ยขยัน อินเซนทีฟ ประกันสังคม สวัสดิการและอาหารพนักงาน": {
+    "en": "Salaries, part-time wages, overtime, attendance bonuses, incentives, social security, benefits and staff meals"
+  },
+  "ค่าใช้จ่ายในการขายและการตลาด": {
+    "en": "Selling & marketing"
+  },
+  "ค่าธรรมเนียมเดลิเวอรีและโฆษณา ค่าโฆษณาออนไลน์ รีวิว โปรโมชัน ค่ารูดบัตร": {
+    "en": "Delivery commissions and ads, online advertising, reviews, campaigns and card processing fees"
+  },
+  "ค่าใช้จ่ายสถานที่และสาธารณูปโภค": {
+    "en": "Occupancy & utilities"
+  },
+  "ค่าเช่า ค่าน้ำ ค่าไฟ ค่าแก๊ส อินเทอร์เน็ต โทรศัพท์ • แยกค่าแก๊สเป็นรายการต่างหากได้": {
+    "en": "Rent, water, electricity, cooking gas, internet and telephone. Gas can be entered separately."
+  },
+  "ค่าใช้จ่ายบริหารและเบ็ดเตล็ด": {
+    "en": "General & administrative"
+  },
+  "ค่าระบบขายและซอฟต์แวร์ วัสดุสิ้นเปลือง ซ่อมบำรุง ค่าเสื่อมราคา": {
+    "en": "POS and software subscriptions, operating supplies, repairs, maintenance and depreciation"
+  },
+  "กรุณาตรวจชื่อรายการ หมวด และจำนวนเงิน": {
+    "en": "Check item names, categories and amounts."
+  },
+  "ข้อมูลต้นทุนเปลี่ยนไปแล้ว กรุณารีเฟรชและตรวจสอบใหม่": {
+    "en": "Cost records have changed. Refresh and review again."
+  },
+  "กรุณาเปลี่ยนชื่อรายการที่สงวนไว้สำหรับระบบ": {
+    "en": "This item name is reserved. Choose another name."
+  },
+  "ไม่พบรายการผู้จำหน่ายเดิม": {
+    "en": "Original supplier record not found"
+  },
+  "กรุณาเปลี่ยนชื่อหมวดที่ขัดแย้งกับข้อมูลระบบ": {
+    "en": "This category name conflicts with a system record. Choose another name."
+  },
+  "ค่าแรงต่อยอดขาย {v0} • เป้าหมาย 15–25%": {
+    "en": "Labor / sales {v0} • Target 15–25%"
+  },
+  "รายการพนักงานเพิ่มเติม เช่น ประกันสังคมและสวัสดิการ": {
+    "en": "Additional labor costs, such as social security and benefits"
+  },
+  "หมวดของ {v0}": {
+    "en": "Category for {v0}"
+  },
+  "รายการผู้จำหน่ายเดิม": {
+    "en": "Existing supplier entry"
+  },
+  "รายการค่าใช้จ่าย": {
+    "en": "Cost entry"
+  },
+  "เพิ่มรายการใน {v0}": {
+    "en": "Add item to {v0}"
+  },
+  "รายได้และต้นทุนสำหรับกำไรขาดทุน": {
+    "en": "Revenue and costs for profit & loss"
+  },
+  "รายได้จากยอดขายหน้าร้าน • ต้นทุนจากเจ้าของกรอกเองทุกเดือน • Statement ใช้ตรวจเทียบเท่านั้น": {
+    "en": "Revenue from POS sales • Owner-entered costs every month • Statements are for comparison only",
+    "th": "รายได้จากยอดขายหน้าร้าน • ต้นทุนจากเจ้าของกรอกเองทุกเดือน • รายการเดินบัญชี ใช้ตรวจเทียบเท่านั้น"
+  },
+  "บันทึกต้นทุน": {
+    "en": "Save costs"
+  },
+  "มีการแก้ไขที่ยังไม่บันทึก • กดบันทึกต้นทุนเพื่ออัปเดตรายงาน": {
+    "en": "Unsaved changes. Save costs to update reports."
+  },
+  "กรอกชื่อรายการและจำนวนเงินให้ครบก่อนบันทึก": {
+    "en": "Complete item names and amounts before saving."
+  },
+  "บันทึกต้นทุนแล้ว รายงานใช้ยอดกรอกเองที่บันทึกไว้": {
+    "en": "Costs saved. Reports use the saved owner-entered amounts."
+  },
+  "1. รายได้": {
+    "en": "1. Revenue"
+  },
+  "ยอดขายสุทธิจากยอดขายหน้าร้าน": {
+    "en": "Net revenue from POS sales"
+  },
+  "ตรวจบิลต้นทางในยอดขายหน้าร้าน": {
+    "en": "View source POS bills"
+  },
+  "ยังไม่มีข้อมูลยอดขายหน้าร้านในเดือนนี้": {
+    "en": "No POS sales for this month yet"
+  },
+  "ช่องทาง / วิธีชำระ": {
+    "en": "Channel / payment method"
+  },
+  "ใช้ยอดสุทธิในบิล ไม่บวกรายรับธนาคารหรือยอดปรับรายได้เดิมซ้ำ": {
+    "en": "Uses net bill amounts. Bank receipts and legacy revenue overrides are not added."
+  },
+  "2. ต้นทุนขาย": {
+    "en": "2. Cost of goods sold (COGS)"
+  },
+  "วัตถุดิบ เครื่องปรุง เครื่องดื่ม บรรจุภัณฑ์ และขนส่งวัตถุดิบ": {
+    "en": "Raw materials, condiments, beverages, packaging and freight-in"
+  },
+  "3. ค่าใช้จ่ายในการดำเนินงาน": {
+    "en": "3. Operating expenses (OPEX)"
+  },
+  "พนักงาน การตลาด สถานที่ และบริหาร": {
+    "en": "Labor, marketing, occupancy and administration"
+  },
+  "กำไรสุทธิ = รายได้ − ต้นทุนขาย − ค่าใช้จ่ายดำเนินงาน": {
+    "en": "Net profit = revenue − COGS − operating expenses"
+  },
+  "ยังไม่ได้กรอกต้นทุน กำไรที่แสดงยังไม่รวมค่าใช้จ่าย กรุณากรอกให้ครบก่อนใช้งบ": {
+    "en": "Costs have not been entered. Profit excludes expenses; complete the costs before using the report."
+  },
+  "ยอดเงินและชื่อผู้จำหน่ายใช้เฉพาะเดือนที่เลือก • ชื่อหมวดและการจัดหมวดใช้ร่วมกันทุกเดือน • ลบรายการแล้วจะซ่อนจากเดือนถัดไป โดยเก็บยอดเดือนอื่นไว้": {
+    "en": "Amounts and supplier name overrides apply to the selected month. Category names and classifications are shared across months. Removing an item hides it going forward and preserves other months’ amounts."
+  },
+  "รายได้จากยอดขายหน้าร้าน และต้นทุนที่เจ้าของกรอกเอง • ใช้คำนวณภาพรวมและกำไรขาดทุนทุกเดือน": {
+    "en": "POS revenue and owner-entered costs power the dashboard and profit & loss every month"
+  },
+  "ใช้ต้นทุนที่เจ้าของกรอกเองทุกเดือน • รายได้จากยอดขายหน้าร้าน • Statement ใช้ตรวจเทียบการจ่ายเท่านั้น": {
+    "en": "Uses owner-entered costs every month and POS revenue. Statements only compare payments.",
+    "th": "ใช้ต้นทุนที่เจ้าของกรอกเองทุกเดือน • รายได้จากยอดขายหน้าร้าน • รายการเดินบัญชี ใช้ตรวจเทียบการจ่ายเท่านั้น"
+  },
+  "ต้นทุนขาย": {
+    "en": "Cost of goods sold"
+  },
+  "ค่าใช้จ่ายในการดำเนินงาน": {
+    "en": "Operating expenses"
+  },
+  "ยอดจ่ายที่จัดหมวดต้นทุน": {
+    "en": "Categorized payments"
+  },
+  "หมวดสำหรับตรวจเทียบ": {
+    "en": "Comparison category"
+  },
+  "รายการโอน / ไม่ใช่ต้นทุน": {
+    "en": "Transfer / not a cost"
+  },
+  "ยอดจ่ายที่จัดหมวด: ธนาคาร / เงินสด": {
+    "en": "Categorized payments: bank / cash"
+  },
+  "Statement แสดงการจ่ายเงินจริง อาจไม่ตรงกับต้นทุนของเดือน เช่น ค่าเสื่อมราคา หรือยอดค้างจ่าย • ไม่ใช้ยอดนี้แทนหรือบวกซ้ำกับต้นทุนที่กรอกเอง": {
+    "en": "Statements show cash payments, which may differ from monthly costs such as depreciation or unpaid expenses. These payments never replace or add to owner-entered costs.",
+    "th": "รายการเดินบัญชี แสดงการจ่ายเงินจริง อาจไม่ตรงกับต้นทุนของเดือน เช่น ค่าเสื่อมราคา หรือยอดค้างจ่าย • ไม่ใช้ยอดนี้แทนหรือบวกซ้ำกับต้นทุนที่กรอกเอง"
+  },
+  "ใช้ยอดกรอกเองคำนวณกำไรขาดทุนทุกเดือน • ยอดธนาคารเก็บไว้ตรวจเทียบเท่านั้น": {
+    "en": "Owner-entered costs determine profit & loss every month. Bank amounts are retained for comparison only."
+  },
+  "ยังไม่มีข้อมูลยอดขายหน้าร้าน": {
+    "en": "No POS sales recorded"
+  },
+  "ยังไม่ได้กรอกต้นทุนในสรุปต้นทุน": {
+    "en": "No costs entered in Cost Setup yet"
+  },
+  "เป้าหมายค่าแรง 15–25%": {
+    "en": "Labor target 15–25%"
+  },
+  "ต้นทุนขายรวม 5 หมวด": {
+    "en": "Total COGS across five categories"
+  },
+  "กำไรขั้นต้น = รายได้ − ต้นทุนขาย": {
+    "en": "Gross profit = revenue − COGS"
+  },
+  "กรอกค่าเสื่อมราคาเฉพาะส่วนของเดือน ไม่ใช่ราคาซื้อทรัพย์สินทั้งหมด": {
+    "en": "Enter depreciation for this month, rather than the full asset purchase price."
+  },
+  "ส่วนลดในบิลหักในยอดขายสุทธิแล้ว ไม่ต้องกรอกเป็นค่าใช้จ่ายซ้ำ": {
+    "en": "Bill discounts are already deducted from net sales. Do not enter them again as expenses."
+  },
+  "Food 28/32/35% • Labor 15/20/25% • Prime 55/60/65% • Margin ≥15/10/5%": {
+    "en": "Food 28/32/35% • Labor 15/20/25% • Prime 55/60/65% • Margin ≥15/10/5%",
+    "th": "วัตถุดิบ 28/32/35% • ค่าแรง 15/20/25% • ต้นทุนหลัก 55/60/65% • อัตรากำไร ≥15/10/5%"
+  },
+  "ใช้ยอดกรอกเองเดิมและรายการใหม่ที่บันทึก • ไม่ดึงยอด Statement มาแทนต้นทุน": {
+    "en": "Uses legacy manual entries and newly saved entries. Statements do not replace these costs.",
+    "th": "ใช้ยอดกรอกเองเดิมและรายการใหม่ที่บันทึก • ไม่ดึงยอด รายการเดินบัญชี มาแทนต้นทุน"
+  },
+  "อ่านสลิป → จับคู่รายการเดินบัญชี → จัดหมวดตรวจเทียบ": {
+    "en": "Read slips → match bank transactions → categorize for comparison"
+  },
+  "หมวดตรวจเทียบการจ่าย → {v0}": {
+    "en": "Payment comparison category → {v0}"
+  },
+  "หมายเหตุและหมวดใช้กระทบยอดกับต้นทุนที่กรอกเอง ไม่เปลี่ยนยอดกำไรขาดทุน": {
+    "en": "Notes and categories reconcile payments with owner-entered costs; they do not change profit & loss."
+  },
+  "ต้นทุนขาย %": {
+    "en": "COGS %"
+  },
+  "ต้นทุนขาย % (สะสมทั้งปี)": {
+    "en": "COGS % (YTD)"
+  },
+  "ต้นทุนขายทั้ง 5 หมวด": {
+    "en": "Five COGS categories"
+  },
+  "รวมต้นทุนขาย": {
+    "en": "Total COGS"
+  },
+  "ค่าใช้จ่ายดำเนินงานอื่น (ไม่รวมค่าแรง)": {
+    "en": "Other operating expenses (excluding labor)"
+  },
+  "รวมค่าใช้จ่ายดำเนินงานอื่น": {
+    "en": "Total other operating expenses"
+  },
+  "บาทที่ยังไม่ได้จัดหมวดการจ่าย กรุณาตรวจในบัญชีและกระทบยอด • สถานะนี้ไม่เปลี่ยนต้นทุนที่กรอกเอง": {
+    "en": "THB in payments awaiting categorization. Review in Bank & Reconcile. This status does not change owner-entered costs."
+  },
+  "COGS 28/32/35% • Labor 15/20/25% • Prime 55/60/65% • Margin ≥15/10/5%": {
+    "en": "COGS 28/32/35% • Labor 15/20/25% • Prime 55/60/65% • Margin ≥15/10/5%",
+    "th": "ต้นทุนขาย 28/32/35% • ค่าแรง 15/20/25% • ต้นทุนหลัก 55/60/65% • อัตรากำไร ≥15/10/5%"
+  },
+  "ยอดเงินและชื่อผู้จำหน่ายใช้เฉพาะเดือนที่เลือก • ชื่อรายการค่าใช้จ่ายและการจัดหมวดใช้ร่วมกันทุกเดือน • ลบรายการแล้วจะซ่อนจากเดือนถัดไป โดยเก็บยอดเดือนอื่นไว้": {
+    "en": "Amounts and supplier name overrides apply to the selected month. Cost item names and classifications are shared across months. Removing an item hides it going forward and preserves other months’ amounts."
+  },
+  "เงินเดือนและค่าจ้างพิเศษให้บันทึกในส่วนค่าแรง ส่วนรายการอื่นใช้ปุ่มบันทึกต้นทุน": {
+    "en": "Save salaries and extra pay in the labor section. Use Save costs for other entries."
   }
 }

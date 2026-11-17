@@ -57,9 +57,9 @@ export function buildStatementRows(
   });
 
   // ───── Expenses ─────
-  rows.push({ t: "section", label: ui("ค่าใช้จ่าย") });
+  rows.push({ t: "section", label: ui("ต้นทุนขาย") });
 
-  rows.push({ t: "sub", label: ui("ต้นทุนวัตถุดิบ (COGS)") });
+  rows.push({ t: "sub", label: ui("ต้นทุนขายทั้ง 5 หมวด") });
   const cogs = [...b.cogsFood, ...b.cogsBev, ...b.cogsPack];
   if (cogs.length === 0)
     rows.push({ t: "item", label: ui("— ไม่มี —"), amount: 0 });
@@ -68,10 +68,11 @@ export function buildStatementRows(
       rows.push({ t: "item", label: l.label, amount: l.amount });
   rows.push({
     t: "subtotal",
-    label: ui("รวมต้นทุนวัตถุดิบ"),
+    label: ui("รวมต้นทุนขาย"),
     amount: base.cogs,
   });
 
+  rows.push({ t: "section", label: ui("ค่าใช้จ่ายในการดำเนินงาน") });
   rows.push({ t: "sub", label: ui("ค่าแรงพนักงาน (Labor)") });
   const labor = [...b.laborSalary, ...b.laborExtra];
   if (labor.length === 0)
@@ -85,7 +86,7 @@ export function buildStatementRows(
     amount: base.labor,
   });
 
-  rows.push({ t: "sub", label: ui("ค่าใช้จ่ายประจำ (Fixed Cost)") });
+  rows.push({ t: "sub", label: ui("ค่าใช้จ่ายดำเนินงานอื่น (ไม่รวมค่าแรง)") });
   if (b.fixed.length === 0)
     rows.push({ t: "item", label: ui("— ไม่มี —"), amount: 0 });
   else
@@ -93,7 +94,7 @@ export function buildStatementRows(
       rows.push({ t: "item", label: l.label, amount: l.amount });
   rows.push({
     t: "subtotal",
-    label: ui("รวมค่าใช้จ่ายประจำ"),
+    label: ui("รวมค่าใช้จ่ายดำเนินงานอื่น"),
     amount: base.fixed,
   });
 

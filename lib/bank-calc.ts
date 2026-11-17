@@ -76,7 +76,7 @@ export type CategorySummaryRow = {
   count: number;
 };
 
-/** Cost Setup and P&L share the same statement classifier. */
+/** Cash-flow comparison for Cost Setup; live P&L uses owner-entered costs. */
 export async function getStatementExpenses(
   fiscalMonthId: number,
   businessId: number

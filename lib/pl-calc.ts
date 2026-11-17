@@ -1,6 +1,10 @@
-import { isPayrollExtraCategory } from "@/lib/flexible-costs";
+import {
+  categoryBucket,
+  supplierGroups,
+  supplierGroup,
+  groupBucket,
+} from "@/lib/cost-plan";
 import { prisma } from "@/lib/prisma";
-import { getStatementCostSummaries } from "@/lib/statement-cost-data";
 import { resolveCostAmounts } from "@/lib/statement-costs";
 
 // ─────────────── Types ───────────────
@@ -32,7 +36,7 @@ export type MonthlyTotals = {
   posBillCount: number;
   posNetSum: number;
   override: number;
-  netRevenue: number; // max(posNetSum, override)
+  netRevenue: number; // POS net sales only; legacy overrides are retained but not applied
 
   costSource: "statement" | "manual" | "mixed";
   pendingStatementCost: number;
@@ -63,10 +67,6 @@ const WEEKDAY_TH = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 function pct(numerator: number, denominator: number): number | null {
   if (denominator === 0) return null;
   return numerator / denominator;
-}
-
-function safeMax(a: number, b: number): number {
-  return a > b ? a : b;
 }
 
 // ─────────────── Yearly P&L (12 months matrix) ───────────────
@@ -125,48 +125,47 @@ export async function getYearlyPL(
   }
 
   // Batch queries for costs
-  const [
-    purchases,
-    suppliers,
-    payrolls,
-    extras,
-    fixedCosts,
-    overrides,
-    statementCosts,
-  ] = await Promise.all([
-    prisma.supplierPurchase.findMany({
-      where: { businessId, fiscalMonthId: { in: monthIds } },
-      select: { fiscalMonthId: true, amount: true, supplierId: true },
-    }),
-    prisma.supplier.findMany({
-      where: { businessId },
-      select: { id: true, category: true },
-    }),
-    prisma.employeePayroll.groupBy({
-      by: ["fiscalMonthId"],
-      where: { businessId, fiscalMonthId: { in: monthIds } },
-      _sum: { amount: true },
-    }),
-    prisma.payrollExtra.groupBy({
-      by: ["fiscalMonthId"],
-      where: { businessId, fiscalMonthId: { in: monthIds } },
-      _sum: { amount: true },
-    }),
-    prisma.fixedCost.findMany({
-      where: { businessId, fiscalMonthId: { in: monthIds } },
-      select: {
-        fiscalMonthId: true,
-        amount: true,
-        category: { select: { icon: true } },
-      },
-    }),
-    prisma.monthlyRevenueOverride.findMany({
-      where: { businessId, fiscalMonthId: { in: monthIds } },
-    }),
-    getStatementCostSummaries(monthIds, businessId),
-  ]);
+  const [purchases, suppliers, payrolls, extras, fixedCosts, costCategories] =
+    await Promise.all([
+      prisma.supplierPurchase.findMany({
+        where: { businessId, fiscalMonthId: { in: monthIds } },
+        select: { fiscalMonthId: true, amount: true, supplierId: true },
+      }),
+      prisma.supplier.findMany({
+        where: { businessId },
+        select: { id: true, category: true },
+      }),
+      prisma.employeePayroll.groupBy({
+        by: ["fiscalMonthId"],
+        where: { businessId, fiscalMonthId: { in: monthIds } },
+        _sum: { amount: true },
+      }),
+      prisma.payrollExtra.groupBy({
+        by: ["fiscalMonthId"],
+        where: { businessId, fiscalMonthId: { in: monthIds } },
+        _sum: { amount: true },
+      }),
+      prisma.fixedCost.findMany({
+        where: { businessId, fiscalMonthId: { in: monthIds } },
+        select: {
+          fiscalMonthId: true,
+          amount: true,
+          category: { select: { icon: true, name: true } },
+        },
+      }),
+      prisma.fixedCostCategory.findMany({
+        where: { businessId },
+        select: { icon: true },
+      }),
+    ]);
 
-  const supplierCat = new Map(suppliers.map((s) => [s.id, s.category]));
+  const supplierOverrides = supplierGroups(costCategories);
+  const supplierCat = new Map(
+    suppliers.map((s) => [
+      s.id,
+      groupBucket(supplierGroup(s, supplierOverrides)),
+    ])
+  );
   const costByMonth = new Map<
     number,
     { food: number; bev: number; pack: number }
@@ -174,15 +173,6 @@ export async function getYearlyPL(
   for (const id of monthIds) {
     costByMonth.set(id, { food: 0, bev: 0, pack: 0 });
   }
-  for (const p of purchases) {
-    const cat = supplierCat.get(p.supplierId);
-    const bucket = costByMonth.get(p.fiscalMonthId);
-    if (!bucket || !cat) continue;
-    if (cat === "FOOD") bucket.food += p.amount;
-    else if (cat === "BEVERAGE") bucket.bev += p.amount;
-    else if (cat === "PACKAGING") bucket.pack += p.amount;
-  }
-
   const laborBaseByMonth = new Map<number, number>(
     payrolls.map((p) => [p.fiscalMonthId, p._sum.amount ?? 0])
   );
@@ -190,39 +180,49 @@ export async function getYearlyPL(
     extras.map((e) => [e.fiscalMonthId, e._sum.amount ?? 0])
   );
   const fixedByMonth = new Map<number, number>();
-  for (const cost of fixedCosts) {
-    const target = isPayrollExtraCategory(cost.category.icon)
-      ? laborExtraByMonth
-      : fixedByMonth;
-    target.set(
-      cost.fiscalMonthId,
-      (target.get(cost.fiscalMonthId) ?? 0) + cost.amount
-    );
+  for (const p of purchases) {
+    const cat = supplierCat.get(p.supplierId);
+    const bucket = costByMonth.get(p.fiscalMonthId);
+    if (!bucket || !cat) continue;
+    if (cat === "food" || cat === "bev" || cat === "pack")
+      bucket[cat] += p.amount;
+    else {
+      const target = cat === "laborExtra" ? laborExtraByMonth : fixedByMonth;
+      target.set(
+        p.fiscalMonthId,
+        (target.get(p.fiscalMonthId) ?? 0) + p.amount
+      );
+    }
   }
-  const overrideByMonth = new Map<number, number>(
-    overrides.map((o) => [o.fiscalMonthId, o.amount])
-  );
 
+  for (const cost of fixedCosts) {
+    const bucket = categoryBucket(cost.category);
+    if (bucket === "food" || bucket === "bev" || bucket === "pack") {
+      const totals = costByMonth.get(cost.fiscalMonthId);
+      if (totals) totals[bucket] += cost.amount;
+    } else {
+      const target = bucket === "laborExtra" ? laborExtraByMonth : fixedByMonth;
+      target.set(
+        cost.fiscalMonthId,
+        (target.get(cost.fiscalMonthId) ?? 0) + cost.amount
+      );
+    }
+  }
   const months: MonthlyTotals[] = year.months.map((m) => {
     const pos = posByMonth.get(m.id) ?? { net: 0, count: 0 };
-    const statement = statementCosts.get(m.id);
-    const c = resolveCostAmounts(
-      {
-        ...(costByMonth.get(m.id) ?? { food: 0, bev: 0, pack: 0 }),
-        laborBase: laborBaseByMonth.get(m.id) ?? 0,
-        laborExtra: laborExtraByMonth.get(m.id) ?? 0,
-        fixed: fixedByMonth.get(m.id) ?? 0,
-      },
-      statement
-    );
+    const c = resolveCostAmounts({
+      ...(costByMonth.get(m.id) ?? { food: 0, bev: 0, pack: 0 }),
+      laborBase: laborBaseByMonth.get(m.id) ?? 0,
+      laborExtra: laborExtraByMonth.get(m.id) ?? 0,
+      fixed: fixedByMonth.get(m.id) ?? 0,
+    });
     const laborBase = c.laborBase;
     const laborExtra = c.laborExtra;
     const labor = laborBase + laborExtra;
     const fixed = c.fixed;
-    const override = overrideByMonth.get(m.id) ?? 0;
 
     const cogs = c.food + c.bev + c.pack;
-    const netRevenue = safeMax(pos.net, override);
+    const netRevenue = pos.net;
     const totalCost = cogs + labor + fixed;
     const netProfit = netRevenue - totalCost;
 
@@ -235,11 +235,11 @@ export async function getYearlyPL(
 
       posBillCount: pos.count,
       posNetSum: pos.net,
-      override,
+      override: 0,
       netRevenue,
 
-      costSource: statement?.hasTransactions ? "statement" : "manual",
-      pendingStatementCost: statement?.pendingTotal ?? 0,
+      costSource: "manual",
+      pendingStatementCost: 0,
       food: c.food,
       bev: c.bev,
       pack: c.pack,
@@ -470,7 +470,7 @@ export function kpiStatusHigherBetter(
 // Restaurant industry standard thresholds (matches Excel manual)
 export const KPI_THRESHOLDS = {
   food: { goodPlus: 0.28, good: 0.32, ok: 0.35 },
-  labor: { goodPlus: 0.25, good: 0.3, ok: 0.35 },
+  labor: { goodPlus: 0.15, good: 0.2, ok: 0.25 },
   prime: { goodPlus: 0.55, good: 0.6, ok: 0.65 },
   fixed: { goodPlus: 0.12, good: 0.15, ok: 0.2 },
   margin: { goodPlus: 0.15, good: 0.1, ok: 0.05 },

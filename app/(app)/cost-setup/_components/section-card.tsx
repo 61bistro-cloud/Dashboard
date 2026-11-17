@@ -27,7 +27,7 @@ export function SectionCard({
 
   return (
     <section className="rounded-card border border-hairline bg-canvas">
-      <header className="flex items-center justify-between border-b border-hairline-soft px-6 py-5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline-soft px-4 py-4 sm:px-6 sm:py-5">
         <h2 className="flex items-center gap-3 text-[17px] font-semibold tracking-tight">
           <Icon className="h-5 w-5 text-muted" strokeWidth={1.6} />
           {title}

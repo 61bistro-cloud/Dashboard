@@ -108,6 +108,8 @@ export default async function DashboardPage() {
       <CostSourceNotice
         source={total.costSource}
         pending={total.pendingStatementCost}
+        revenue={total.netRevenue}
+        costTotal={total.totalCost}
       />
 
       <SectionTitle
@@ -162,7 +164,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard
           icon={ChefHat}
-          label={ui("Food % (YTD)")}
+          label={ui("ต้นทุนขาย % (สะสมทั้งปี)")}
           pct={total.foodPct}
           status={kpiStatusLowerBetter(total.foodPct, KPI_THRESHOLDS.food)}
           bench="≤ 32%"
@@ -172,7 +174,7 @@ export default async function DashboardPage() {
           label={ui("Labor % (YTD)")}
           pct={total.laborPct}
           status={kpiStatusLowerBetter(total.laborPct, KPI_THRESHOLDS.labor)}
-          bench="≤ 30%"
+          bench={ui("เป้าหมายค่าแรง 15–25%")}
         />
         <KpiCard
           icon={Home}
@@ -406,7 +408,7 @@ function MonthlyStatusTable({
               <th className="px-3 py-2 font-medium text-right">
                 {ui("รายได้")}
               </th>
-              <th className="px-2 py-2 font-medium">{ui("Food %")}</th>
+              <th className="px-2 py-2 font-medium">{ui("ต้นทุนขาย %")}</th>
               <th className="px-2 py-2 font-medium">{ui("Labor %")}</th>
               <th className="px-2 py-2 font-medium">{ui("Fixed %")}</th>
               <th className="px-2 py-2 font-medium">{ui("Prime %")}</th>
@@ -500,7 +502,7 @@ function MonthlyStatusTable({
         <span className="text-muted-soft">|</span>
         <span>
           {ui(
-            "Food 28/32/35% • Labor 25/30/35% • Prime 55/60/65% • Margin ≥15/10/5%"
+            "COGS 28/32/35% • Labor 15/20/25% • Prime 55/60/65% • Margin ≥15/10/5%"
           )}
         </span>
       </div>

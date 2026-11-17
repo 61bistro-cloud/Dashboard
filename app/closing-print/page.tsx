@@ -46,7 +46,7 @@ export default async function ClosingPrintPage({
   const ratio = (n: number) =>
     base.netRevenue > 0 ? n / base.netRevenue : null;
   const ratios: [string, number | null][] = [
-    [ui("Food %"), ratio(base.cogs)],
+    [ui("ต้นทุนขาย %"), ratio(base.cogs)],
     [ui("Labor %"), ratio(base.labor)],
     [ui("Prime %"), ratio(base.cogs + base.labor)],
     [ui("Fixed %"), ratio(base.fixed)],

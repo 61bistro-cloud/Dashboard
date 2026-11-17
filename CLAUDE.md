@@ -48,15 +48,15 @@ Deploy บน Vercel, ฐานข้อมูล Neon Postgres. UI ภาษา
 
 `/` Dashboard · `/daily-pl` · `/monthly-pl` · `/closing` (ปิดงบ) · `/cost-setup` · `/pos-sales` · `/bank` (กระทบยอด) · `/admin/businesses` · `/admin/users`
 
-## Cost Setup / Statement → P&L
+## Cost Setup / Revenue, COGS and OPEX
 
-- `lib/statement-costs.ts` เป็น classifier/aggregation กลาง; `lib/statement-cost-data.ts` อ่าน BankTransaction แบบแยก business + fiscalMonth.
-- เดือนที่มีรายการ Bank & Reconcile ใช้รายจ่ายที่จัดหมวด EXPENSE จากทุกบัญชี (รวมเงินสด/บัตร) แทนยอดกรอกเองทั้งเดือน; ไม่บวกซ้ำ. เดือนที่ยังไม่มีรายการใช้ยอดกรอกเองเดิม.
-- TRANSFER, ชำระบัตรเครดิต, เงินเบิกผู้บริหาร และเงินเบิกล่วงหน้าไม่นับ P&L. เงินออกที่ไม่มีหมวดหรืออยู่หมวด INCOME แสดงเป็นรอตรวจสอบ ยังไม่นับต้นทุน.
-- หมวดวัตถุดิบ/จัดซื้อ → Food, เครื่องดื่ม → Bev, แพ็คเกจจิ้ง → Pack, เงินเดือน → Labor Base, ค่าจ้าง/OT → Labor Extra, EXPENSE อื่น → Fixed/Operating. แสดง mapping ใน Cost Setup.
-- Cost Setup / Dashboard / Daily P&L / Monthly P&L / breakdown ปิดงบใช้หลักเดียวกัน. Daily P&L ยังเฉลี่ยรายจ่ายทั้งเดือนตามจำนวนวัน ไม่ใช่เงินออกจริงในวันนั้น.
-- อ่านคำนวณโดยตรง ไม่คัดลอก Statement ไปสร้าง payroll/purchase/fixed-cost rows. ไม่เขียนทับ snapshot ปิดงบเดิม.
-- `npm run test:costs` ตรวจต้นทุนและการเชื่อม P&L ด้วยข้อมูลจำลอง ไม่ใช้ฐานข้อมูล.
+- Live P&L uses POS `netAmount` revenue and owner-entered costs for every month. Bank statements are payment reconciliation only; they never replace or add to manual costs. Legacy revenue override records are retained but no longer included in live revenue.
+- `lib/cost-plan.ts` defines five COGS groups (raw ingredients, condiments, beverages, packaging, freight-in) and four OPEX groups (labor, selling/marketing, occupancy/utilities, administration). Labor is OPEX; gross profit is revenue minus COGS.
+- `FixedCostCategory.icon` stores explicit `cost-setup:group:<group>` classifications. Inactive metadata categories named `__supplier_group_<id>` with icons `cost-setup:supplier-group:<id>:<group>` classify existing suppliers without schema changes. Do not count these metadata records as expenses. Classification is shared across months; amounts and supplier name overrides are monthly.
+- `manual-actions.ts` validates business ownership and a revision hash, saves an entire plan atomically and preserves other months’ amounts when an item is removed. No startup migration, seed or conversion writes production data. Existing payroll/extra-pay records remain editable in the labor group.
+- `pl-calc.ts`, closing breakdown and Cost Setup use the same group/bucket mapping. Daily P&L allocates monthly costs evenly over calendar days. Existing finalized snapshots are preserved and only change through the explicit reopen/refinalize workflow.
+- Statement summaries retain transfers/pending classifications for cash-flow comparison. Cash movements, card repayments and owner contributions do not become POS sales or manual costs automatically.
+- `test:costs` validates manual-only policy, classification, CRUD/tenancy/stale revisions, cross-report consistency and frozen snapshots with mock data only.
 
 ## จับคู่หลักฐาน
 
@@ -81,7 +81,7 @@ Deploy บน Vercel, ฐานข้อมูล Neon Postgres. UI ภาษา
 
 - `lib/flexible-costs.ts` identifies custom extra-pay and shop-cost categories using reserved `FixedCostCategory.icon` markers `cost-setup:payroll-extra[:TYPE]` / `cost-setup:other`. Amounts use `FixedCost` by business/category/month; no schema migration or automatic conversion is required.
 - On explicit payroll save only, replace that month’s legacy `PayrollExtra` rows with editable categories/amounts in one transaction. Untouched historical legacy amounts remain readable. Removed built-in items retain inactive markers so they do not reappear on reload. Removing a category clears the selected month only and preserves historical amounts.
-- `pl-calc.ts` and closing breakdown classify marked extra-pay amounts as Labor Extra and shop costs as Fixed/Operating. Statement-first cost resolution remains unchanged; manual forms are editable comparison data in statement months and never get added a second time.
+- `pl-calc.ts` and closing breakdown classify marked extra-pay amounts as Labor Extra and shop costs as Fixed/Operating. All live reports now use the manual cost plan every month; statement payments are comparison data only.
 - Item names are shared across months; monthly amounts are separate. New UI labels must have Thai/English translations. Tests use mock data only (`npm run test:costs`).
 
 ## Supported account templates and account deletion

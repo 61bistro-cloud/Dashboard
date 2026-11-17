@@ -164,7 +164,7 @@ export function EvidenceMatcher({
     <div className="space-y-4">
       <section className="rounded-card border border-hairline bg-surface p-4 space-y-3 text-xs">
         <h2 className="font-semibold text-sm">
-          {ui("อ่านสลิป → จับคู่ Statement → ลงหมวด → อัปเดต Dashboard")}
+          {ui("อ่านสลิป → จับคู่รายการเดินบัญชี → จัดหมวดตรวจเทียบ")}
         </h2>
         <button
           type="button"
@@ -777,7 +777,7 @@ function EvidenceCategoryEditor({
                   ? ui("หมวดนี้ไม่นับเป็นค่าใช้จ่าย P&L")
                   : status === "pending"
                     ? ui("รอจัดหมวด / ตรวจสอบ")
-                    : ui("ค่าใช้จ่ายเข้า Cost Setup / P&L → {v0}", {
+                    : ui("หมวดตรวจเทียบการจ่าย → {v0}", {
                         v0: ui(COST_BUCKET_LABELS[status]),
                       })}
             </p>
@@ -797,7 +797,7 @@ function EvidenceCategoryEditor({
           </button>
           <p className="text-muted">
             {ui(
-              "Remark ที่ยืนยันจะอยู่ในบันทึกรายการธนาคาร เมื่อเปลี่ยนหมวด Cost Setup และ P&L จะคำนวณตามหมวดใหม่"
+              "หมายเหตุและหมวดใช้กระทบยอดกับต้นทุนที่กรอกเอง ไม่เปลี่ยนยอดกำไรขาดทุน"
             )}
           </p>
         </>

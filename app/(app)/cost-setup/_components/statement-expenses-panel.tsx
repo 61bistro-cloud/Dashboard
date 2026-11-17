@@ -62,7 +62,7 @@ export function StatementExpensesPanel({
         {(
           [
             [ui("เงินออกทั้งหมด"), summary.withdrawalTotal],
-            [ui("ค่าใช้จ่ายเข้า P&L"), summary.grandTotal],
+            [ui("ยอดจ่ายที่จัดหมวดต้นทุน"), summary.grandTotal],
             [ui("รอจัดหมวด / ตรวจสอบ"), summary.pendingTotal],
             [
               ui("โอน / ชำระบัตร / เบิกเงิน (ไม่นับ P&L)"),
@@ -85,7 +85,7 @@ export function StatementExpensesPanel({
         >
           {ui("ยังมีเงินออก")} {fmtTHB(summary.pendingTotal)}{" "}
           {ui(
-            "บาทที่ไม่ได้จัดหมวดรายจ่าย หรือถูกจัดเป็นรายรับ โปรดตรวจใน Bank & Reconcile ยอดนี้ยังไม่รวมในต้นทุนและกำไรที่แสดงจึงยังไม่ครบ"
+            "บาทที่ยังไม่ได้จัดหมวดการจ่าย กรุณาตรวจในบัญชีและกระทบยอด • สถานะนี้ไม่เปลี่ยนต้นทุนที่กรอกเอง"
           )}
         </p>
       )}
@@ -99,7 +99,7 @@ export function StatementExpensesPanel({
             <thead className="bg-surface text-left">
               <tr>
                 <th className="px-3 py-2">{ui("หมวดต้นทุน")}</th>
-                <th className="px-3 py-2">{ui("หมวดใน P&L")}</th>
+                <th className="px-3 py-2">{ui("หมวดสำหรับตรวจเทียบ")}</th>
                 <th className="px-3 py-2 text-right">
                   {ui("ธนาคาร / เงินสด")}
                 </th>
@@ -137,9 +137,9 @@ export function StatementExpensesPanel({
                       </td>
                       <td className="px-3 py-2 text-muted">
                         {row.status === "pending"
-                          ? ui("รอตรวจสอบ — ยังไม่นับ P&L")
+                          ? ui("รอจัดหมวด / ตรวจสอบ")
                           : row.status === "excluded"
-                            ? ui("ไม่นับ P&L")
+                            ? ui("รายการโอน / ไม่ใช่ต้นทุน")
                             : ui(COST_BUCKET_LABELS[row.status])}
                       </td>
                       <td className="px-3 py-2 text-right tabular-nums">
@@ -327,22 +327,19 @@ export function StatementExpensesPanel({
       )}
       <footer className="border-t border-hairline-soft px-5 py-3 text-xs text-muted space-y-2">
         <p>
-          {ui("ค่าใช้จ่ายที่นับใน P&L: ธนาคาร / เงินสด")}{" "}
-          {fmtTHB(summary.bankTotal)} {ui("+ บัตรเครดิต")}{" "}
-          {fmtTHB(summary.cardTotal)} = {fmtTHB(summary.grandTotal)} {ui("บาท")}
+          {ui("ยอดจ่ายที่จัดหมวด: ธนาคาร / เงินสด")} {fmtTHB(summary.bankTotal)}{" "}
+          {ui("+ บัตรเครดิต")} {fmtTHB(summary.cardTotal)} ={" "}
+          {fmtTHB(summary.grandTotal)} {ui("บาท")}
         </p>
         <p>
           {ui(
-            "เงินออกทั้งหมด = ค่าใช้จ่ายเข้า P&L + รอตรวจสอบ + รายการไม่นับ P&L • ชำระบัตรเครดิตไม่นับซ้ำกับยอดซื้อผ่านบัตร • ยอดยกมาและเงินรับเข้าไม่ใช่รายจ่าย"
+            "Statement แสดงการจ่ายเงินจริง อาจไม่ตรงกับต้นทุนของเดือน เช่น ค่าเสื่อมราคา หรือยอดค้างจ่าย • ไม่ใช้ยอดนี้แทนหรือบวกซ้ำกับต้นทุนที่กรอกเอง"
           )}
         </p>
         <p>
           {ui("ยอดกรอกเองเดิม")} {fmtTHB(manualTotal)} {ui("บาท")}{" "}
-          {summary.hasTransactions
-            ? ui("เก็บไว้เทียบเท่านั้น ไม่บวกซ้ำกับ Statement")
-            : ui("ใช้คำนวณชั่วคราวจนกว่าจะลง Bank & Reconcile")}{" "}
           {ui(
-            "• กรุณานำเข้าให้ครบทุกบัญชี และบันทึกรายจ่ายเงินสดในบัญชีเงินสด"
+            "ใช้ยอดกรอกเองคำนวณกำไรขาดทุนทุกเดือน • ยอดธนาคารเก็บไว้ตรวจเทียบเท่านั้น"
           )}
         </p>
       </footer>

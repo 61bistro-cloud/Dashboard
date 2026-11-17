@@ -114,7 +114,7 @@ export function PayrollSection({
       }}
     >
       <div className="space-y-1">
-        <div className="grid grid-cols-[auto_1fr_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_100px_auto] sm:grid-cols-[auto_minmax(0,1fr)_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
           <div className="w-5"></div>
           <div>{ui("พนักงาน")}</div>
           <div className="text-right">{ui("เงินเดือน (บาท)")}</div>
@@ -128,7 +128,7 @@ export function PayrollSection({
             return (
               <SortableRow key={e.id} id={e.id}>
                 {({ dragHandle }) => (
-                  <div className="group grid grid-cols-[auto_1fr_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface">
+                  <div className="group grid grid-cols-[auto_minmax(0,1fr)_100px_auto] sm:grid-cols-[auto_minmax(0,1fr)_160px_auto] gap-3 items-center px-2 py-1 rounded hover:bg-surface">
                     {dragHandle}
                     <div className="flex items-center gap-2 text-sm min-w-0">
                       <input
@@ -199,7 +199,7 @@ export function PayrollSection({
             onSubmit={handleAdd}
             className="mt-2 px-2 py-2 rounded bg-surface space-y-2"
           >
-            <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-center">
               <div className="flex items-center gap-2">
                 <Plus
                   className="h-4 w-4 text-muted-soft shrink-0"
@@ -214,7 +214,7 @@ export function PayrollSection({
                   placeholder={ui(
                     "ชื่อพนักงาน — เช่น Boom (Service) 17:00-02:00"
                   )}
-                  className="flex-1 rounded-input border border-hairline bg-canvas px-2.5 py-1.5 text-sm focus:border-ink focus:outline-none"
+                  className="min-w-0 flex-1 rounded-input border border-hairline bg-canvas px-2.5 py-1.5 text-sm focus:border-ink focus:outline-none"
                 />
               </div>
               <div className="flex gap-1.5">

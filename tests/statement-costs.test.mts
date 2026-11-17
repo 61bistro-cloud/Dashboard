@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
 import { isPayrollExtraCategory } from "../lib/flexible-costs.ts";
+import * as costPlan from "../lib/cost-plan.ts";
 import {
   classifyExpense,
   emptyCosts,
@@ -67,7 +68,7 @@ test("all expense buckets reconcile to statement withdrawals without counting tr
   );
 });
 
-test("manual costs are replaced for statement months, never added to the same payments", () => {
+test("manual costs remain the sole P&L source even when statement transactions exist", () => {
   const manual = {
     food: 999,
     bev: 1,
@@ -77,13 +78,13 @@ test("manual costs are replaced for statement months, never added to the same pa
     fixed: 777,
   };
   const s = summarizeStatementCosts(transactions()).get(1)!;
-  assert.deepEqual(resolveCostAmounts(manual, s), s.amounts);
+  assert.deepEqual(resolveCostAmounts(manual, s), manual);
   assert.deepEqual(resolveCostAmounts(manual), manual);
   assert.notEqual(resolveCostAmounts(manual), manual);
   const receiptOnly = summarizeStatementCosts([
     tx(1, "รับเงิน", 0, "INCOME"),
   ]).get(1)!;
-  assert.deepEqual(resolveCostAmounts(manual, receiptOnly), emptyCosts());
+  assert.deepEqual(resolveCostAmounts(manual, receiptOnly), manual);
 });
 
 test("unknown expenses default to operating costs; missing/income categories wait for review", () => {
@@ -104,7 +105,7 @@ test("aggregation keeps months separate and performs money arithmetic in cents",
   assert.equal(s.get(1)!.rows[0].count, 2);
 });
 
-async function pipeline(snapshot: any = null) {
+async function pipeline(snapshot: any = null, structured = false) {
   let rows = transactions();
   const scopes: any[] = [];
   const months = Array.from({ length: 12 }, (_, i) => ({
@@ -123,14 +124,14 @@ async function pipeline(snapshot: any = null) {
       supplierId: 1,
       amount: 1000,
       nameOverride: null,
-      supplier: { name: "Manual food", category: "FOOD" },
+      supplier: { id: 1, name: "Manual food", category: "FOOD" },
     },
     {
       fiscalMonthId: 2,
       supplierId: 1,
       amount: 20,
       nameOverride: null,
-      supplier: { name: "Manual food", category: "FOOD" },
+      supplier: { id: 1, name: "Manual food", category: "FOOD" },
     },
   ];
   const prisma = {
@@ -191,6 +192,10 @@ async function pipeline(snapshot: any = null) {
         ].filter((row) => row.fiscalMonthId === where.fiscalMonthId),
     },
     payrollExtra: { groupBy: async () => [], findMany: async () => [] },
+    fixedCostCategory: {
+      findMany: async () =>
+        structured ? [{ icon: "cost-setup:supplier-group:1:admin" }] : [],
+    },
     fixedCost: {
       groupBy: async () => [
         { fiscalMonthId: 1, _sum: { amount: 1000 } },
@@ -198,6 +203,26 @@ async function pipeline(snapshot: any = null) {
       ],
       findMany: async ({ where }: any) =>
         [
+          ...(structured
+            ? [
+                ["raw", 10],
+                ["condiments", 15],
+                ["beverage", 8],
+                ["packaging", 4],
+                ["freight", 6],
+                ["labor", 2],
+                ["selling", 9],
+                ["occupancy", 11],
+                ["admin", 13],
+              ].map(([group, amount]) => ({
+                fiscalMonthId: 2,
+                amount: Number(amount),
+                category: {
+                  name: String(group),
+                  icon: `cost-setup:group:${group}`,
+                },
+              }))
+            : []),
           {
             fiscalMonthId: 1,
             amount: 1000,
@@ -228,8 +253,8 @@ async function pipeline(snapshot: any = null) {
         ),
     },
     monthlyRevenueOverride: {
-      findMany: async () => [],
-      findUnique: async () => null,
+      findMany: async () => [{ fiscalMonthId: 1, amount: 50000 }],
+      findUnique: async () => ({ amount: 50000 }),
     },
     bankTransaction: {
       findMany: async (query: any) => {
@@ -249,6 +274,7 @@ async function pipeline(snapshot: any = null) {
     const mock: Record<string, any> = {
       "@/lib/prisma": { prisma },
       "@/lib/flexible-costs": { isPayrollExtraCategory },
+      "@/lib/cost-plan": costPlan,
       "@/lib/fiscal": { PAYROLL_EXTRA_LABELS: {} },
       "@/lib/bank-calc": { getReconciliation: async () => [] },
     };
@@ -299,34 +325,36 @@ test("Cost Setup expense buckets feed monthly, yearly, Daily P&L and closing lin
   const h = await pipeline();
   const yearly = await h.pl.getYearlyPL(2569, 1);
   const april = yearly.months[0];
-  assert.equal(april.totalCost, 215);
-  assert.equal(april.netProfit, 285);
-  assert.equal(april.costSource, "statement");
-  assert.equal(april.pendingStatementCost, 10);
-  assert.equal(april.cogs, 130);
-  assert.equal(april.labor, 55);
-  assert.equal(april.fixed, 30);
+  assert.equal(april.totalCost, 3000);
+  assert.equal(april.netProfit, -2500);
+  assert.equal(april.netRevenue, 500);
+  assert.equal(april.override, 0);
+  assert.equal(april.costSource, "manual");
+  assert.equal(april.pendingStatementCost, 0);
+  assert.equal(april.cogs, 1000);
+  assert.equal(april.labor, 1000);
+  assert.equal(april.fixed, 1000);
   assert.equal(yearly.months[1].totalCost, 45);
   assert.equal(yearly.months[1].laborExtra, 7);
   assert.equal(yearly.months[1].fixed, 8);
   assert.equal(yearly.months[1].costSource, "manual");
-  assert.equal(yearly.total.totalCost, 260);
-  assert.equal(yearly.total.costSource, "mixed");
+  assert.equal(yearly.total.totalCost, 3045);
+  assert.equal(yearly.total.costSource, "manual");
   const daily = await h.pl.getDailyPL(1, 1);
-  assert.equal(daily.totals.totalCost, 215);
+  assert.equal(daily.totals.totalCost, 3000);
   assert.ok(
     Math.abs(
-      daily.days.reduce((s: number, d: any) => s + d.totalCost, 0) - 215
+      daily.days.reduce((s: number, d: any) => s + d.totalCost, 0) - 3000
     ) < 0.00001
   );
   const breakdown = await h.closing.computeBreakdown(1, 1);
-  assert.equal(breakdown.cogsFood[0].label, "🥩 ต้นทุน - วัตถุดิบอาหาร");
+  assert.equal(breakdown.cogsFood[0].label, "Manual food");
   assert.equal(
     Object.entries(breakdown)
       .filter(([key]) => key !== "revenue")
       .flatMap(([, value]) => value as any[])
       .reduce((sum, row) => sum + row.amount, 0),
-    215
+    3000
   );
   const mayDaily = await h.pl.getDailyPL(2, 1);
   assert.equal(mayDaily.totals.totalCost, 45);
@@ -356,14 +384,14 @@ test("Cost Setup expense buckets feed monthly, yearly, Daily P&L and closing lin
   }
 });
 
-test("category changes/deletions refresh live totals without copying into manual cost records", async () => {
+test("statement category changes and deletions never change manual P&L costs", async () => {
   const h = await pipeline();
   const rows = transactions();
   rows[0].category = category(1, "โอนระหว่างบัญชี", "TRANSFER");
   h.replace(rows);
-  assert.equal((await h.pl.getYearlyPL(2569, 1)).months[0].totalCost, 115);
+  assert.equal((await h.pl.getYearlyPL(2569, 1)).months[0].totalCost, 3000);
   h.replace(rows.filter((r) => r.category?.id !== 6));
-  assert.equal((await h.pl.getYearlyPL(2569, 1)).months[0].totalCost, 85);
+  assert.equal((await h.pl.getYearlyPL(2569, 1)).months[0].totalCost, 3000);
   h.replace([]);
   assert.equal((await h.pl.getYearlyPL(2569, 1)).months[0].totalCost, 3000);
   const breakdown = await h.closing.computeBreakdown(1, 1);
@@ -376,7 +404,7 @@ test("category changes/deletions refresh live totals without copying into manual
   );
 });
 
-test("existing closing snapshots and their line items stay frozen when live Statement costs change", async () => {
+test("existing closing snapshots stay frozen after switching live reports to owner-entered costs", async () => {
   const snapshot = {
     id: 1,
     status: "CLOSED",
@@ -406,14 +434,46 @@ test("existing closing snapshots and their line items stay frozen when live Stat
   };
   const h = await pipeline(snapshot);
   const view = await h.closing.getClosingView(1, 1);
-  assert.equal(view.live.totalCost, 215);
+  assert.equal(view.live.totalCost, 3000);
   assert.equal(view.final.totalCost, 90);
   assert.equal(view.breakdown.cogsFood[0].label, "Frozen food");
   assert.ok(view.drift.length > 0);
+  assert.equal(
+    view.checks.some((check: any) => check.key === "statement_pending"),
+    false
+  );
+});
+
+test("all nine manual groups feed COGS/OPEX and closing exactly once, independent of statement amounts", async () => {
+  const h = await pipeline(null, true);
+  h.replace([
+    ...transactions(),
+    tx(90, "วัตถุดิบ", 99999, "EXPENSE", false, 2),
+  ]);
+  const yearly = await h.pl.getYearlyPL(2569, 1),
+    may = yearly.months[1];
+  assert.equal(may.cogs, 43);
+  assert.equal(may.food, 31);
+  assert.equal(may.bev, 8);
+  assert.equal(may.pack, 4);
+  assert.equal(may.labor, 19);
+  assert.equal(may.fixed, 61);
+  assert.equal(may.totalCost, 123);
+  assert.equal(may.costSource, "manual");
+  assert.equal(yearly.total.totalCost, 3123);
+  const breakdown = await h.closing.computeBreakdown(1, 2);
+  const sum = (rows: any[]) => rows.reduce((s, r) => s + r.amount, 0);
+  assert.equal(
+    sum(breakdown.cogsFood) + sum(breakdown.cogsBev) + sum(breakdown.cogsPack),
+    43
+  );
+  assert.equal(sum(breakdown.laborSalary) + sum(breakdown.laborExtra), 19);
+  assert.equal(sum(breakdown.fixed), 61);
+  const daily = await h.pl.getDailyPL(2, 1);
+  assert.equal(daily.totals.totalCost, 123);
   assert.ok(
-    view.checks.some(
-      (check: any) =>
-        check.key === "statement_pending" && check.status === "warn"
-    )
+    Math.abs(
+      daily.days.reduce((s: number, d: any) => s + d.totalCost, 0) - 123
+    ) < 0.00001
   );
 });

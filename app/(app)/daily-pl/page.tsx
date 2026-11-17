@@ -108,6 +108,8 @@ export default async function DailyPLPage({
       <CostSourceNotice
         source={totals.costSource}
         pending={totals.pendingStatementCost}
+        revenue={totals.netRevenue}
+        costTotal={totals.totalCost}
         monthId={month.id}
       />
 

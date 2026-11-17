@@ -242,7 +242,7 @@ export default async function ClosingPage({
           <PLStatement view={view} />
 
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <Kpi label={ui("Food %")} v={ratios.food} />
+            <Kpi label={ui("ต้นทุนขาย %")} v={ratios.food} />
             <Kpi label={ui("Labor %")} v={ratios.labor} />
             <Kpi label={ui("Prime %")} v={ratios.prime} />
             <Kpi label={ui("Fixed %")} v={ratios.fixed} />

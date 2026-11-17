@@ -108,6 +108,8 @@ export default async function MonthlyPLPage({
       <CostSourceNotice
         source={data.total.costSource}
         pending={data.total.pendingStatementCost}
+        revenue={data.total.netRevenue}
+        costTotal={data.total.totalCost}
       />
 
       {/* KPI cards */}
@@ -130,7 +132,7 @@ function KpiPanel({ total }: { total: MonthlyTotals }) {
   }> = [
     {
       icon: ChefHat,
-      label: ui("Food Cost %"),
+      label: ui("ต้นทุนขาย %"),
       pct: total.foodPct,
       status: kpiStatusLowerBetter(total.foodPct, KPI_THRESHOLDS.food),
       bench: ui("เป้า ≤ 32%"),
@@ -140,7 +142,7 @@ function KpiPanel({ total }: { total: MonthlyTotals }) {
       label: ui("Labor %"),
       pct: total.laborPct,
       status: kpiStatusLowerBetter(total.laborPct, KPI_THRESHOLDS.labor),
-      bench: ui("เป้า ≤ 30%"),
+      bench: ui("เป้าหมายค่าแรง 15–25%"),
     },
     {
       icon: Zap,
@@ -234,26 +236,18 @@ function PLMatrix({
       values: () => ({ num: null }),
     },
     {
-      label: ui("Food + Bev + Pack"),
+      label: ui("ต้นทุนขายรวม 5 หมวด"),
       indent: 1,
       values: (m) => ({ num: m.cogs, pct: m.foodPct }),
     },
     {
-      label: ui("ค่าแรงพนักงาน (Labor)"),
-      indent: 1,
-      values: (m) => ({ num: m.labor, pct: m.laborPct }),
-    },
-    {
-      label: ui("กำไรขั้นต้น (Gross Profit) = Revenue − COGS − Labor"),
+      label: ui("กำไรขั้นต้น = รายได้ − ต้นทุนขาย"),
       indent: 0,
       bold: true,
       cls: "bg-surface",
       values: (m) => ({
-        num: m.netRevenue - m.cogs - m.labor,
-        pct:
-          m.netRevenue === 0
-            ? null
-            : (m.netRevenue - m.cogs - m.labor) / m.netRevenue,
+        num: m.netRevenue - m.cogs,
+        pct: m.netRevenue === 0 ? null : (m.netRevenue - m.cogs) / m.netRevenue,
       }),
     },
     {
@@ -262,7 +256,12 @@ function PLMatrix({
       values: () => ({ num: null }),
     },
     {
-      label: ui("Fixed Cost (เช่า/ไฟ/Sub/Platform/อื่นๆ)"),
+      label: ui("ค่าแรงพนักงาน (Labor)"),
+      indent: 1,
+      values: (m) => ({ num: m.labor, pct: m.laborPct }),
+    },
+    {
+      label: ui("ค่าใช้จ่ายดำเนินงานอื่น (ไม่รวมค่าแรง)"),
       indent: 1,
       values: (m) => ({ num: m.fixed, pct: m.fixedPct }),
     },

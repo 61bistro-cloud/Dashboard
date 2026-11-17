@@ -1,4 +1,4 @@
-/** Shared cash-basis expense classification for Cost Setup and all live P&Ls. */
+/** Statement payment classification for reconciliation; never a live P&L cost source. */
 export const COST_BUCKET_LABELS = {
   food: "วัตถุดิบอาหาร / จัดซื้อ",
   bev: "เครื่องดื่ม",
@@ -144,12 +144,12 @@ export function summarizeStatementCosts(
   return months;
 }
 
-/** One source per month prevents a statement payment duplicating a manual cost.
- * Manual books remain the fallback until Bank & Reconcile has data for a month.
+/** Owner-entered costs are the P&L source for every month. Statement payments
+ * are a separate cash-flow comparison and never replace or add to these costs.
  */
 export function resolveCostAmounts(
   manual: CostAmounts,
-  statement?: StatementCostSummary
+  _statement?: StatementCostSummary
 ): CostAmounts {
-  return statement?.hasTransactions ? { ...statement.amounts } : { ...manual };
+  return { ...manual };
 }
