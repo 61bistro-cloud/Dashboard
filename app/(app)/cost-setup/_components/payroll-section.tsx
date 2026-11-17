@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useEffect, useState, useTransition } from "react";
 import { Users, Trash2, Plus, AlertCircle } from "lucide-react";
 import {
@@ -32,6 +34,7 @@ export function PayrollSection({
   employees: EmpRow[];
   extras: ExtraRow[];
 }) {
+  const { ui } = useUi();
   const [emps, setEmps] = useState<EmpRow[]>(employees);
   const [exts, setExts] = useState<ExtraRow[]>(extras);
 
@@ -76,7 +79,10 @@ export function PayrollSection({
   const handleDelete = (id: number, name: string) => {
     if (
       !confirm(
-        `ลบพนักงาน "${name}"?\nถ้ามีประวัติเงินเดือนบันทึกไว้ ระบบจะซ่อนแทนการลบ (รักษาประวัติ)`
+        ui(
+          'ลบพนักงาน "{v0}"?\nถ้ามีประวัติเงินเดือนบันทึกไว้ ระบบจะซ่อนแทนการลบ (รักษาประวัติ)',
+          { v0: name }
+        )
       )
     )
       return;
@@ -88,7 +94,7 @@ export function PayrollSection({
   return (
     <SectionCard
       icon={Users}
-      title="ค่าแรงพนักงาน (Payroll)"
+      title={ui("ค่าแรงพนักงาน (Payroll)")}
       total={total}
       onSave={() =>
         savePayroll({
@@ -105,8 +111,8 @@ export function PayrollSection({
       <div className="space-y-1">
         <div className="grid grid-cols-[auto_1fr_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
           <div className="w-5"></div>
-          <div>พนักงาน</div>
-          <div className="text-right">เงินเดือน (บาท)</div>
+          <div>{ui("พนักงาน")}</div>
+          <div className="text-right">{ui("เงินเดือน (บาท)")}</div>
           <div></div>
         </div>
 
@@ -136,20 +142,26 @@ export function PayrollSection({
                             )
                           );
                         }}
-                        aria-label={`ชื่อพนักงาน ${e.shortName ?? e.name}`}
+                        aria-label={ui("ชื่อพนักงาน {v0}", {
+                          v0: e.shortName ?? e.name,
+                        })}
                         className="flex-1 min-w-0 rounded-input border border-transparent bg-transparent px-1.5 py-0.5 text-sm hover:border-hairline focus:border-ink focus:bg-canvas focus:outline-none transition-colors"
                       />
                       {hasOverride && (
                         <span
                           className="text-xs text-amber-600 cursor-help shrink-0"
-                          title="แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
+                          title={ui(
+                            "แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
+                          )}
                         >
-                          เฉพาะเดือนนี้
+                          {ui("เฉพาะเดือนนี้")}
                         </span>
                       )}
                     </div>
                     <MoneyInput
-                      ariaLabel={`เงินเดือน ${e.shortName ?? e.name}`}
+                      ariaLabel={ui("เงินเดือน {v0}", {
+                        v0: e.shortName ?? e.name,
+                      })}
                       value={e.amount}
                       onChange={(n) =>
                         setEmps((prev) =>
@@ -164,8 +176,8 @@ export function PayrollSection({
                       onClick={() => handleDelete(e.id, displayName)}
                       disabled={pendingDelete}
                       className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
-                      aria-label={`ลบพนักงาน ${displayName}`}
-                      title={`ลบพนักงาน ${displayName}`}
+                      aria-label={ui("ลบพนักงาน {v0}", { v0: displayName })}
+                      title={ui("ลบพนักงาน {v0}", { v0: displayName })}
                     >
                       <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
                     </button>
@@ -194,7 +206,9 @@ export function PayrollSection({
                   onChange={(ev) => setNewName(ev.target.value)}
                   autoFocus
                   required
-                  placeholder="ชื่อพนักงาน — เช่น Boom (Service) 17:00-02:00"
+                  placeholder={ui(
+                    "ชื่อพนักงาน — เช่น Boom (Service) 17:00-02:00"
+                  )}
                   className="flex-1 rounded-input border border-hairline bg-canvas px-2.5 py-1.5 text-sm focus:border-ink focus:outline-none"
                 />
               </div>
@@ -208,21 +222,21 @@ export function PayrollSection({
                   }}
                   className="text-xs text-muted hover:text-ink px-2 py-1 rounded"
                 >
-                  ยกเลิก
+                  {ui("ยกเลิก")}
                 </button>
                 <button
                   type="submit"
                   disabled={pendingAdd || !newName.trim()}
                   className="rounded-pill bg-ink text-canvas px-3 py-1 text-xs font-medium hover:bg-ink-2 disabled:opacity-50"
                 >
-                  {pendingAdd ? "..." : "เพิ่ม"}
+                  {pendingAdd ? "..." : ui("เพิ่ม")}
                 </button>
               </div>
             </div>
             {addError && (
               <div className="flex items-center gap-1.5 text-xs text-red-600">
                 <AlertCircle className="h-3.5 w-3.5" strokeWidth={2} />
-                {addError}
+                {ui(addError)}
               </div>
             )}
           </form>
@@ -233,12 +247,12 @@ export function PayrollSection({
             className="mt-2 flex items-center gap-2 w-full px-2 py-2 text-sm text-muted hover:text-ink hover:bg-surface rounded transition-colors"
           >
             <Plus className="h-4 w-4" strokeWidth={1.75} />
-            เพิ่มพนักงาน
+            {ui("เพิ่มพนักงาน")}
           </button>
         )}
 
         <div className="mt-4 mb-2 px-2 text-xs font-medium uppercase tracking-wide text-muted">
-          OT / โบนัส / ค่าจ้างพิเศษ
+          {ui("OT / โบนัส / ค่าจ้างพิเศษ")}
         </div>
         {exts.map((x) => (
           <div
@@ -246,10 +260,10 @@ export function PayrollSection({
             className="grid grid-cols-[1fr_180px_28px] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
           >
             <div className="text-sm text-ink/90">
-              {PAYROLL_EXTRA_LABELS[x.type]}
+              {ui(PAYROLL_EXTRA_LABELS[x.type])}
             </div>
             <MoneyInput
-              ariaLabel={PAYROLL_EXTRA_LABELS[x.type]}
+              ariaLabel={ui(PAYROLL_EXTRA_LABELS[x.type])}
               value={x.amount}
               onChange={(n) =>
                 setExts((prev) =>

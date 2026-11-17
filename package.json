@@ -17,7 +17,8 @@
     "test:costs": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/statement-costs.test.mts",
     "test:line": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/line-webhook.test.mts",
     "test:evidence": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/evidence-upload.test.mts",
-    "test:matching": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/evidence-match.test.mts tests/evidence-category.test.mts tests/evidence-auto.test.mts"
+    "test:matching": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/evidence-match.test.mts tests/evidence-category.test.mts tests/evidence-auto.test.mts",
+    "test:i18n": "node --import tsx --test --test-isolation=none tests/i18n.test.mts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -33,6 +34,7 @@
     "lucide-react": "^1.17.0",
     "next": "^16.2.7",
     "next-auth": "^5.0.0-beta.31",
+    "next-intl": "^4.15.1",
     "pdfjs-dist": "^6.0.227",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MessageCircle, Loader2, Check, Copy, Unlink } from "lucide-react";
@@ -12,6 +14,7 @@ export function LineConfig({
   configured: boolean;
   webhookUrl: string;
 }) {
+  const { ui } = useUi();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [secret, setSecret] = useState("");
@@ -24,7 +27,7 @@ export function LineConfig({
     setMsg(null);
     setErr(null);
     if (!secret && !token) {
-      setErr("กรอก Channel secret และ/หรือ Access token");
+      setErr(ui("กรอก Channel secret และ/หรือ Access token"));
       return;
     }
     startTransition(async () => {
@@ -33,11 +36,11 @@ export function LineConfig({
         channelToken: token,
       });
       if (r.ok) {
-        setMsg("บันทึกการตั้งค่า LINE แล้ว");
+        setMsg(ui("บันทึกการตั้งค่า LINE แล้ว"));
         setSecret("");
         setToken("");
         router.refresh();
-      } else setErr(r.message ?? "บันทึกไม่สำเร็จ");
+      } else setErr(r.message ?? ui("บันทึกไม่สำเร็จ"));
     });
   }
 
@@ -48,7 +51,7 @@ export function LineConfig({
           className="h-4 w-4 text-emerald-600"
           strokeWidth={1.75}
         />
-        รับสลิป/บิลผ่าน LINE
+        {ui("รับสลิป/บิลผ่าน LINE")}{" "}
         <span
           className={
             "ml-1 rounded-pill px-2 py-0.5 text-xs " +
@@ -57,13 +60,13 @@ export function LineConfig({
               : "bg-neutral-100 text-neutral-600")
           }
         >
-          {configured ? "ตั้งค่าแล้ว" : "ยังไม่ตั้งค่า"}
+          {configured ? ui("ตั้งค่าแล้ว") : ui("ยังไม่ตั้งค่า")}
         </span>
       </h2>
 
       <div className="text-xs">
         <span className="block text-muted mb-1">
-          Webhook URL (เอาไปวางใน LINE Developers → Messaging API)
+          {ui("Webhook URL (เอาไปวางใน LINE Developers → Messaging API)")}
         </span>
         <div className="flex items-center gap-2">
           <code className="flex-1 rounded border border-hairline-soft bg-surface px-2 py-1 break-all">
@@ -83,22 +86,24 @@ export function LineConfig({
             ) : (
               <Copy className="h-3.5 w-3.5" />
             )}
-            {copied ? "คัดลอกแล้ว" : "คัดลอก"}
+            {copied ? ui("คัดลอกแล้ว") : ui("คัดลอก")}
           </button>
         </div>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3">
         <label className="text-xs">
-          <span className="block text-muted mb-0.5">Channel secret</span>
+          <span className="block text-muted mb-0.5">
+            {ui("Channel secret")}
+          </span>
           <input
             type="password"
             value={secret}
             onChange={(e) => setSecret(e.target.value)}
             placeholder={
               configured
-                ? "•••••• (ตั้งไว้แล้ว — เว้นว่างถ้าไม่เปลี่ยน)"
-                : "วาง Channel secret"
+                ? ui("•••••• (ตั้งไว้แล้ว — เว้นว่างถ้าไม่เปลี่ยน)")
+                : ui("วาง Channel secret")
             }
             autoComplete="off"
             className="w-full rounded border border-hairline-soft bg-canvas px-2 py-1"
@@ -106,7 +111,7 @@ export function LineConfig({
         </label>
         <label className="text-xs">
           <span className="block text-muted mb-0.5">
-            Channel access token (long-lived)
+            {ui("Channel access token (long-lived)")}
           </span>
           <input
             type="password"
@@ -114,8 +119,8 @@ export function LineConfig({
             onChange={(e) => setToken(e.target.value)}
             placeholder={
               configured
-                ? "•••••• (ตั้งไว้แล้ว — เว้นว่างถ้าไม่เปลี่ยน)"
-                : "วาง Access token"
+                ? ui("•••••• (ตั้งไว้แล้ว — เว้นว่างถ้าไม่เปลี่ยน)")
+                : ui("วาง Access token")
             }
             autoComplete="off"
             className="w-full rounded border border-hairline-soft bg-canvas px-2 py-1"
@@ -134,8 +139,8 @@ export function LineConfig({
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
             <Check className="h-3.5 w-3.5" />
-          )}
-          บันทึก
+          )}{" "}
+          {ui("บันทึก")}
         </button>
         {configured && (
           <button
@@ -149,22 +154,23 @@ export function LineConfig({
             disabled={pending}
             className="inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
           >
-            <Unlink className="h-3.5 w-3.5" /> ลบการตั้งค่า
+            <Unlink className="h-3.5 w-3.5" /> {ui("ลบการตั้งค่า")}
           </button>
         )}
       </div>
 
       <p className="text-xs text-muted">
-        รูปที่ส่งเข้า LINE จะถูกเก็บเป็น “หลักฐานการโอน” ในเดือนปัจจุบัน
-        (ต้องเชื่อม Google Drive + สร้างโครงสร้างก่อน)
+        {ui(
+          "รูปที่ส่งเข้า LINE จะถูกเก็บเป็น “หลักฐานการโอน” ในเดือนปัจจุบัน (ต้องเชื่อม Google Drive + สร้างโครงสร้างก่อน)"
+        )}
       </p>
 
       {msg && (
         <p className="flex items-center gap-1.5 text-xs text-emerald-700">
-          <Check className="h-3.5 w-3.5" /> {msg}
+          <Check className="h-3.5 w-3.5" /> {ui(msg)}
         </p>
       )}
-      {err && <p className="text-xs text-red-600">{err}</p>}
+      {err && <p className="text-xs text-red-600">{ui(err)}</p>}
     </section>
   );
 }

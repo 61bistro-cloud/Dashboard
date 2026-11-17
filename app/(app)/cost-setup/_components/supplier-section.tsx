@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useEffect, useState, useTransition } from "react";
 import { Boxes, Trash2, Plus, AlertCircle } from "lucide-react";
 import {
@@ -31,6 +33,7 @@ export function SupplierSection({
   fiscalMonthId: number;
   suppliers: SupRow[];
 }) {
+  const { ui } = useUi();
   const [rows, setRows] = useState<SupRow[]>(suppliers);
   useEffect(() => setRows(suppliers), [suppliers]);
   const [, startReorder] = useTransition();
@@ -60,7 +63,7 @@ export function SupplierSection({
   return (
     <SectionCard
       icon={Boxes}
-      title="ต้นทุนวัตถุดิบ + เครื่องดื่ม + บรรจุภัณฑ์"
+      title={ui("ต้นทุนวัตถุดิบ + เครื่องดื่ม + บรรจุภัณฑ์")}
       total={total}
       onSave={() =>
         saveSuppliers({
@@ -83,7 +86,7 @@ export function SupplierSection({
             <CategoryGroup
               key={cat}
               category={cat}
-              title={meta.label}
+              title={ui(meta.label)}
               icon={CatIcon}
               rows={list}
               subtotal={subtotal}
@@ -132,6 +135,7 @@ function CategoryGroup({
   onAmountChange: (id: number, amount: number) => void;
   onNameChange: (id: number, name: string, globalName: string) => void;
 }) {
+  const { ui } = useUi();
   const [pendingDelete, startDelete] = useTransition();
   const [pendingAdd, startAdd] = useTransition();
   const [addMode, setAddMode] = useState(false);
@@ -157,7 +161,10 @@ function CategoryGroup({
   const handleDelete = (id: number, name: string) => {
     if (
       !confirm(
-        `ลบ supplier "${name}"?\nถ้ามีประวัติยอดซื้อ ระบบจะซ่อนแทนการลบ (รักษาประวัติ)`
+        ui(
+          'ลบ supplier "{v0}"?\nถ้ามีประวัติยอดซื้อ ระบบจะซ่อนแทนการลบ (รักษาประวัติ)',
+          { v0: name }
+        )
       )
     )
       return;
@@ -174,7 +181,7 @@ function CategoryGroup({
           {title}
         </div>
         <div className="text-xs text-muted tabular-nums">
-          รวม {fmt(subtotal)}
+          {ui("รวม")} {fmt(subtotal)}
         </div>
       </div>
       <div className="space-y-1">
@@ -194,15 +201,17 @@ function CategoryGroup({
                         onChange={(ev) =>
                           onNameChange(r.id, ev.target.value, r.name)
                         }
-                        aria-label={`ชื่อ supplier ${r.name}`}
+                        aria-label={ui("ชื่อ supplier {v0}", { v0: r.name })}
                         className="flex-1 min-w-0 rounded-input border border-transparent bg-transparent px-1.5 py-0.5 text-sm hover:border-hairline focus:border-ink focus:bg-canvas focus:outline-none transition-colors"
                       />
                       {hasOverride && (
                         <span
                           className="text-xs text-amber-600 cursor-help shrink-0"
-                          title="แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
+                          title={ui(
+                            "แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ"
+                          )}
                         >
-                          เฉพาะเดือนนี้
+                          {ui("เฉพาะเดือนนี้")}
                         </span>
                       )}
                     </div>
@@ -216,8 +225,8 @@ function CategoryGroup({
                       onClick={() => handleDelete(r.id, displayName)}
                       disabled={pendingDelete}
                       className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-0.5"
-                      aria-label={`ลบ supplier ${displayName}`}
-                      title={`ลบ supplier ${displayName}`}
+                      aria-label={ui("ลบ supplier {v0}", { v0: displayName })}
+                      title={ui("ลบ supplier {v0}", { v0: displayName })}
                     >
                       <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
                     </button>
@@ -245,7 +254,7 @@ function CategoryGroup({
                   onChange={(ev) => setNewName(ev.target.value)}
                   autoFocus
                   required
-                  placeholder={`ชื่อ supplier ใหม่ใน "${title}"`}
+                  placeholder={ui('ชื่อ supplier ใหม่ใน "{v0}"', { v0: title })}
                   className="flex-1 rounded-input border border-hairline bg-canvas px-2.5 py-1.5 text-sm focus:border-ink focus:outline-none"
                 />
               </div>
@@ -259,21 +268,21 @@ function CategoryGroup({
                   }}
                   className="text-xs text-muted hover:text-ink px-2 py-1 rounded"
                 >
-                  ยกเลิก
+                  {ui("ยกเลิก")}
                 </button>
                 <button
                   type="submit"
                   disabled={pendingAdd || !newName.trim()}
                   className="rounded-pill bg-ink text-canvas px-3 py-1 text-xs font-medium hover:bg-ink-2 disabled:opacity-50"
                 >
-                  {pendingAdd ? "..." : "เพิ่ม"}
+                  {pendingAdd ? "..." : ui("เพิ่ม")}
                 </button>
               </div>
             </div>
             {addError && (
               <div className="flex items-center gap-1.5 text-xs text-red-600">
                 <AlertCircle className="h-3.5 w-3.5" strokeWidth={2} />
-                {addError}
+                {ui(addError)}
               </div>
             )}
           </form>
@@ -284,7 +293,7 @@ function CategoryGroup({
             className="mt-1 flex items-center gap-2 w-full px-2 py-1.5 text-xs text-muted hover:text-ink hover:bg-surface rounded transition-colors"
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
-            เพิ่ม supplier ใน {title}
+            {ui("เพิ่ม supplier ใน")} {title}
           </button>
         )}
       </div>

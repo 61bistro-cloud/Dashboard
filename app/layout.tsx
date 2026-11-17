@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Sarabun } from "next/font/google";
 import "./globals.css";
+import { NextIntlClientProvider } from "next-intl";
+import { getUi } from "@/lib/i18n/server";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -16,7 +18,7 @@ const sarabun = Sarabun({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "61 Bistro — ระบบบัญชี 2569",
   description:
     "ระบบบัญชี + P&L ของร้าน 61 Bistro — Dashboard, Daily/Monthly P&L, Cost Setup, POS Sales, Bank Reconciliation",
@@ -50,21 +52,35 @@ const themeInitScript = `
 })();
 `;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { uiLocale } = await getUi();
   return (
     <html
-      lang="th"
+      lang={uiLocale}
       className={`${inter.variable} ${sarabun.variable}`}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <NextIntlClientProvider locale={uiLocale} messages={{}}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { ui } = await getUi();
+  return {
+    ...baseMetadata,
+    title: ui(String(baseMetadata.title)),
+    description: ui(String(baseMetadata.description)),
+  };
 }

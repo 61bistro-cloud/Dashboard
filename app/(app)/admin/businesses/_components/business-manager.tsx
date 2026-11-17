@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { Building2, Plus, Loader2, Check, Pencil, Power } from "lucide-react";
 import {
@@ -17,6 +19,7 @@ type Biz = {
 };
 
 export function BusinessManager({ businesses }: { businesses: Biz[] }) {
+  const { ui } = useUi();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
@@ -72,16 +75,18 @@ export function BusinessManager({ businesses }: { businesses: Biz[] }) {
       >
         <div className="flex items-center gap-2 mb-3">
           <Plus className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
-          <h3 className="text-sm font-semibold">เพิ่มธุรกิจใหม่</h3>
+          <h3 className="text-sm font-semibold">{ui("เพิ่มธุรกิจใหม่")}</h3>
         </div>
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-[240px]">
-            <label className="block text-xs text-muted mb-1">ชื่อธุรกิจ</label>
+            <label className="block text-xs text-muted mb-1">
+              {ui("ชื่อธุรกิจ")}
+            </label>
             <input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="เช่น 61 Café สาขา 2"
+              placeholder={ui("เช่น 61 Café สาขา 2")}
               maxLength={80}
               className="w-full rounded-input border border-hairline bg-canvas px-3 py-2 text-sm focus:border-ink focus:outline-none"
             />
@@ -95,19 +100,20 @@ export function BusinessManager({ businesses }: { businesses: Biz[] }) {
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <Plus className="h-3.5 w-3.5" />
-            )}
-            สร้างธุรกิจ
+            )}{" "}
+            {ui("สร้างธุรกิจ")}
           </button>
         </div>
         <p className="mt-2 text-xs text-muted">
-          ระบบจะสร้างบัญชีธนาคาร + หมวดหมู่รายรับรายจ่ายเริ่มต้นให้อัตโนมัติ
-          ส่วนพนักงาน/Supplier/ต้นทุนต้องกรอกเองในแต่ละธุรกิจ
+          {ui(
+            "ระบบจะสร้างบัญชีธนาคาร + หมวดหมู่รายรับรายจ่ายเริ่มต้นให้อัตโนมัติ ส่วนพนักงาน/Supplier/ต้นทุนต้องกรอกเองในแต่ละธุรกิจ"
+          )}
         </p>
       </form>
 
       {error && (
         <div className="rounded-input bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-800">
-          {error}
+          {ui(error)}
         </div>
       )}
 
@@ -116,12 +122,20 @@ export function BusinessManager({ businesses }: { businesses: Biz[] }) {
         <table className="w-full text-sm">
           <thead className="bg-surface text-left">
             <tr>
-              <th className="px-4 py-3 font-medium">ธุรกิจ</th>
-              <th className="px-4 py-3 font-medium text-right">พนักงาน</th>
-              <th className="px-4 py-3 font-medium text-right">บิล POS</th>
-              <th className="px-4 py-3 font-medium text-right">รายการธนาคาร</th>
-              <th className="px-4 py-3 font-medium">สถานะ</th>
-              <th className="px-4 py-3 font-medium text-right">จัดการ</th>
+              <th className="px-4 py-3 font-medium">{ui("ธุรกิจ")}</th>
+              <th className="px-4 py-3 font-medium text-right">
+                {ui("พนักงาน")}
+              </th>
+              <th className="px-4 py-3 font-medium text-right">
+                {ui("บิล POS")}
+              </th>
+              <th className="px-4 py-3 font-medium text-right">
+                {ui("รายการธนาคาร")}
+              </th>
+              <th className="px-4 py-3 font-medium">{ui("สถานะ")}</th>
+              <th className="px-4 py-3 font-medium text-right">
+                {ui("จัดการ")}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-hairline-soft">
@@ -142,7 +156,7 @@ export function BusinessManager({ businesses }: { businesses: Biz[] }) {
                         onClick={() => onRename(b.id)}
                         disabled={pending}
                         className="text-emerald-700 hover:text-emerald-800"
-                        aria-label="บันทึก"
+                        aria-label={ui("บันทึก")}
                       >
                         <Check className="h-4 w-4" strokeWidth={2.5} />
                       </button>
@@ -151,7 +165,7 @@ export function BusinessManager({ businesses }: { businesses: Biz[] }) {
                         onClick={() => setEditingId(null)}
                         className="text-xs text-muted hover:text-ink"
                       >
-                        ยกเลิก
+                        {ui("ยกเลิก")}
                       </button>
                     </div>
                   ) : (
@@ -182,7 +196,7 @@ export function BusinessManager({ businesses }: { businesses: Biz[] }) {
                         : "bg-surface text-muted")
                     }
                   >
-                    {b.active ? "ใช้งาน" : "ปิด"}
+                    {b.active ? ui("ใช้งาน") : ui("ปิด")}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right">
@@ -194,8 +208,8 @@ export function BusinessManager({ businesses }: { businesses: Biz[] }) {
                         setEditName(b.name);
                       }}
                       className="text-muted-soft hover:text-ink"
-                      title="แก้ชื่อ"
-                      aria-label="แก้ชื่อ"
+                      title={ui("แก้ชื่อ")}
+                      aria-label={ui("แก้ชื่อ")}
                     >
                       <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
                     </button>
@@ -207,8 +221,8 @@ export function BusinessManager({ businesses }: { businesses: Biz[] }) {
                         "hover:text-ink " +
                         (b.active ? "text-amber-600" : "text-emerald-600")
                       }
-                      title={b.active ? "ปิดใช้งาน" : "เปิดใช้งาน"}
-                      aria-label={b.active ? "ปิดใช้งาน" : "เปิดใช้งาน"}
+                      title={b.active ? ui("ปิดใช้งาน") : ui("เปิดใช้งาน")}
+                      aria-label={b.active ? ui("ปิดใช้งาน") : ui("เปิดใช้งาน")}
                     >
                       <Power className="h-3.5 w-3.5" strokeWidth={1.75} />
                     </button>

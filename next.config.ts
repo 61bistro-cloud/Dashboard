@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   experimental: { serverActions: { bodySizeLimit: "4.5mb" } },
@@ -7,4 +8,4 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["pdfjs-dist", "googleapis"],
 };
 
-export default nextConfig;
+export default createNextIntlPlugin("./i18n/request.ts")(nextConfig);

@@ -1,3 +1,6 @@
+import { displayMonth } from "@/lib/i18n/core";
+
+import { getUi } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Scale, AlertTriangle, Settings2, LayoutList } from "lucide-react";
@@ -20,6 +23,7 @@ export default async function DailyReconPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER" && session.user.role !== "ACCOUNTANT") {
@@ -29,8 +33,8 @@ export default async function DailyReconPage({
   if (!business) {
     return (
       <div className="p-8">
-        <PageHeader icon={Scale} title="กระทบยอดรายวัน" />
-        <p className="mt-4 text-red-600">ยังไม่มีสิทธิ์เข้าถึงธุรกิจ</p>
+        <PageHeader icon={Scale} title={ui("กระทบยอดรายวัน")} />
+        <p className="mt-4 text-red-600">{ui("ยังไม่มีสิทธิ์เข้าถึงธุรกิจ")}</p>
       </div>
     );
   }
@@ -68,8 +72,8 @@ export default async function DailyReconPage({
   if (!sel) {
     return (
       <div className="p-8">
-        <PageHeader icon={Scale} title="กระทบยอดรายวัน" />
-        <p className="mt-4 text-muted">ยังไม่มีข้อมูลเดือน</p>
+        <PageHeader icon={Scale} title={ui("กระทบยอดรายวัน")} />
+        <p className="mt-4 text-muted">{ui("ยังไม่มีข้อมูลเดือน")}</p>
       </div>
     );
   }
@@ -78,8 +82,8 @@ export default async function DailyReconPage({
   if (!data) {
     return (
       <div className="p-8">
-        <PageHeader icon={Scale} title="กระทบยอดรายวัน" />
-        <p className="mt-4 text-red-600">คำนวณไม่ได้</p>
+        <PageHeader icon={Scale} title={ui("กระทบยอดรายวัน")} />
+        <p className="mt-4 text-red-600">{ui("คำนวณไม่ได้")}</p>
       </div>
     );
   }
@@ -102,13 +106,19 @@ export default async function DailyReconPage({
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1100px] mx-auto space-y-5">
       <PageHeader
         icon={Scale}
-        title="กระทบยอดรายวัน"
-        description={`${business.name} — ยอดหลักดึงจาก POS · ยอดเข้าจริงกรอกเอง · ส่วนต่าง = ค่าธรรมเนียม/GP`}
+        title={ui("กระทบยอดรายวัน")}
+        description={ui(
+          "{v0} — ยอดหลักดึงจาก POS · ยอดเข้าจริงกรอกเอง · ส่วนต่าง = ค่าธรรมเนียม/GP",
+          { v0: business.name }
+        )}
         action={
           <MonthPicker
             months={allMonths.map((m) => ({
               id: m.id,
-              label: `${m.label} ${m.year.yearBE}`,
+              label: displayMonth(
+                `${displayMonth(m.label, uiLocale)} ${m.year.yearBE}`,
+                uiLocale
+              ),
             }))}
             currentId={sel.id}
           />
@@ -122,7 +132,7 @@ export default async function DailyReconPage({
           active={!activeItem && !settings}
           icon={LayoutList}
         >
-          ภาพรวม
+          {ui("ภาพรวม")}
         </Tab>
         {data.items.map((it) => (
           <Tab
@@ -138,7 +148,7 @@ export default async function DailyReconPage({
           active={settings}
           icon={Settings2}
         >
-          ตั้งค่ารายการ
+          {ui("ตั้งค่ารายการ")}
         </Tab>
       </div>
 
@@ -168,9 +178,10 @@ export default async function DailyReconPage({
             <div className="flex items-start gap-2 rounded-card border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
               <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
               <span>
-                มียอด POS <strong>{fmtTHB(data.unmatchedPos)}</strong>{" "}
-                ที่ไม่เข้ารายการไหนเลย — เพิ่ม/แก้กฎในแท็บ “ตั้งค่ารายการ”
-                ให้ครอบคลุม
+                {ui("มียอด POS")} <strong>{fmtTHB(data.unmatchedPos)}</strong>{" "}
+                {ui(
+                  "ที่ไม่เข้ารายการไหนเลย — เพิ่ม/แก้กฎในแท็บ “ตั้งค่ารายการ” ให้ครอบคลุม"
+                )}
               </span>
             </div>
           )}
@@ -178,24 +189,26 @@ export default async function DailyReconPage({
           <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
             <header className="border-b border-hairline-soft px-5 py-3">
               <h2 className="text-sm font-semibold">
-                ภาพรวม — {data.month.fullLabel}
+                {ui("ภาพรวม —")} {displayMonth(data.month.fullLabel, uiLocale)}
               </h2>
               <p className="text-xs text-muted mt-0.5">
-                กดชื่อรายการเพื่อไปกรอกยอดเข้าจริงรายวัน
+                {ui("กดชื่อรายการเพื่อไปกรอกยอดเข้าจริงรายวัน")}
               </p>
             </header>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead className="bg-surface text-left">
                   <tr>
-                    <th className="px-3 py-2 font-medium">รายการ</th>
+                    <th className="px-3 py-2 font-medium">{ui("รายการ")}</th>
                     <th className="px-3 py-2 font-medium text-right">
-                      ยอดหลัก (POS)
+                      {ui("ยอดหลัก (POS)")}
                     </th>
                     <th className="px-3 py-2 font-medium text-right">
-                      เข้าจริง (กรอก)
+                      {ui("เข้าจริง (กรอก)")}
                     </th>
-                    <th className="px-3 py-2 font-medium text-right">ต่าง</th>
+                    <th className="px-3 py-2 font-medium text-right">
+                      {ui("ต่าง")}
+                    </th>
                     <th className="px-3 py-2 font-medium text-right">%</th>
                   </tr>
                 </thead>
@@ -240,7 +253,7 @@ export default async function DailyReconPage({
                 </tbody>
                 <tfoot className="bg-surface font-medium">
                   <tr>
-                    <td className="px-3 py-2">รวม</td>
+                    <td className="px-3 py-2">{ui("รวม")}</td>
                     <td className="px-3 py-2 text-right tabular-nums">
                       {fmtTHB(grandPos)}
                     </td>
@@ -265,10 +278,10 @@ export default async function DailyReconPage({
           <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
             <header className="border-b border-hairline-soft px-5 py-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold">
-                ค่าใช้จ่ายรายวัน (จากธนาคาร)
+                {ui("ค่าใช้จ่ายรายวัน (จากธนาคาร)")}
               </h2>
               <span className="text-xs text-muted">
-                รวม{" "}
+                {ui("รวม")}{" "}
                 <strong className="text-red-700">
                   {fmtTHB(data.expenseTotal)}
                 </strong>
@@ -276,17 +289,18 @@ export default async function DailyReconPage({
             </header>
             {data.expenseTotal === 0 ? (
               <p className="px-5 py-6 text-center text-xs text-muted">
-                ยังไม่มีรายการเงินออกของเดือนนี้ — นำเข้า statement ในหน้า Bank
-                ก่อน
+                {ui(
+                  "ยังไม่มีรายการเงินออกของเดือนนี้ — นำเข้า statement ในหน้า Bank ก่อน"
+                )}
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead className="bg-surface text-left">
                     <tr>
-                      <th className="px-3 py-2 font-medium">วันที่</th>
+                      <th className="px-3 py-2 font-medium">{ui("วันที่")}</th>
                       <th className="px-3 py-2 font-medium text-right">
-                        จ่ายออก
+                        {ui("จ่ายออก")}
                       </th>
                     </tr>
                   </thead>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import { addAdjustment, removeAdjustment } from "../actions";
@@ -19,6 +21,7 @@ export function Adjustments({
   fiscalMonthId: number;
   adjustments: Adj[];
 }) {
+  const { ui } = useUi();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
@@ -30,7 +33,7 @@ export function Adjustments({
     e.preventDefault();
     setError(null);
     if (!password) {
-      setError("ใส่รหัสอนุมัติก่อน");
+      setError(ui("ใส่รหัสอนุมัติก่อน"));
       return;
     }
     start(async () => {
@@ -53,7 +56,7 @@ export function Adjustments({
   function onRemove(id: number) {
     setError(null);
     if (!password) {
-      setError("ใส่รหัสอนุมัติก่อนจึงจะลบได้");
+      setError(ui("ใส่รหัสอนุมัติก่อนจึงจะลบได้"));
       return;
     }
     start(async () => {
@@ -68,10 +71,13 @@ export function Adjustments({
   return (
     <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
       <header className="border-b border-hairline-soft px-5 py-3">
-        <h2 className="text-sm font-semibold">รายการปรับปรุง (Adjustments)</h2>
+        <h2 className="text-sm font-semibold">
+          {ui("รายการปรับปรุง (Adjustments)")}
+        </h2>
         <p className="text-xs text-muted mt-0.5">
-          แก้ไขเพิ่มเติม เช่น ปรับรายได้/ต้นทุนที่ตกหล่น — ทุกครั้งต้องใส่
-          รหัสอนุมัติเจ้าของ
+          {ui(
+            "แก้ไขเพิ่มเติม เช่น ปรับรายได้/ต้นทุนที่ตกหล่น — ทุกครั้งต้องใส่ รหัสอนุมัติเจ้าของ"
+          )}
         </p>
       </header>
 
@@ -86,7 +92,9 @@ export function Adjustments({
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="รหัสอนุมัติเจ้าของ (ใส่ครั้งเดียวใช้ได้ทั้งเพิ่ม/ลบ)"
+            placeholder={ui(
+              "รหัสอนุมัติเจ้าของ (ใส่ครั้งเดียวใช้ได้ทั้งเพิ่ม/ลบ)"
+            )}
             autoComplete="off"
             className="flex-1 rounded-input border border-hairline bg-canvas px-3 py-1.5 text-sm focus:border-ink focus:outline-none"
           />
@@ -108,7 +116,7 @@ export function Adjustments({
                       : "bg-red-50 text-red-700")
                   }
                 >
-                  {a.kind === "REVENUE" ? "รายได้" : "ต้นทุน"}
+                  {a.kind === "REVENUE" ? ui("รายได้") : ui("ต้นทุน")}
                 </span>
                 <span className="flex-1 truncate">{a.label}</span>
                 <span
@@ -125,7 +133,7 @@ export function Adjustments({
                   onClick={() => onRemove(a.id)}
                   disabled={pending}
                   className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-1"
-                  aria-label="ลบ"
+                  aria-label={ui("ลบ")}
                 >
                   <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
                 </button>
@@ -137,30 +145,34 @@ export function Adjustments({
         {/* add form */}
         <form onSubmit={onAdd} className="flex flex-wrap items-end gap-2">
           <div className="w-32">
-            <label className="block text-xs text-muted mb-1">ประเภท</label>
+            <label className="block text-xs text-muted mb-1">
+              {ui("ประเภท")}
+            </label>
             <select
               value={kind}
               onChange={(e) => setKind(e.target.value as "REVENUE" | "COST")}
               className="w-full rounded-input border border-hairline bg-canvas px-2 py-2 text-sm"
             >
-              <option value="COST">ต้นทุน/ค่าใช้จ่าย</option>
-              <option value="REVENUE">รายได้</option>
+              <option value="COST">{ui("ต้นทุน/ค่าใช้จ่าย")}</option>
+              <option value="REVENUE">{ui("รายได้")}</option>
             </select>
           </div>
           <div className="flex-1 min-w-[160px]">
-            <label className="block text-xs text-muted mb-1">รายละเอียด</label>
+            <label className="block text-xs text-muted mb-1">
+              {ui("รายละเอียด")}
+            </label>
             <input
               type="text"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="เช่น ค่าปรับ, ส่วนลดพิเศษ, รายได้อื่น"
+              placeholder={ui("เช่น ค่าปรับ, ส่วนลดพิเศษ, รายได้อื่น")}
               maxLength={120}
               className="w-full rounded-input border border-hairline bg-canvas px-3 py-2 text-sm focus:border-ink focus:outline-none"
             />
           </div>
           <div className="w-32">
             <label className="block text-xs text-muted mb-1">
-              จำนวน (± ได้)
+              {ui("จำนวน (± ได้)")}
             </label>
             <input
               type="text"
@@ -180,15 +192,15 @@ export function Adjustments({
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <Plus className="h-3.5 w-3.5" />
-            )}
-            เพิ่ม
+            )}{" "}
+            {ui("เพิ่ม")}
           </button>
         </form>
 
         {error && (
           <div className="flex items-center gap-1.5 text-xs text-red-600">
             <AlertCircle className="h-3.5 w-3.5" strokeWidth={2} />
-            {error}
+            {ui(error)}
           </div>
         )}
       </div>

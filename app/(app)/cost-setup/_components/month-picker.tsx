@@ -1,4 +1,6 @@
 "use client";
+import { useUi } from "@/lib/i18n/use-ui";
+import { displayMonth } from "@/lib/i18n/core";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -9,6 +11,7 @@ export function MonthPicker({
   months: { id: number; label: string }[];
   currentId: number;
 }) {
+  const { ui, uiLocale } = useUi();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -25,7 +28,7 @@ export function MonthPicker({
     >
       {months.map((m) => (
         <option key={m.id} value={m.id}>
-          {m.label}
+          {displayMonth(m.label, uiLocale)}
         </option>
       ))}
     </select>

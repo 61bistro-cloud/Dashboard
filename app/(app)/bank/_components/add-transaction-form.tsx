@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { Plus, AlertCircle } from "lucide-react";
 import { addTransaction } from "../actions";
@@ -21,6 +23,7 @@ export function AddTransactionForm({
   defaultDate: string;
   categories: Cat[];
 }) {
+  const { ui } = useUi();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [date, setDate] = useState(defaultDate);
@@ -68,7 +71,7 @@ export function AddTransactionForm({
       className="border-b border-hairline-soft px-5 py-3 bg-surface/50"
     >
       <div className="grid grid-cols-2 md:grid-cols-12 gap-2 items-end text-xs">
-        <Field label="วันที่" cols="col-span-1 md:col-span-2">
+        <Field label={ui("วันที่")} cols="col-span-1 md:col-span-2">
           <input
             type="date"
             value={date}
@@ -77,7 +80,7 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5"
           />
         </Field>
-        <Field label="เวลา" cols="col-span-1 md:col-span-1">
+        <Field label={ui("เวลา")} cols="col-span-1 md:col-span-1">
           <input
             type="time"
             value={time}
@@ -85,17 +88,17 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5"
           />
         </Field>
-        <Field label="รายการ" cols="col-span-2 md:col-span-3">
+        <Field label={ui("รายการ")} cols="col-span-2 md:col-span-3">
           <input
             type="text"
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             required
-            placeholder="เช่น โอนซื้อของ Makro"
+            placeholder={ui("เช่น โอนซื้อของ Makro")}
             className="w-full rounded-input border border-hairline px-2 py-1.5"
           />
         </Field>
-        <Field label="ฝาก" cols="col-span-1 md:col-span-1">
+        <Field label={ui("ฝาก")} cols="col-span-1 md:col-span-1">
           <input
             type="text"
             inputMode="decimal"
@@ -108,7 +111,7 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5 text-right tabular-nums"
           />
         </Field>
-        <Field label="ถอน" cols="col-span-1 md:col-span-1">
+        <Field label={ui("ถอน")} cols="col-span-1 md:col-span-1">
           <input
             type="text"
             inputMode="decimal"
@@ -121,7 +124,7 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5 text-right tabular-nums"
           />
         </Field>
-        <Field label="ช่องทาง" cols="col-span-2 md:col-span-1">
+        <Field label={ui("ช่องทาง")} cols="col-span-2 md:col-span-1">
           <input
             type="text"
             value={channel}
@@ -130,14 +133,14 @@ export function AddTransactionForm({
             className="w-full rounded-input border border-hairline px-2 py-1.5"
           />
         </Field>
-        <Field label="หมวด" cols="col-span-2 md:col-span-2">
+        <Field label={ui("หมวด")} cols="col-span-2 md:col-span-2">
           <select
             value={catId}
             onChange={(e) => setCatId(e.target.value)}
             className="w-full rounded-input border border-hairline px-2 py-1.5"
           >
-            <option value="">-- ไม่ระบุ --</option>
-            <optgroup label="รายรับ">
+            <option value="">{ui("-- ไม่ระบุ --")}</option>
+            <optgroup label={ui("รายรับ")}>
               {categories
                 .filter((c) => c.kind === "INCOME")
                 .map((c) => (
@@ -146,7 +149,7 @@ export function AddTransactionForm({
                   </option>
                 ))}
             </optgroup>
-            <optgroup label="รายจ่าย">
+            <optgroup label={ui("รายจ่าย")}>
               {categories
                 .filter((c) => c.kind === "EXPENSE")
                 .map((c) => (
@@ -155,7 +158,7 @@ export function AddTransactionForm({
                   </option>
                 ))}
             </optgroup>
-            <optgroup label="โอน">
+            <optgroup label={ui("โอน")}>
               {categories
                 .filter((c) => c.kind === "TRANSFER")
                 .map((c) => (
@@ -173,14 +176,14 @@ export function AddTransactionForm({
             className="inline-flex w-full items-center justify-center gap-1 rounded-input bg-ink px-3 py-2 md:py-1.5 text-canvas text-xs font-medium hover:bg-ink-2 disabled:opacity-50"
           >
             <Plus className="h-3 w-3" strokeWidth={2.5} />
-            {pending ? "..." : "เพิ่ม"}
+            {pending ? "..." : ui("เพิ่ม")}
           </button>
         </div>
       </div>
       {error && (
         <div className="mt-2 flex items-center gap-1.5 text-xs text-red-600">
           <AlertCircle className="h-3.5 w-3.5" strokeWidth={2} />
-          {error}
+          {ui(error)}
         </div>
       )}
     </form>

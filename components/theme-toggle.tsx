@@ -1,11 +1,14 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
 
 type Theme = "light" | "dark";
 
 export function ThemeToggle() {
+  const { ui } = useUi();
   const [theme, setTheme] = useState<Theme | null>(null);
 
   // Read current theme on mount (set by inline script in <head>)
@@ -39,7 +42,7 @@ export function ThemeToggle() {
 
   const Icon = theme === "dark" ? Sun : Moon;
   const label =
-    theme === "dark" ? "เปลี่ยนเป็นโหมดสว่าง" : "เปลี่ยนเป็นโหมดมืด";
+    theme === "dark" ? ui("เปลี่ยนเป็นโหมดสว่าง") : ui("เปลี่ยนเป็นโหมดมืด");
 
   return (
     <button
@@ -51,7 +54,7 @@ export function ThemeToggle() {
     >
       <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
       <span className="whitespace-nowrap">
-        {theme === "dark" ? "ธีมสว่าง" : "ธีมมืด"}
+        {theme === "dark" ? ui("ธีมสว่าง") : ui("ธีมมืด")}
       </span>
     </button>
   );

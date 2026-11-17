@@ -1,3 +1,4 @@
+import { getUi } from "@/lib/i18n/server";
 import { auth, signIn } from "@/auth";
 import { redirect } from "next/navigation";
 import { UtensilsCrossed } from "lucide-react";
@@ -17,6 +18,7 @@ export default async function SignInPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const { ui } = await getUi();
   const session = await auth();
   if (session) redirect("/");
 
@@ -32,7 +34,7 @@ export default async function SignInPage({
           <h1 className="mt-5 text-[28px] font-semibold tracking-tight">
             61 Bistro
           </h1>
-          <p className="mt-1 text-[15px] text-muted">ระบบบัญชี 2569</p>
+          <p className="mt-1 text-[15px] text-muted">{ui("ระบบบัญชี 2569")}</p>
         </div>
 
         <form
@@ -45,25 +47,25 @@ export default async function SignInPage({
             type="submit"
             className="flex w-full items-center justify-center gap-3 rounded-pill border border-hairline bg-canvas px-5 py-3 text-[15px] font-medium text-ink hover:bg-surface transition-colors"
           >
-            <GoogleLogo />
-            เข้าสู่ระบบด้วย Google
+            <GoogleLogo /> {ui("เข้าสู่ระบบด้วย Google")}
           </button>
         </form>
 
         {error && (
           <div className="mt-5 rounded-input bg-pink px-3.5 py-2.5 text-sm text-black">
-            {ERROR_MESSAGES[error] ?? "เกิดข้อผิดพลาด — ลองอีกครั้ง"}
+            {ui(ERROR_MESSAGES[error] ?? "เกิดข้อผิดพลาด — ลองอีกครั้ง")}
           </div>
         )}
 
         <div className="mt-10 rounded-card bg-surface p-5 text-xs text-muted">
           <div className="font-medium mb-2 text-ink uppercase tracking-wide">
-            สิทธิ์เข้าถึง
+            {ui("สิทธิ์เข้าถึง")}
           </div>
           <p>
-            เฉพาะ Gmail ที่อยู่ในรายชื่อที่ได้รับอนุญาตเท่านั้นที่เข้าระบบได้
-            <br />
-            ผู้ใช้ใหม่ติดต่อเจ้าของร้านเพื่อเพิ่มสิทธิ์
+            {ui(
+              "เฉพาะ Gmail ที่อยู่ในรายชื่อที่ได้รับอนุญาตเท่านั้นที่เข้าระบบได้"
+            )}
+            <br /> {ui("ผู้ใช้ใหม่ติดต่อเจ้าของร้านเพื่อเพิ่มสิทธิ์")}
           </p>
         </div>
       </div>

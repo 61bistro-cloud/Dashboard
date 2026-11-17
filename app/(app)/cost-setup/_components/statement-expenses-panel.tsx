@@ -1,3 +1,4 @@
+import { useUi } from "@/lib/i18n/use-ui";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { fmtTHB } from "@/lib/fiscal";
@@ -15,28 +16,34 @@ export function StatementExpensesPanel({
   manualTotal: number;
   monthId: number;
 }) {
+  const { ui } = useUi();
   return (
     <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
       <header className="border-b border-hairline-soft px-5 py-3">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <FileText className="h-4 w-4 text-muted-soft" />
-          สรุปรายจ่ายจาก Bank & Reconcile
+          {ui("สรุปรายจ่ายจาก Bank & Reconcile")}
         </h2>
         <p className="text-xs text-muted mt-1">
-          รวมทุกบัญชีและบัตรเครดิตตามเดือนที่บันทึก • จัดหมวดหรือแก้ไขรายการที่{" "}
+          {ui(
+            "รวมทุกบัญชีและบัตรเครดิตตามเดือนที่บันทึก • จัดหมวดหรือแก้ไขรายการที่"
+          )}{" "}
           <Link href={`/bank?month=${monthId}`} className="underline">
-            Bank & Reconcile
+            {ui("Bank & Reconcile")}
           </Link>{" "}
-          แล้วสรุปจะอัปเดตอัตโนมัติ
+          {ui("แล้วสรุปจะอัปเดตอัตโนมัติ")}
         </p>
       </header>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4">
         {(
           [
-            ["เงินออกทั้งหมด", summary.withdrawalTotal],
-            ["ค่าใช้จ่ายเข้า P&L", summary.grandTotal],
-            ["รอจัดหมวด / ตรวจสอบ", summary.pendingTotal],
-            ["โอน / ชำระบัตร / เบิกเงิน (ไม่นับ P&L)", summary.excludedTotal],
+            [ui("เงินออกทั้งหมด"), summary.withdrawalTotal],
+            [ui("ค่าใช้จ่ายเข้า P&L"), summary.grandTotal],
+            [ui("รอจัดหมวด / ตรวจสอบ"), summary.pendingTotal],
+            [
+              ui("โอน / ชำระบัตร / เบิกเงิน (ไม่นับ P&L)"),
+              summary.excludedTotal,
+            ],
           ] as const
         ).map(([label, amount]) => (
           <div key={label} className="rounded-input border border-hairline p-3">
@@ -52,26 +59,29 @@ export function StatementExpensesPanel({
           role="status"
           className="mx-4 mb-4 rounded-input bg-amber-50 text-amber-800 p-3 text-xs"
         >
-          ยังมีเงินออก {fmtTHB(summary.pendingTotal)} บาทที่ไม่ได้จัดหมวดรายจ่าย
-          หรือถูกจัดเป็นรายรับ โปรดตรวจใน Bank & Reconcile
-          ยอดนี้ยังไม่รวมในต้นทุนและกำไรที่แสดงจึงยังไม่ครบ
+          {ui("ยังมีเงินออก")} {fmtTHB(summary.pendingTotal)}{" "}
+          {ui(
+            "บาทที่ไม่ได้จัดหมวดรายจ่าย หรือถูกจัดเป็นรายรับ โปรดตรวจใน Bank & Reconcile ยอดนี้ยังไม่รวมในต้นทุนและกำไรที่แสดงจึงยังไม่ครบ"
+          )}
         </p>
       )}
       {summary.rows.length === 0 ? (
         <p className="p-6 text-center text-sm text-muted">
-          ยังไม่มีรายการเงินออกในเดือนนี้
+          {ui("ยังไม่มีรายการเงินออกในเดือนนี้")}
         </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead className="bg-surface text-left">
               <tr>
-                <th className="px-3 py-2">หมวดธนาคาร</th>
-                <th className="px-3 py-2">หมวดใน P&L</th>
-                <th className="px-3 py-2 text-right">ธนาคาร / เงินสด</th>
-                <th className="px-3 py-2 text-right">บัตรเครดิต</th>
-                <th className="px-3 py-2 text-right">รวม</th>
-                <th className="px-3 py-2 text-right">รายการ</th>
+                <th className="px-3 py-2">{ui("หมวดธนาคาร")}</th>
+                <th className="px-3 py-2">{ui("หมวดใน P&L")}</th>
+                <th className="px-3 py-2 text-right">
+                  {ui("ธนาคาร / เงินสด")}
+                </th>
+                <th className="px-3 py-2 text-right">{ui("บัตรเครดิต")}</th>
+                <th className="px-3 py-2 text-right">{ui("รวม")}</th>
+                <th className="px-3 py-2 text-right">{ui("รายการ")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-hairline-soft">
@@ -80,10 +90,10 @@ export function StatementExpensesPanel({
                   <td className="px-3 py-2">{row.name}</td>
                   <td className="px-3 py-2 text-muted">
                     {row.status === "pending"
-                      ? "รอตรวจสอบ — ยังไม่นับ P&L"
+                      ? ui("รอตรวจสอบ — ยังไม่นับ P&L")
                       : row.status === "excluded"
-                        ? "ไม่นับ P&L"
-                        : COST_BUCKET_LABELS[row.status]}
+                        ? ui("ไม่นับ P&L")
+                        : ui(COST_BUCKET_LABELS[row.status])}
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums">
                     {fmtTHB(row.bankAmount)}
@@ -103,21 +113,23 @@ export function StatementExpensesPanel({
       )}
       <footer className="border-t border-hairline-soft px-5 py-3 text-xs text-muted space-y-2">
         <p>
-          ค่าใช้จ่ายที่นับใน P&L: ธนาคาร / เงินสด {fmtTHB(summary.bankTotal)} +
-          บัตรเครดิต {fmtTHB(summary.cardTotal)} = {fmtTHB(summary.grandTotal)}{" "}
-          บาท
+          {ui("ค่าใช้จ่ายที่นับใน P&L: ธนาคาร / เงินสด")}{" "}
+          {fmtTHB(summary.bankTotal)} {ui("+ บัตรเครดิต")}{" "}
+          {fmtTHB(summary.cardTotal)} = {fmtTHB(summary.grandTotal)} {ui("บาท")}
         </p>
         <p>
-          เงินออกทั้งหมด = ค่าใช้จ่ายเข้า P&L + รอตรวจสอบ + รายการไม่นับ P&L •
-          ชำระบัตรเครดิตไม่นับซ้ำกับยอดซื้อผ่านบัตร •
-          ยอดยกมาและเงินรับเข้าไม่ใช่รายจ่าย
+          {ui(
+            "เงินออกทั้งหมด = ค่าใช้จ่ายเข้า P&L + รอตรวจสอบ + รายการไม่นับ P&L • ชำระบัตรเครดิตไม่นับซ้ำกับยอดซื้อผ่านบัตร • ยอดยกมาและเงินรับเข้าไม่ใช่รายจ่าย"
+          )}
         </p>
         <p>
-          ยอดกรอกเองเดิม {fmtTHB(manualTotal)} บาท
+          {ui("ยอดกรอกเองเดิม")} {fmtTHB(manualTotal)} {ui("บาท")}{" "}
           {summary.hasTransactions
-            ? " เก็บไว้เทียบเท่านั้น ไม่บวกซ้ำกับ Statement"
-            : " ใช้คำนวณชั่วคราวจนกว่าจะลง Bank & Reconcile"}{" "}
-          • กรุณานำเข้าให้ครบทุกบัญชี และบันทึกรายจ่ายเงินสดในบัญชีเงินสด
+            ? ui("เก็บไว้เทียบเท่านั้น ไม่บวกซ้ำกับ Statement")
+            : ui("ใช้คำนวณชั่วคราวจนกว่าจะลง Bank & Reconcile")}{" "}
+          {ui(
+            "• กรุณานำเข้าให้ครบทุกบัญชี และบันทึกรายจ่ายเงินสดในบัญชีเงินสด"
+          )}
         </p>
       </footer>
     </section>

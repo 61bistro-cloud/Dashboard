@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { FileUp, Loader2, Check, AlertCircle } from "lucide-react";
 import { parseStatementPdf, importStatementRows } from "../actions";
@@ -24,6 +26,7 @@ export function StatementUpload({
   accountName: string;
   categories: Cat[];
 }) {
+  const { ui } = useUi();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [needPassword, setNeedPassword] = useState(false);
@@ -46,7 +49,7 @@ export function StatementUpload({
       try {
         const result = await parseStatementPdf(formData);
         if (!result.ok) {
-          setError(result.message ?? "อ่าน PDF ไม่ได้");
+          setError(result.message ?? ui("อ่าน PDF ไม่ได้"));
           if (result.needPassword) setNeedPassword(true);
           if (result.wrongPassword) setWrongPassword(true);
           setRows([]);
@@ -62,7 +65,7 @@ export function StatementUpload({
         setOpeningBalance(result.openingBalance ?? null);
         setSetOpening(result.openingBalance != null);
         if (result.preview.length === 0) {
-          setError("ไม่พบรายการใน PDF นี้ — รูปแบบไฟล์อาจไม่รองรับ");
+          setError(ui("ไม่พบรายการใน PDF นี้ — รูปแบบไฟล์อาจไม่รองรับ"));
         }
       } catch (e) {
         setError((e as Error).message);
@@ -76,7 +79,7 @@ export function StatementUpload({
     setSkipped(0);
     const selectedRows = rows.filter((r) => r.selected);
     if (selectedRows.length === 0) {
-      setError("กรุณาเลือกอย่างน้อย 1 รายการ");
+      setError(ui("กรุณาเลือกอย่างน้อย 1 รายการ"));
       return;
     }
     startTransition(async () => {
@@ -103,7 +106,7 @@ export function StatementUpload({
           setSkipped(result.skipped ?? 0);
           setRows([]);
         } else {
-          setError(result.message ?? "บันทึกไม่สำเร็จ");
+          setError(result.message ?? ui("บันทึกไม่สำเร็จ"));
         }
       } catch (e) {
         setError((e as Error).message);
@@ -127,11 +130,13 @@ export function StatementUpload({
         <summary className="cursor-pointer px-5 py-3 flex items-center justify-between hover:bg-surface">
           <div className="flex items-center gap-2 text-sm font-medium">
             <FileUp className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
-            นำเข้า PDF Statement (KBANK / SCB / กรุงศรี) — {accountName}
+            {ui("นำเข้า PDF Statement (KBANK / SCB / กรุงศรี) —")} {accountName}
           </div>
-          <span className="text-xs text-muted group-open:hidden">เปิด ▾</span>
+          <span className="text-xs text-muted group-open:hidden">
+            {ui("เปิด ▾")}
+          </span>
           <span className="text-xs text-muted hidden group-open:inline">
-            ปิด ▴
+            {ui("ปิด ▴")}
           </span>
         </summary>
 
@@ -144,7 +149,7 @@ export function StatementUpload({
             <input type="hidden" name="accountId" value={accountId} />
             <div className="flex-1 min-w-[240px]">
               <label className="block text-xs text-muted mb-1">
-                ไฟล์ Statement (PDF)
+                {ui("ไฟล์ Statement (PDF)")}
               </label>
               <input
                 type="file"
@@ -156,7 +161,7 @@ export function StatementUpload({
             </div>
             <div className="w-48">
               <label className="block text-xs text-muted mb-1">
-                รหัสผ่าน PDF
+                {ui("รหัสผ่าน PDF")}
               </label>
               <input
                 type="password"
@@ -175,8 +180,8 @@ export function StatementUpload({
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <FileUp className="h-3.5 w-3.5" />
-              )}
-              อ่าน PDF
+              )}{" "}
+              {ui("อ่าน PDF")}
             </button>
           </form>
 
@@ -184,15 +189,15 @@ export function StatementUpload({
             <div className="flex items-start gap-2 rounded-card border border-red-200 bg-red-50 p-3 text-xs text-red-800">
               <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
               <div>
-                {error}
+                {ui(error)}
                 {needPassword && (
                   <div className="mt-1 text-red-700/80">
-                    ลองใส่วันเกิด 8 หลัก (วันเดือนปีค.ศ.) เช่น 20051994
+                    {ui("ลองใส่วันเกิด 8 หลัก (วันเดือนปีค.ศ.) เช่น 20051994")}
                   </div>
                 )}
                 {wrongPassword && (
                   <div className="mt-1 text-red-700/80">
-                    รหัสผ่านผิด — โปรดตรวจสอบและลองอีกครั้ง
+                    {ui("รหัสผ่านผิด — โปรดตรวจสอบและลองอีกครั้ง")}
                   </div>
                 )}
               </div>
@@ -203,11 +208,11 @@ export function StatementUpload({
             <div className="flex items-center gap-2 rounded-card border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
               <Check className="h-4 w-4 shrink-0" />
               <span>
-                บันทึก {imported} รายการเรียบร้อย
+                {ui("บันทึก")} {imported} {ui("รายการเรียบร้อย")}{" "}
                 {skipped > 0 && (
                   <span className="text-emerald-700/80">
-                    {" "}
-                    — ข้ามรายการซ้ำ {skipped} รายการ (กันยอดเบิ้ล)
+                    {ui("— ข้ามรายการซ้ำ")} {skipped}{" "}
+                    {ui("รายการ (กันยอดเบิ้ล)")}
                   </span>
                 )}
               </span>
@@ -227,35 +232,40 @@ export function StatementUpload({
                     className="mt-0.5 accent-sky-600"
                   />
                   <span>
-                    ตั้ง <strong>ยอดยกมา</strong> ของเดือนนี้ ={" "}
+                    {ui("ตั้ง")} <strong>{ui("ยอดยกมา")}</strong>{" "}
+                    {ui("ของเดือนนี้ =")}{" "}
                     <strong className="tabular-nums">
                       {fmtTHB(openingBalance)}
                     </strong>{" "}
-                    (จากบรรทัด &ldquo;ยอดยกมา&rdquo; ใน statement) —
-                    แนะนำให้ติ๊ก เพื่อให้ยอดคงเหลือตรงกับ statement
+                    {ui(
+                      "(จากบรรทัด “ยอดยกมา” ใน statement) — แนะนำให้ติ๊ก เพื่อให้ยอดคงเหลือตรงกับ statement"
+                    )}
                   </span>
                 </label>
               )}
               {dupCount > 0 && (
                 <div className="flex items-start justify-between gap-3 rounded-card border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
                   <span>
-                    ตัดรายการซ้ำออก <strong>{dupCount}</strong> รายการ
-                    (เคยนำเข้าแล้ว หรือซ้ำกันในไฟล์) — ระบบไม่ติ๊กเลือกให้นำเข้า
+                    {ui("ตัดรายการซ้ำออก")} <strong>{dupCount}</strong>{" "}
+                    {ui(
+                      "รายการ (เคยนำเข้าแล้ว หรือซ้ำกันในไฟล์) — ระบบไม่ติ๊กเลือกให้นำเข้า"
+                    )}
                   </span>
                   <button
                     type="button"
                     onClick={() => setHideDuplicates((v) => !v)}
                     className="shrink-0 underline hover:text-amber-950"
                   >
-                    {hideDuplicates ? "แสดงรายการซ้ำ" : "ซ่อนรายการซ้ำ"}
+                    {hideDuplicates ? ui("แสดงรายการซ้ำ") : ui("ซ่อนรายการซ้ำ")}
                   </button>
                 </div>
               )}
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="text-xs text-muted">
-                  พบ {rows.length} รายการ
-                  {dupCount > 0 && ` (ซ้ำ ${dupCount})`} — เลือก {selectedCount}{" "}
-                  รายการ ✓ ตรวจสอบและแก้หมวดก่อนยืนยัน
+                  {ui("พบ")} {rows.length} {ui("รายการ")}{" "}
+                  {dupCount > 0 && ui("(ซ้ำ {v0})", { v0: dupCount })}{" "}
+                  {ui("— เลือก")} {selectedCount}{" "}
+                  {ui("รายการ ✓ ตรวจสอบและแก้หมวดก่อนยืนยัน")}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -267,7 +277,7 @@ export function StatementUpload({
                     }
                     className="text-xs text-ink/75 underline hover:text-ink"
                   >
-                    เลือกทั้งหมด
+                    {ui("เลือกทั้งหมด")}
                   </button>
                   <span className="text-muted-soft">·</span>
                   <button
@@ -279,7 +289,7 @@ export function StatementUpload({
                     }
                     className="text-xs text-ink/75 underline hover:text-ink"
                   >
-                    ล้างการเลือก
+                    {ui("ล้างการเลือก")}
                   </button>
                   <span className="text-muted-soft">·</span>
                   <button
@@ -287,7 +297,7 @@ export function StatementUpload({
                     onClick={() => setRows([])}
                     className="text-xs text-red-600 underline hover:text-red-700"
                   >
-                    ยกเลิก
+                    {ui("ยกเลิก")}
                   </button>
                 </div>
               </div>
@@ -297,17 +307,25 @@ export function StatementUpload({
                   <table className="w-full text-xs">
                     <thead className="bg-surface text-left">
                       <tr>
-                        <th className="px-2 py-2 font-medium w-10">เลือก</th>
-                        <th className="px-2 py-2 font-medium">วันที่</th>
-                        <th className="px-2 py-2 font-medium">รายการ</th>
-                        <th className="px-2 py-2 font-medium text-right">
-                          ฝาก
+                        <th className="px-2 py-2 font-medium w-10">
+                          {ui("เลือก")}
+                        </th>
+                        <th className="px-2 py-2 font-medium">
+                          {ui("วันที่")}
+                        </th>
+                        <th className="px-2 py-2 font-medium">
+                          {ui("รายการ")}
                         </th>
                         <th className="px-2 py-2 font-medium text-right">
-                          ถอน
+                          {ui("ฝาก")}
                         </th>
-                        <th className="px-2 py-2 font-medium">ช่องทาง</th>
-                        <th className="px-2 py-2 font-medium">หมวด</th>
+                        <th className="px-2 py-2 font-medium text-right">
+                          {ui("ถอน")}
+                        </th>
+                        <th className="px-2 py-2 font-medium">
+                          {ui("ช่องทาง")}
+                        </th>
+                        <th className="px-2 py-2 font-medium">{ui("หมวด")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-hairline-soft">
@@ -333,7 +351,7 @@ export function StatementUpload({
                             />
                             {r.duplicate && (
                               <div className="mt-0.5 text-[10px] font-medium text-amber-700">
-                                ซ้ำ
+                                {ui("ซ้ำ")}
                               </div>
                             )}
                           </td>
@@ -349,7 +367,7 @@ export function StatementUpload({
                             />
                             {r.time && (
                               <div className="mt-0.5 text-[10px] text-muted-soft tabular-nums">
-                                {r.time} น.
+                                {r.time} {ui("น.")}
                               </div>
                             )}
                           </td>
@@ -388,7 +406,7 @@ export function StatementUpload({
                               disabled={!r.selected}
                               className="w-full rounded border border-hairline-soft bg-canvas px-1 py-0.5 text-xs"
                             >
-                              <option value="">— ไม่ระบุ —</option>
+                              <option value="">{ui("— ไม่ระบุ —")}</option>
                               {categories.map((c) => (
                                 <option key={c.id} value={c.id}>
                                   {c.name}
@@ -403,7 +421,9 @@ export function StatementUpload({
                 </div>
               ) : (
                 <p className="rounded-card border border-hairline bg-surface/40 px-4 py-6 text-center text-xs text-muted">
-                  ทุกรายการในไฟล์นี้เคยนำเข้าแล้ว — ไม่มีรายการใหม่ให้บันทึก
+                  {ui(
+                    "ทุกรายการในไฟล์นี้เคยนำเข้าแล้ว — ไม่มีรายการใหม่ให้บันทึก"
+                  )}
                 </p>
               )}
 
@@ -418,8 +438,8 @@ export function StatementUpload({
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
                     <Check className="h-3.5 w-3.5" />
-                  )}
-                  ยืนยันนำเข้า {selectedCount} รายการ
+                  )}{" "}
+                  {ui("ยืนยันนำเข้า")} {selectedCount} {ui("รายการ")}
                 </button>
               </div>
             </div>

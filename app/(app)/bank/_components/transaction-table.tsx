@@ -1,4 +1,7 @@
 "use client";
+import { displayMonth } from "@/lib/i18n/core";
+
+import { useUi } from "@/lib/i18n/use-ui";
 
 import { useState, useTransition } from "react";
 import { Pencil, Trash2, Loader2 } from "lucide-react";
@@ -32,6 +35,7 @@ export function TransactionTable({
   rows,
   categories,
 }: Props) {
+  const { ui, uiLocale } = useUi();
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirming, setConfirming] = useState(false);
@@ -82,10 +86,13 @@ export function TransactionTable({
         setEditing(false);
         cancelConfirmation();
         setMessage(
-          `ลบ ${result.deleted} รายการแล้ว${result.resetOpening ? " และล้างยอดยกมาแล้ว" : ""}`
+          ui("ลบ {v0} รายการแล้ว{v1}", {
+            v0: result.deleted,
+            v1: result.resetOpening ? " และล้างยอดยกมาแล้ว" : "",
+          })
         );
       } catch {
-        setError("ลบไม่สำเร็จ กรุณาลองอีกครั้ง");
+        setError(ui("ลบไม่สำเร็จ กรุณาลองอีกครั้ง"));
       }
     });
   }
@@ -94,7 +101,7 @@ export function TransactionTable({
     <div>
       {message && (
         <p role="status" className="px-5 py-3 text-xs text-emerald-700">
-          {message}
+          {ui(message)}
         </p>
       )}
       {rows.length > 0 && (
@@ -111,7 +118,7 @@ export function TransactionTable({
             className="inline-flex items-center gap-1.5 rounded-pill border border-hairline px-3 py-1.5 disabled:opacity-50"
           >
             <Pencil className="h-3.5 w-3.5" />
-            {editing ? "เสร็จสิ้น" : "แก้ไข / เลือกรายการ"}
+            {editing ? ui("เสร็จสิ้น") : ui("แก้ไข / เลือกรายการ")}
           </button>
           {editing && (
             <>
@@ -121,10 +128,11 @@ export function TransactionTable({
                 onClick={toggleAll}
                 className="underline disabled:opacity-50"
               >
-                {allSelected ? "ยกเลิกเลือกทั้งหมด" : "เลือกทั้งหมด"}
+                {allSelected ? ui("ยกเลิกเลือกทั้งหมด") : ui("เลือกทั้งหมด")}
               </button>
               <span className="text-muted">
-                เลือก {selectedIds.length} / {rows.length} รายการ
+                {ui("เลือก")} {selectedIds.length} / {rows.length}{" "}
+                {ui("รายการ")}
               </span>
               <button
                 type="button"
@@ -135,11 +143,12 @@ export function TransactionTable({
                 }}
                 className="inline-flex items-center gap-1.5 rounded-pill bg-red-600 text-white px-3 py-1.5 disabled:opacity-50"
               >
-                <Trash2 className="h-3.5 w-3.5" />
-                ลบที่เลือก ({selectedIds.length})
+                <Trash2 className="h-3.5 w-3.5" /> {ui("ลบที่เลือก (")}
+                {selectedIds.length})
               </button>
               <span className="text-muted">
-                เฉพาะ {accountName} — {monthLabel}
+                {ui("เฉพาะ")} {accountName} —{" "}
+                {displayMonth(monthLabel, uiLocale)}
               </span>
             </>
           )}
@@ -149,15 +158,16 @@ export function TransactionTable({
         <form
           onSubmit={removeSelected}
           className="m-4 rounded-card border border-red-200 bg-surface p-4 space-y-3 text-xs"
-          aria-label="ยืนยันลบรายการที่เลือก"
+          aria-label={ui("ยืนยันลบรายการที่เลือก")}
         >
           <p className="font-medium">
-            ยืนยันลบ {selectedIds.length} รายการจาก {accountName} — {monthLabel}
-            ?
+            {ui("ยืนยันลบ")} {selectedIds.length} {ui("รายการจาก")}{" "}
+            {accountName} — {displayMonth(monthLabel, uiLocale)}?
           </p>
           <p className="text-muted">
-            เมื่อลบแล้วจะกู้คืนไม่ได้ หากลงผิดเดือน สามารถนำเข้า Statement
-            อีกครั้งในเดือนที่ถูกต้องได้
+            {ui(
+              "เมื่อลบแล้วจะกู้คืนไม่ได้ หากลงผิดเดือน สามารถนำเข้า Statement อีกครั้งในเดือนที่ถูกต้องได้"
+            )}
           </p>
           {allSelected && (
             <label className="flex items-center gap-2">
@@ -168,11 +178,11 @@ export function TransactionTable({
                 disabled={pending}
                 className="accent-ink"
               />
-              ล้างยอดยกมาของบัญชีในเดือนนี้ด้วย (กรณีนำเข้าผิดเดือน)
+              {ui("ล้างยอดยกมาของบัญชีในเดือนนี้ด้วย (กรณีนำเข้าผิดเดือน)")}
             </label>
           )}
           <label className="block">
-            รหัสอนุมัติเจ้าของร้าน
+            {ui("รหัสอนุมัติเจ้าของร้าน")}
             <input
               type="password"
               autoComplete="off"
@@ -185,7 +195,7 @@ export function TransactionTable({
           </label>
           {error && (
             <p role="alert" className="text-red-600">
-              {error}
+              {ui(error)}
             </p>
           )}
           <div className="flex gap-3">
@@ -194,8 +204,8 @@ export function TransactionTable({
               disabled={pending || selectedIds.length === 0}
               className="inline-flex items-center gap-1.5 rounded-pill bg-red-600 text-white px-4 py-2 disabled:opacity-50"
             >
-              {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-              ยืนยันลบ {selectedIds.length} รายการ
+              {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}{" "}
+              {ui("ยืนยันลบ")} {selectedIds.length} {ui("รายการ")}
             </button>
             <button
               type="button"
@@ -203,14 +213,14 @@ export function TransactionTable({
               disabled={pending}
               className="rounded-pill border border-hairline px-4 py-2 disabled:opacity-50"
             >
-              ยกเลิก
+              {ui("ยกเลิก")}
             </button>
           </div>
         </form>
       )}
       {rows.length === 0 ? (
         <div className="p-10 text-center text-sm text-muted">
-          ยังไม่มีรายการในเดือนนี้ — เพิ่มรายการด้านบน
+          {ui("ยังไม่มีรายการในเดือนนี้ — เพิ่มรายการด้านบน")}
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -221,7 +231,7 @@ export function TransactionTable({
                   <th className="px-3 py-2">
                     <input
                       type="checkbox"
-                      aria-label="เลือกทุกรายการในบัญชีและเดือนนี้"
+                      aria-label={ui("เลือกทุกรายการในบัญชีและเดือนนี้")}
                       checked={allSelected}
                       ref={(input) => {
                         if (input)
@@ -234,20 +244,22 @@ export function TransactionTable({
                     />
                   </th>
                 )}
-                <th className="px-3 py-2 font-medium">วันที่</th>
-                <th className="px-3 py-2 font-medium">รายการ</th>
+                <th className="px-3 py-2 font-medium">{ui("วันที่")}</th>
+                <th className="px-3 py-2 font-medium">{ui("รายการ")}</th>
                 <th className="px-3 py-2 font-medium text-right">
-                  {accountType === "CREDIT_CARD" ? "ชำระคืน" : "ฝาก"}
+                  {accountType === "CREDIT_CARD" ? ui("ชำระคืน") : ui("ฝาก")}
                 </th>
                 <th className="px-3 py-2 font-medium text-right">
-                  {accountType === "CREDIT_CARD" ? "ใช้จ่าย" : "ถอน"}
+                  {accountType === "CREDIT_CARD" ? ui("ใช้จ่าย") : ui("ถอน")}
                 </th>
                 <th className="px-3 py-2 font-medium text-right">
-                  {accountType === "CREDIT_CARD" ? "ค้างชำระสะสม" : "คงเหลือ"}
+                  {accountType === "CREDIT_CARD"
+                    ? ui("ค้างชำระสะสม")
+                    : ui("คงเหลือ")}
                 </th>
-                <th className="px-3 py-2 font-medium">ช่องทาง</th>
-                <th className="px-3 py-2 font-medium">หมวด</th>
-                <th className="px-3 py-2 font-medium">หลักฐาน</th>
+                <th className="px-3 py-2 font-medium">{ui("ช่องทาง")}</th>
+                <th className="px-3 py-2 font-medium">{ui("หมวด")}</th>
+                <th className="px-3 py-2 font-medium">{ui("หลักฐาน")}</th>
                 <th className="px-3 py-2 font-medium"></th>
               </tr>
             </thead>
@@ -263,7 +275,9 @@ export function TransactionTable({
                     <td className="px-3 py-1.5">
                       <input
                         type="checkbox"
-                        aria-label={`เลือกรายการ ${r.description}`}
+                        aria-label={ui("เลือกรายการ {v0}", {
+                          v0: r.description,
+                        })}
                         checked={selected.has(r.id)}
                         disabled={pending || confirming}
                         onChange={() => toggle(r.id)}
@@ -284,7 +298,7 @@ export function TransactionTable({
                     {r.note && (
                       <details className="mt-1 text-muted">
                         <summary className="cursor-pointer text-[10px]">
-                          Remark / บันทึก
+                          {ui("Remark / บันทึก")}
                         </summary>
                         <p className="whitespace-pre-line mt-1">{r.note}</p>
                       </details>
@@ -323,7 +337,7 @@ export function TransactionTable({
                           title={file.name}
                           className="block underline whitespace-nowrap"
                         >
-                          หลักฐาน {index + 1} ↗
+                          {ui("หลักฐาน")} {index + 1} ↗
                         </a>
                       ))
                     ) : (

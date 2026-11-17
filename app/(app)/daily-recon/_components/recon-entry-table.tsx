@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Check, Save } from "lucide-react";
@@ -27,6 +29,7 @@ export function ReconEntryTable({
   itemName: string;
   days: DayRow[];
 }) {
+  const { ui } = useUi();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
@@ -68,9 +71,9 @@ export function ReconEntryTable({
         })),
       });
       if (r.ok) {
-        setMsg(`บันทึกแล้ว (${r.saved} วัน)`);
+        setMsg(ui("บันทึกแล้ว ({v0} วัน)", { v0: r.saved }));
         router.refresh();
-      } else setErr(r.message ?? "บันทึกไม่สำเร็จ");
+      } else setErr(r.message ?? ui("บันทึกไม่สำเร็จ"));
     });
   }
 
@@ -80,8 +83,9 @@ export function ReconEntryTable({
         <div>
           <h2 className="text-sm font-semibold">{itemName}</h2>
           <p className="text-xs text-muted mt-0.5">
-            ยอดหลัก = ดึงจาก POS อัตโนมัติ · ยอดเข้าจริง = กรอกเอง · ต่าง =
-            ยอดหลัก − เข้าจริง
+            {ui(
+              "ยอดหลัก = ดึงจาก POS อัตโนมัติ · ยอดเข้าจริง = กรอกเอง · ต่าง = ยอดหลัก − เข้าจริง"
+            )}
           </p>
         </div>
         <button
@@ -94,8 +98,8 @@ export function ReconEntryTable({
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
             <Save className="h-3.5 w-3.5" />
-          )}
-          บันทึกยอดเข้าจริง
+          )}{" "}
+          {ui("บันทึกยอดเข้าจริง")}
         </button>
       </header>
 
@@ -103,10 +107,10 @@ export function ReconEntryTable({
         <div className="px-5 pt-3">
           {msg && (
             <p className="flex items-center gap-1.5 text-xs text-emerald-700">
-              <Check className="h-3.5 w-3.5" /> {msg}
+              <Check className="h-3.5 w-3.5" /> {ui(msg)}
             </p>
           )}
-          {err && <p className="text-xs text-red-600">{err}</p>}
+          {err && <p className="text-xs text-red-600">{ui(err)}</p>}
         </div>
       )}
 
@@ -114,12 +118,14 @@ export function ReconEntryTable({
         <table className="w-full text-xs">
           <thead className="bg-surface text-left">
             <tr>
-              <th className="px-3 py-2 font-medium">วันที่</th>
+              <th className="px-3 py-2 font-medium">{ui("วันที่")}</th>
               <th className="px-3 py-2 font-medium text-right">
-                ยอดหลัก (POS)
+                {ui("ยอดหลัก (POS)")}
               </th>
-              <th className="px-3 py-2 font-medium text-right">ยอดเข้าจริง</th>
-              <th className="px-3 py-2 font-medium text-right">ต่าง</th>
+              <th className="px-3 py-2 font-medium text-right">
+                {ui("ยอดเข้าจริง")}
+              </th>
+              <th className="px-3 py-2 font-medium text-right">{ui("ต่าง")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-hairline-soft">
@@ -131,7 +137,7 @@ export function ReconEntryTable({
                 <tr key={d.date} className={idle ? "text-muted-soft" : ""}>
                   <td className="px-3 py-1 whitespace-nowrap">
                     {d.date.slice(8)}{" "}
-                    <span className="text-muted-soft">{d.weekday}</span>
+                    <span className="text-muted-soft">{ui(d.weekday)}</span>
                   </td>
                   <td className="px-3 py-1 text-right tabular-nums">
                     {d.pos > 0 ? fmt(d.pos) : "-"}
@@ -143,7 +149,7 @@ export function ReconEntryTable({
                       onChange={(e) =>
                         setVals((p) => ({ ...p, [d.date]: e.target.value }))
                       }
-                      placeholder={d.pos > 0 ? "กรอกยอดที่เข้าจริง" : "-"}
+                      placeholder={d.pos > 0 ? ui("กรอกยอดที่เข้าจริง") : "-"}
                       className="w-32 rounded border border-hairline-soft bg-canvas px-2 py-0.5 text-right tabular-nums focus:border-ink focus:outline-none"
                     />
                   </td>
@@ -167,7 +173,7 @@ export function ReconEntryTable({
           </tbody>
           <tfoot className="bg-surface font-medium">
             <tr>
-              <td className="px-3 py-2">รวม</td>
+              <td className="px-3 py-2">{ui("รวม")}</td>
               <td className="px-3 py-2 text-right tabular-nums">
                 {fmt(totalPos)}
               </td>

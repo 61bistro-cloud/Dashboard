@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Paperclip, Loader2, X, ExternalLink } from "lucide-react";
@@ -22,6 +24,7 @@ export function AttachButton({
   kind?: "SLIP" | "BILL";
   files: AttachedFile[];
 }) {
+  const { ui } = useUi();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
@@ -40,7 +43,7 @@ export function AttachButton({
       fd.append("file", file);
       const r = await attachFile(fd);
       if (inputRef.current) inputRef.current.value = "";
-      if (!r.ok) setErr(r.message ?? "ผิดพลาด");
+      if (!r.ok) setErr(r.message ?? ui("ผิดพลาด"));
       else router.refresh();
     });
   }
@@ -67,14 +70,14 @@ export function AttachButton({
             title={f.name}
             className="inline-flex items-center gap-0.5 underline"
           >
-            <ExternalLink className="h-3 w-3" /> ไฟล์
+            <ExternalLink className="h-3 w-3" /> {ui("ไฟล์")}
           </a>
           <button
             type="button"
             onClick={() => onRemove(f.id)}
             disabled={pending}
             className="text-sky-500 hover:text-red-600"
-            aria-label="ลบไฟล์แนบ"
+            aria-label={ui("ลบไฟล์แนบ")}
           >
             <X className="h-3 w-3" />
           </button>
@@ -85,8 +88,8 @@ export function AttachButton({
         onClick={() => inputRef.current?.click()}
         disabled={pending}
         className="inline-flex items-center rounded p-0.5 text-muted-soft hover:text-ink hover:bg-surface disabled:opacity-50"
-        aria-label="แนบไฟล์"
-        title="แนบไฟล์ (เก็บเข้า Google Drive)"
+        aria-label={ui("แนบไฟล์")}
+        title={ui("แนบไฟล์ (เก็บเข้า Google Drive)")}
       >
         {pending ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -101,7 +104,7 @@ export function AttachButton({
         onChange={onPick}
         className="hidden"
       />
-      {err && <span className="text-[10px] text-red-600">{err}</span>}
+      {err && <span className="text-[10px] text-red-600">{ui(err)}</span>}
     </div>
   );
 }

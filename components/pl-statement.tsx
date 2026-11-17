@@ -1,3 +1,6 @@
+import { useUi } from "@/lib/i18n/use-ui";
+import type { Ui } from "@/lib/i18n/core";
+
 import type { ClosingView } from "@/lib/closing";
 
 // Accounting-style number: no currency symbol, negatives in parentheses.
@@ -19,79 +22,102 @@ type Row =
   | { t: "memo"; label: string; value: string };
 
 /** Turn a closing view into a hierarchical income-statement row list. */
-export function buildStatementRows(view: ClosingView): Row[] {
+export function buildStatementRows(
+  view: ClosingView,
+  ui: Ui = (source) => source
+): Row[] {
   const b = view.breakdown;
   const base = view.closing ?? view.live;
   const rows: Row[] = [];
 
   // ───── Revenue ─────
-  rows.push({ t: "section", label: "รายได้" });
-  rows.push({ t: "sub", label: "รายได้จากการขาย (POS)" });
+  rows.push({ t: "section", label: ui("รายได้") });
+  rows.push({ t: "sub", label: ui("รายได้จากการขาย (POS)") });
   if (b.revenue.length === 0) {
-    rows.push({ t: "item", label: "— ยังไม่มีข้อมูลยอดขาย —", amount: 0 });
+    rows.push({ t: "item", label: ui("— ยังไม่มีข้อมูลยอดขาย —"), amount: 0 });
   } else {
     for (const l of b.revenue)
       rows.push({ t: "item", label: l.label, amount: l.amount });
   }
   rows.push({
     t: "subtotal",
-    label: "รวมรายได้จากการขาย",
+    label: ui("รวมรายได้จากการขาย"),
     amount: base.netRevenue,
   });
   if (view.adjustRevenue !== 0)
     rows.push({
       t: "item",
-      label: "ปรับปรุงรายได้",
+      label: ui("ปรับปรุงรายได้"),
       amount: view.adjustRevenue,
     });
-  rows.push({ t: "total", label: "รวมรายได้", amount: view.final.netRevenue });
+  rows.push({
+    t: "total",
+    label: ui("รวมรายได้"),
+    amount: view.final.netRevenue,
+  });
 
   // ───── Expenses ─────
-  rows.push({ t: "section", label: "ค่าใช้จ่าย" });
+  rows.push({ t: "section", label: ui("ค่าใช้จ่าย") });
 
-  rows.push({ t: "sub", label: "ต้นทุนวัตถุดิบ (COGS)" });
+  rows.push({ t: "sub", label: ui("ต้นทุนวัตถุดิบ (COGS)") });
   const cogs = [...b.cogsFood, ...b.cogsBev, ...b.cogsPack];
   if (cogs.length === 0)
-    rows.push({ t: "item", label: "— ไม่มี —", amount: 0 });
+    rows.push({ t: "item", label: ui("— ไม่มี —"), amount: 0 });
   else
     for (const l of cogs)
       rows.push({ t: "item", label: l.label, amount: l.amount });
-  rows.push({ t: "subtotal", label: "รวมต้นทุนวัตถุดิบ", amount: base.cogs });
+  rows.push({
+    t: "subtotal",
+    label: ui("รวมต้นทุนวัตถุดิบ"),
+    amount: base.cogs,
+  });
 
-  rows.push({ t: "sub", label: "ค่าแรงพนักงาน (Labor)" });
+  rows.push({ t: "sub", label: ui("ค่าแรงพนักงาน (Labor)") });
   const labor = [...b.laborSalary, ...b.laborExtra];
   if (labor.length === 0)
-    rows.push({ t: "item", label: "— ไม่มี —", amount: 0 });
+    rows.push({ t: "item", label: ui("— ไม่มี —"), amount: 0 });
   else
     for (const l of labor)
       rows.push({ t: "item", label: l.label, amount: l.amount });
-  rows.push({ t: "subtotal", label: "รวมค่าแรงพนักงาน", amount: base.labor });
+  rows.push({
+    t: "subtotal",
+    label: ui("รวมค่าแรงพนักงาน"),
+    amount: base.labor,
+  });
 
-  rows.push({ t: "sub", label: "ค่าใช้จ่ายประจำ (Fixed Cost)" });
+  rows.push({ t: "sub", label: ui("ค่าใช้จ่ายประจำ (Fixed Cost)") });
   if (b.fixed.length === 0)
-    rows.push({ t: "item", label: "— ไม่มี —", amount: 0 });
+    rows.push({ t: "item", label: ui("— ไม่มี —"), amount: 0 });
   else
     for (const l of b.fixed)
       rows.push({ t: "item", label: l.label, amount: l.amount });
-  rows.push({ t: "subtotal", label: "รวมค่าใช้จ่ายประจำ", amount: base.fixed });
+  rows.push({
+    t: "subtotal",
+    label: ui("รวมค่าใช้จ่ายประจำ"),
+    amount: base.fixed,
+  });
 
   if (view.adjustCost !== 0)
-    rows.push({ t: "item", label: "ปรับปรุงต้นทุน", amount: view.adjustCost });
+    rows.push({
+      t: "item",
+      label: ui("ปรับปรุงต้นทุน"),
+      amount: view.adjustCost,
+    });
   rows.push({
     t: "total",
-    label: "รวมค่าใช้จ่าย",
+    label: ui("รวมค่าใช้จ่าย"),
     amount: view.final.totalCost,
   });
 
   // ───── Net ─────
   rows.push({
     t: "grand",
-    label: "กำไร(ขาดทุน) สุทธิ",
+    label: ui("กำไร(ขาดทุน) สุทธิ"),
     amount: view.final.netProfit,
   });
   rows.push({
     t: "memo",
-    label: "Net Margin",
+    label: ui("Net Margin"),
     value:
       view.final.marginPct == null
         ? "-"
@@ -109,7 +135,8 @@ export function PLStatement({
   view: ClosingView;
   print?: boolean;
 }) {
-  const rows = buildStatementRows(view);
+  const { ui } = useUi();
+  const rows = buildStatementRows(view, ui);
 
   const c = print
     ? {

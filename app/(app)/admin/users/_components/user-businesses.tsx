@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { Loader2, Check } from "lucide-react";
 import { setUserBusinesses } from "../actions";
@@ -17,12 +19,17 @@ export function UserBusinessAssign({
   assigned: number[];
   isOwner: boolean;
 }) {
+  const { ui } = useUi();
   const [pending, startTransition] = useTransition();
   const [sel, setSel] = useState<number[]>(assigned);
   const [saved, setSaved] = useState(false);
 
   if (isOwner) {
-    return <span className="text-xs text-muted">เห็นทุกธุรกิจ (เจ้าของ)</span>;
+    return (
+      <span className="text-xs text-muted">
+        {ui("เห็นทุกธุรกิจ (เจ้าของ)")}
+      </span>
+    );
   }
 
   function toggle(id: number) {
@@ -74,8 +81,8 @@ export function UserBusinessAssign({
             <Loader2 className="h-3 w-3 animate-spin" />
           ) : (
             <Check className="h-3 w-3" strokeWidth={2.5} />
-          )}
-          บันทึก
+          )}{" "}
+          {ui("บันทึก")}
         </button>
       )}
       {saved && !dirty && <span className="text-xs text-emerald-600">✓</span>}

@@ -1,4 +1,7 @@
 "use client";
+import { displayMonth } from "@/lib/i18n/core";
+
+import { useUi } from "@/lib/i18n/use-ui";
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -22,6 +25,7 @@ export function EvidenceUpload({
   disabled: boolean;
   onBusy: (busy: boolean) => void;
 }) {
+  const { ui, uiLocale } = useUi();
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const running = useRef(false);
@@ -45,7 +49,7 @@ export function EvidenceUpload({
       fiscalMonthId: monthId,
     };
     if (!selectedContext.fiscalMonthId) {
-      setError("กรุณาเลือกเดือนของหลักฐานชุดนี้");
+      setError(ui("กรุณาเลือกเดือนของหลักฐานชุดนี้"));
       return;
     }
     const queue = retry
@@ -80,7 +84,12 @@ export function EvidenceUpload({
         }
       );
       setMessage(
-        `สำเร็จ ${result.succeeded} ไฟล์${result.failed ? ` • ไม่สำเร็จ ${result.failed} ไฟล์ ดูรายละเอียดด้านล่าง` : ""}`
+        ui("สำเร็จ {v0} ไฟล์{v1}", {
+          v0: result.succeeded,
+          v1: result.failed
+            ? ` • ไม่สำเร็จ ${result.failed} ไฟล์ ดูรายละเอียดด้านล่าง`
+            : "",
+        })
       );
       if (result.succeeded > 0) router.refresh();
     } finally {
@@ -100,23 +109,25 @@ export function EvidenceUpload({
     >
       <h3 className="flex items-center gap-2 text-xs font-medium">
         <Upload className="h-3.5 w-3.5" />
-        อัปโหลดหลักฐานหลายไฟล์เข้า Drive
+        {ui("อัปโหลดหลักฐานหลายไฟล์เข้า Drive")}
       </h3>
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-xs">
-          <span className="block text-muted mb-1">ประเภทของทั้งชุด</span>
+          <span className="block text-muted mb-1">
+            {ui("ประเภทของทั้งชุด")}
+          </span>
           <select
             value={kind}
             disabled={locked}
             onChange={(event) => setKind(event.target.value as "SLIP" | "BILL")}
             className="rounded border border-hairline-soft bg-canvas px-2 py-1"
           >
-            <option value="SLIP">หลักฐานการโอน (สลิป)</option>
-            <option value="BILL">บิลซื้อ</option>
+            <option value="SLIP">{ui("หลักฐานการโอน (สลิป)")}</option>
+            <option value="BILL">{ui("บิลซื้อ")}</option>
           </select>
         </label>
         <label className="text-xs">
-          <span className="block text-muted mb-1">เดือนของทั้งชุด</span>
+          <span className="block text-muted mb-1">{ui("เดือนของทั้งชุด")}</span>
           <select
             value={monthId}
             required
@@ -124,17 +135,17 @@ export function EvidenceUpload({
             onChange={(event) => setMonthId(event.target.value)}
             className="rounded border border-hairline-soft bg-canvas px-2 py-1"
           >
-            <option value="">— เลือกเดือน —</option>
+            <option value="">{ui("— เลือกเดือน —")}</option>
             {months.map((month) => (
               <option key={month.id} value={month.id}>
-                {month.label}
+                {displayMonth(month.label, uiLocale)}
               </option>
             ))}
           </select>
         </label>
         <label className="text-xs flex-1 min-w-[200px]">
           <span className="block text-muted mb-1">
-            ไฟล์รูปภาพ / PDF (เลือกหลายไฟล์ได้)
+            {ui("ไฟล์รูปภาพ / PDF (เลือกหลายไฟล์ได้)")}
           </span>
           <input
             ref={input}
@@ -162,8 +173,10 @@ export function EvidenceUpload({
             disabled={busy || disabled || items.length === 0 || !monthId}
             className="inline-flex items-center gap-1.5 rounded-pill bg-ink text-canvas px-4 py-1.5 text-xs disabled:opacity-50"
           >
-            <Upload className="h-3.5 w-3.5" />
-            อัปโหลด {items.length ? `ทั้งหมด ${items.length} ไฟล์` : "ทั้งหมด"}
+            <Upload className="h-3.5 w-3.5" /> {ui("อัปโหลด")}{" "}
+            {items.length
+              ? ui("ทั้งหมด {v0} ไฟล์", { v0: items.length })
+              : ui("ทั้งหมด")}
           </button>
         )}
         {context && !busy && errorCount > 0 && (
@@ -173,7 +186,8 @@ export function EvidenceUpload({
             onClick={() => void start(true)}
             className="rounded-pill border border-hairline px-3 py-1.5 text-xs disabled:opacity-50"
           >
-            ลองใหม่เฉพาะที่ไม่สำเร็จ ({errorCount})
+            {ui("ลองใหม่เฉพาะที่ไม่สำเร็จ (")}
+            {errorCount})
           </button>
         )}
         {context && !busy && (
@@ -189,50 +203,53 @@ export function EvidenceUpload({
             }}
             className="rounded-pill border border-hairline px-3 py-1.5 text-xs disabled:opacity-50"
           >
-            เลือกไฟล์ชุดใหม่
+            {ui("เลือกไฟล์ชุดใหม่")}
           </button>
         )}
       </div>
       <p className="text-xs text-muted">
-        เลือกหลายรูปพร้อมกันได้ด้วย Ctrl / Cmd หรือ Shift • ไม่เกิน 4 MB ต่อไฟล์
-        • ทุกไฟล์ใช้ประเภทและเดือนเดียวกัน ระบบยังไม่อ่านวันที่จากรูป
+        {ui(
+          "เลือกหลายรูปพร้อมกันได้ด้วย Ctrl / Cmd หรือ Shift • ไม่เกิน 4 MB ต่อไฟล์ • ทุกไฟล์ใช้ประเภทและเดือนเดียวกัน ระบบยังไม่อ่านวันที่จากรูป"
+        )}
       </p>
       {items.length > 0 && (
         <p className="text-xs">
-          เลือก {items.length} ไฟล์ • {kind === "SLIP" ? "สลิป" : "บิลซื้อ"} •{" "}
+          {ui("เลือก")} {items.length} {ui("ไฟล์ •")}{" "}
+          {kind === "SLIP" ? ui("สลิป") : ui("บิลซื้อ")} •{" "}
           {months.find((month) => String(month.id) === monthId)?.label ??
-            "ยังไม่เลือกเดือน"}
+            ui("ยังไม่เลือกเดือน")}
         </p>
       )}
       {busy && (
         <div role="status" className="text-xs space-y-2">
           <p className="flex items-center gap-1.5">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ดำเนินการ {completedCount} / {items.length} ไฟล์ —
-            โปรดเปิดหน้านี้ไว้จนเสร็จ
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> {ui("ดำเนินการ")}{" "}
+            {completedCount} / {items.length}{" "}
+            {ui("ไฟล์ — โปรดเปิดหน้านี้ไว้จนเสร็จ")}
           </p>
           <progress
             className="w-full"
             value={completedCount}
             max={items.length}
-            aria-label="ความคืบหน้าอัปโหลดหลักฐาน"
+            aria-label={ui("ความคืบหน้าอัปโหลดหลักฐาน")}
           />
         </div>
       )}
       {message && (
         <p role="status" className="text-xs">
-          {message} • รวมสำเร็จ {successCount} / {items.length} ไฟล์
+          {ui(message)} {ui("• รวมสำเร็จ")} {successCount} / {items.length}{" "}
+          {ui("ไฟล์")}
         </p>
       )}
       {error && (
         <p role="alert" className="text-xs text-red-600">
-          {error}
+          {ui(error)}
         </p>
       )}
       {items.length > 0 && (
         <ul
           className="max-h-64 overflow-y-auto divide-y divide-hairline-soft text-xs"
-          aria-label="รายการไฟล์อัปโหลด"
+          aria-label={ui("รายการไฟล์อัปโหลด")}
         >
           {items.map((item) => (
             <li key={item.id} className="flex items-start gap-2 py-2">
@@ -246,16 +263,16 @@ export function EvidenceUpload({
               <span className="break-all flex-1">
                 {item.file.name}
                 {item.message && (
-                  <span className="block text-red-600">{item.message}</span>
+                  <span className="block text-red-600">{ui(item.message)}</span>
                 )}
               </span>
               <span className="shrink-0 text-muted">
                 {
                   {
-                    pending: "รออัปโหลด",
-                    uploading: "กำลังอัปโหลด",
-                    success: "สำเร็จ",
-                    error: "ไม่สำเร็จ",
+                    pending: ui("รออัปโหลด"),
+                    uploading: ui("กำลังอัปโหลด"),
+                    success: ui("สำเร็จ"),
+                    error: ui("ไม่สำเร็จ"),
                   }[item.status]
                 }
               </span>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, ChevronDown, Check } from "lucide-react";
@@ -15,6 +17,7 @@ export function BusinessSwitcher({
   businesses: BizOpt[];
   currentId: number;
 }) {
+  const { ui } = useUi();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -41,9 +44,9 @@ export function BusinessSwitcher({
         </div>
         <div>
           <div className="text-[15px] font-semibold leading-tight tracking-tight">
-            {current?.name ?? "ธุรกิจ"}
+            {current?.name ?? ui("ธุรกิจ")}
           </div>
-          <div className="text-xs text-muted">ระบบบัญชี 2569</div>
+          <div className="text-xs text-muted">{ui("ระบบบัญชี 2569")}</div>
         </div>
       </div>
     );
@@ -74,9 +77,9 @@ export function BusinessSwitcher({
         </div>
         <div className="flex-1 text-left min-w-0">
           <div className="text-[15px] font-semibold leading-tight tracking-tight truncate">
-            {current?.name ?? "เลือกธุรกิจ"}
+            {current?.name ?? ui("เลือกธุรกิจ")}
           </div>
-          <div className="text-xs text-muted">แตะเพื่อสลับธุรกิจ</div>
+          <div className="text-xs text-muted">{ui("แตะเพื่อสลับธุรกิจ")}</div>
         </div>
         <ChevronDown
           className={

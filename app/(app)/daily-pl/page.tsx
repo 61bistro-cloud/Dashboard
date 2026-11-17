@@ -1,3 +1,6 @@
+import { displayMonth } from "@/lib/i18n/core";
+
+import { getUi } from "@/lib/i18n/server";
 import { CostSourceNotice } from "@/components/cost-source-notice";
 import { redirect } from "next/navigation";
 import {
@@ -26,6 +29,7 @@ export default async function DailyPLPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
 
@@ -33,9 +37,9 @@ export default async function DailyPLPage({
   if (!business) {
     return (
       <div className="p-8">
-        <PageHeader icon={Calendar} title="Daily P&L" />
+        <PageHeader icon={Calendar} title={ui("Daily P&L")} />
         <p className="mt-4 text-red-600">
-          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+          {ui("คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน")}
         </p>
       </div>
     );
@@ -57,8 +61,8 @@ export default async function DailyPLPage({
   if (!currentMonth) {
     return (
       <div className="p-8">
-        <PageHeader icon={Calendar} title="Daily P&L" />
-        <p className="mt-4 text-red-600">ไม่พบข้อมูลปีงบในระบบ</p>
+        <PageHeader icon={Calendar} title={ui("Daily P&L")} />
+        <p className="mt-4 text-red-600">{ui("ไม่พบข้อมูลปีงบในระบบ")}</p>
       </div>
     );
   }
@@ -67,8 +71,8 @@ export default async function DailyPLPage({
   if (!data) {
     return (
       <div className="p-8">
-        <PageHeader icon={Calendar} title="Daily P&L" />
-        <p className="mt-4 text-red-600">ไม่สามารถคำนวณข้อมูลได้</p>
+        <PageHeader icon={Calendar} title={ui("Daily P&L")} />
+        <p className="mt-4 text-red-600">{ui("ไม่สามารถคำนวณข้อมูลได้")}</p>
       </div>
     );
   }
@@ -82,13 +86,19 @@ export default async function DailyPLPage({
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <PageHeader
         icon={Calendar}
-        title="Daily P&L"
-        description={`กำไร/ขาดทุนรายวัน — Net Sales ดึงจาก POS, ต้นทุนกระจายจาก Cost Setup หาร ${month.daysInMonth} วัน`}
+        title={ui("Daily P&L")}
+        description={ui(
+          "กำไร/ขาดทุนรายวัน — Net Sales ดึงจาก POS, ต้นทุนกระจายจาก Cost Setup หาร {v0} วัน",
+          { v0: month.daysInMonth }
+        )}
         action={
           <MonthPicker
             months={allMonths.map((m) => ({
               id: m.id,
-              label: `${m.label} ${m.year.yearBE}`,
+              label: displayMonth(
+                `${displayMonth(m.label, uiLocale)} ${m.year.yearBE}`,
+                uiLocale
+              ),
             }))}
             currentId={currentMonth.id}
           />
@@ -105,21 +115,23 @@ export default async function DailyPLPage({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <SummaryCard
           icon={Wallet}
-          label="รายได้สุทธิ"
+          label={ui("รายได้สุทธิ")}
           value={fmtTHB(totals.netRevenue)}
-          sub={`${totals.posBillCount.toLocaleString("th-TH")} บิล`}
+          sub={ui("{v0} บิล", {
+            v0: totals.posBillCount.toLocaleString("th-TH"),
+          })}
           tone="mint"
         />
         <SummaryCard
           icon={Banknote}
-          label="รวมต้นทุน"
+          label={ui("รวมต้นทุน")}
           value={fmtTHB(totals.totalCost)}
-          sub="COGS + Labor + Fixed"
+          sub={ui("COGS + Labor + Fixed")}
           tone="cream"
         />
         <SummaryCard
           icon={TrendingUp}
-          label="กำไรสุทธิ"
+          label={ui("กำไรสุทธิ")}
           value={fmtTHB(totals.netProfit)}
           sub={
             totals.marginPct == null
@@ -130,9 +142,13 @@ export default async function DailyPLPage({
         />
         <SummaryCard
           icon={CalendarCheck}
-          label="วันที่ขาย"
+          label={ui("วันที่ขาย")}
           value={`${profitDays + lossDays} / ${month.daysInMonth}`}
-          sub={`กำไร ${profitDays} • ขาดทุน ${lossDays} • ไม่ขาย ${noSalesDays}`}
+          sub={ui("กำไร {v0} • ขาดทุน {v1} • ไม่ขาย {v2}", {
+            v0: profitDays,
+            v1: lossDays,
+            v2: noSalesDays,
+          })}
           tone="lilac"
         />
       </div>
@@ -140,30 +156,32 @@ export default async function DailyPLPage({
       {/* Daily table */}
       <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
         <header className="border-b border-hairline-soft px-5 py-3">
-          <h2 className="text-sm font-semibold">รายวัน — {month.fullLabel}</h2>
+          <h2 className="text-sm font-semibold">
+            {ui("รายวัน —")} {displayMonth(month.fullLabel, uiLocale)}
+          </h2>
           <p className="text-xs text-muted mt-0.5">
-            ต้นทุนต่อวัน: COGS {fmtTHB(totals.cogs / month.daysInMonth)} • Labor{" "}
-            {fmtTHB(totals.labor / month.daysInMonth)} • Fixed{" "}
-            {fmtTHB(totals.fixed / month.daysInMonth)}
+            {ui("ต้นทุนต่อวัน: COGS")} {fmtTHB(totals.cogs / month.daysInMonth)}{" "}
+            {ui("• Labor")} {fmtTHB(totals.labor / month.daysInMonth)}{" "}
+            {ui("• Fixed")} {fmtTHB(totals.fixed / month.daysInMonth)}
           </p>
         </header>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead className="bg-surface text-left">
               <tr>
-                <Th>วันที่</Th>
-                <Th>วัน</Th>
-                <Th align="right">บิล</Th>
-                <Th align="right">Gross</Th>
-                <Th align="right">ส่วนลด</Th>
-                <Th align="right">Net</Th>
-                <Th align="right">VAT</Th>
-                <Th align="right">COGS</Th>
-                <Th align="right">Labor</Th>
-                <Th align="right">Fixed</Th>
-                <Th align="right">รวมต้นทุน</Th>
-                <Th align="right">กำไร/ขาดทุน</Th>
-                <Th align="right">Margin %</Th>
+                <Th>{ui("วันที่")}</Th>
+                <Th>{ui("วัน")}</Th>
+                <Th align="right">{ui("บิล")}</Th>
+                <Th align="right">{ui("Gross")}</Th>
+                <Th align="right">{ui("ส่วนลด")}</Th>
+                <Th align="right">{ui("Net")}</Th>
+                <Th align="right">{ui("VAT")}</Th>
+                <Th align="right">{ui("COGS")}</Th>
+                <Th align="right">{ui("Labor")}</Th>
+                <Th align="right">{ui("Fixed")}</Th>
+                <Th align="right">{ui("รวมต้นทุน")}</Th>
+                <Th align="right">{ui("กำไร/ขาดทุน")}</Th>
+                <Th align="right">{ui("Margin %")}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-hairline-soft">
@@ -183,7 +201,7 @@ export default async function DailyPLPage({
                         (isWeekend ? "text-rose-600 font-medium" : "")
                       }
                     >
-                      {d.weekday}
+                      {ui(d.weekday)}
                     </td>
                     <td className="px-3 py-1 text-right tabular-nums">
                       {d.billCount || "-"}
@@ -245,7 +263,7 @@ export default async function DailyPLPage({
             <tfoot className="bg-surface font-semibold">
               <tr>
                 <td colSpan={2} className="px-3 py-2">
-                  รวม
+                  {ui("รวม")}
                 </td>
                 <td className="px-3 py-2 text-right tabular-nums">
                   {totals.posBillCount.toLocaleString("th-TH")}

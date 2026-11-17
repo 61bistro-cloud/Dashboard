@@ -1,3 +1,6 @@
+import { displayMonth, dateLocale } from "@/lib/i18n/core";
+
+import { getUi } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -19,6 +22,7 @@ import { LineConfig } from "./_components/line-config";
 export const maxDuration = 60;
 
 export default async function GoogleAdminPage() {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER") redirect("/");
@@ -26,8 +30,8 @@ export default async function GoogleAdminPage() {
   if (!biz) {
     return (
       <div className="p-8">
-        <PageHeader icon={CloudCog} title="เชื่อม Google Drive" />
-        <p className="mt-4 text-red-600">ยังไม่มีสิทธิ์เข้าถึงธุรกิจ</p>
+        <PageHeader icon={CloudCog} title={ui("เชื่อม Google Drive")} />
+        <p className="mt-4 text-red-600">{ui("ยังไม่มีสิทธิ์เข้าถึงธุรกิจ")}</p>
       </div>
     );
   }
@@ -62,21 +66,27 @@ export default async function GoogleAdminPage() {
     "https://dashboard-roan-eta-72.vercel.app/api/line/webhook";
   const monthOpts = months.map((m) => ({
     id: m.id,
-    label: `${m.label} ${m.year.yearBE}`,
+    label: displayMonth(
+      `${displayMonth(m.label, uiLocale)} ${m.year.yearBE}`,
+      uiLocale
+    ),
   }));
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[900px] mx-auto space-y-6">
       <PageHeader
         icon={CloudCog}
-        title="เชื่อมต่อ Google / LINE"
-        description={`${biz.name} — Master Sheet + หลักฐาน/บิล ใน Google Drive + รับสลิปผ่าน LINE`}
+        title={ui("เชื่อมต่อ Google / LINE")}
+        description={ui(
+          "{v0} — Master Sheet + หลักฐาน/บิล ใน Google Drive + รับสลิปผ่าน LINE",
+          { v0: biz.name }
+        )}
       />
 
       {!googleConfigured() && (
         <div className="rounded-card border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          ยังไม่ได้ตั้งค่า <code>AUTH_GOOGLE_ID</code> /{" "}
-          <code>AUTH_GOOGLE_SECRET</code> — ใส่ใน Vercel ก่อน
+          {ui("ยังไม่ได้ตั้งค่า")} <code>AUTH_GOOGLE_ID</code> /{" "}
+          <code>AUTH_GOOGLE_SECRET</code> {ui("— ใส่ใน Vercel ก่อน")}
         </div>
       )}
 
@@ -86,21 +96,22 @@ export default async function GoogleAdminPage() {
           ok={connected}
           label={
             connected
-              ? `เชื่อมแล้ว: ${b?.googleEmail ?? "—"}`
-              : "ยังไม่ได้เชื่อม Google"
+              ? ui("เชื่อมแล้ว: {v0}", { v0: b?.googleEmail ?? "—" })
+              : ui("ยังไม่ได้เชื่อม Google")
           }
         />
         <StatusRow
           ok={structureReady}
           label={
             structureReady
-              ? "สร้างโฟลเดอร์ + Master Sheet แล้ว"
-              : "ยังไม่ได้สร้างโครงสร้าง"
+              ? ui("สร้างโฟลเดอร์ + Master Sheet แล้ว")
+              : ui("ยังไม่ได้สร้างโครงสร้าง")
           }
         />
         {b?.googleSyncedAt && (
           <p className="text-xs text-muted">
-            ซิงค์ล่าสุด: {b.googleSyncedAt.toLocaleString("th-TH")}
+            {ui("ซิงค์ล่าสุด:")}{" "}
+            {b.googleSyncedAt.toLocaleString(dateLocale(uiLocale))}
           </p>
         )}
 
@@ -112,7 +123,7 @@ export default async function GoogleAdminPage() {
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 text-ink underline"
             >
-              <FileSpreadsheet className="h-4 w-4" /> เปิด Master Sheet{" "}
+              <FileSpreadsheet className="h-4 w-4" /> {ui("เปิด Master Sheet")}
               <ExternalLink className="h-3 w-3" />
             </a>
             <a
@@ -121,7 +132,7 @@ export default async function GoogleAdminPage() {
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 text-ink underline"
             >
-              <FolderTree className="h-4 w-4" /> เปิดโฟลเดอร์ใน Drive{" "}
+              <FolderTree className="h-4 w-4" /> {ui("เปิดโฟลเดอร์ใน Drive")}
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>
@@ -139,11 +150,12 @@ export default async function GoogleAdminPage() {
 
       <div className="rounded-card border border-hairline p-4 text-sm">
         <Link href="/bank/evidence" className="underline font-medium">
-          ขั้นต่อไป: จับคู่หลักฐานกับ Statement →
+          {ui("ขั้นต่อไป: จับคู่หลักฐานกับ Statement →")}
         </Link>
         <p className="text-xs text-muted mt-1">
-          เลือกเดือนที่อัปโหลดไว้ อ่านข้อมูลจากรูป แล้วตรวจและยืนยันคู่ใน Bank &
-          Reconcile
+          {ui(
+            "เลือกเดือนที่อัปโหลดไว้ อ่านข้อมูลจากรูป แล้วตรวจและยืนยันคู่ใน Bank & Reconcile"
+          )}
         </p>
       </div>
       <LineConfig configured={lineConfigured} webhookUrl={webhookUrl} />
@@ -152,7 +164,9 @@ export default async function GoogleAdminPage() {
       {recent.length > 0 && (
         <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
           <header className="border-b border-hairline-soft px-5 py-3">
-            <h2 className="text-sm font-semibold">ไฟล์หลักฐานล่าสุดใน Drive</h2>
+            <h2 className="text-sm font-semibold">
+              {ui("ไฟล์หลักฐานล่าสุดใน Drive")}
+            </h2>
           </header>
           <ul className="divide-y divide-hairline-soft text-xs">
             {recent.map((f) => (
@@ -165,7 +179,7 @@ export default async function GoogleAdminPage() {
                       : "bg-amber-100 text-amber-800")
                   }
                 >
-                  {f.kind === "SLIP" ? "สลิป" : "บิลซื้อ"}
+                  {f.kind === "SLIP" ? ui("สลิป") : ui("บิลซื้อ")}
                 </span>
                 <a
                   href={f.webViewLink}
@@ -180,11 +194,11 @@ export default async function GoogleAdminPage() {
                     className="underline whitespace-nowrap"
                     href={`/bank/evidence?month=${f.fiscalMonthId}`}
                   >
-                    จับคู่
+                    {ui("จับคู่")}
                   </Link>
                 )}
                 <span className="text-muted whitespace-nowrap">
-                  {f.createdAt.toLocaleDateString("th-TH")} ·{" "}
+                  {f.createdAt.toLocaleDateString(dateLocale(uiLocale))} ·{" "}
                   {f.uploadedByName ?? "—"}
                 </span>
               </li>
@@ -196,30 +210,35 @@ export default async function GoogleAdminPage() {
       {/* Setup guide */}
       <section className="rounded-card border border-hairline bg-surface/40 p-5 text-sm">
         <h2 className="font-semibold mb-2">
-          วิธีตั้งค่า Google Cloud (ทำครั้งเดียว)
+          {ui("วิธีตั้งค่า Google Cloud (ทำครั้งเดียว)")}
         </h2>
         <ol className="list-decimal pl-5 space-y-1 text-muted">
           <li>
-            เปิด <strong>Google Drive API</strong> และ{" "}
-            <strong>Google Sheets API</strong> ในโปรเจกต์ Google Cloud เดิม
-            (ที่ใช้ทำ login)
+            {ui("เปิด")} <strong>Google Drive API</strong> {ui("และ")}{" "}
+            <strong>Google Sheets API</strong>{" "}
+            {ui("ในโปรเจกต์ Google Cloud เดิม (ที่ใช้ทำ login)")}
           </li>
           <li>
-            ใน OAuth consent screen → <strong>Data Access</strong> เพิ่ม scope:{" "}
-            <code>https://www.googleapis.com/auth/drive.file</code> (อันเดียวพอ)
+            {ui("ใน OAuth consent screen →")} <strong>Data Access</strong>{" "}
+            {ui("เพิ่ม scope:")}{" "}
+            <code>https://www.googleapis.com/auth/drive.file</code>{" "}
+            {ui("(อันเดียวพอ)")}
           </li>
           <li>
-            ใน OAuth Client เพิ่ม <strong>Authorized redirect URI</strong>:
+            {ui("ใน OAuth Client เพิ่ม")}{" "}
+            <strong>Authorized redirect URI</strong>:
             <br />
             <code>
               https://dashboard-roan-eta-72.vercel.app/api/google/callback
             </code>{" "}
-            และ <code>http://localhost:3000/api/google/callback</code>
+            {ui("และ")} <code>http://localhost:3000/api/google/callback</code>
           </li>
           <li>
-            กลับมากดปุ่ม <strong>“เชื่อม Google Drive ของร้าน”</strong> ด้านบน →
-            อนุญาต → กด <strong>“สร้างโครงสร้าง”</strong> แล้ว{" "}
-            <strong>“ซิงค์”</strong>
+            {ui("กลับมากดปุ่ม")}{" "}
+            <strong>{ui("“เชื่อม Google Drive ของร้าน”")}</strong>{" "}
+            {ui("ด้านบน → อนุญาต → กด")}{" "}
+            <strong>{ui("“สร้างโครงสร้าง”")}</strong> {ui("แล้ว")}{" "}
+            <strong>{ui("“ซิงค์”")}</strong>
           </li>
         </ol>
       </section>

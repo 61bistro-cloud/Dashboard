@@ -1,3 +1,4 @@
+import { getUi } from "@/lib/i18n/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { SidebarNav } from "@/components/sidebar-nav";
@@ -11,6 +12,7 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { ui } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
 
@@ -43,7 +45,7 @@ export default async function AppLayout({
     <div className="min-h-dvh bg-canvas md:pl-64 print:pl-0">
       {/* Desktop sidebar */}
       <aside
-        aria-label="แถบเมนูหลัก"
+        aria-label={ui("แถบเมนูหลัก")}
         className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-hairline bg-canvas md:flex print:hidden"
       >
         {navBody}

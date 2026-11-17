@@ -1,3 +1,6 @@
+import { displayMonth, dateLocale } from "@/lib/i18n/core";
+
+import { getUi } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -7,7 +10,10 @@ import { getClosingView } from "@/lib/closing";
 import { PLStatement } from "@/components/pl-statement";
 import { PrintButton } from "./print-button";
 
-export const metadata = { title: "งบกำไรขาดทุน — Export" };
+export async function generateMetadata() {
+  const { ui } = await getUi();
+  return { title: ui("งบกำไรขาดทุน — Export") };
+}
 
 type SearchParams = Promise<{ month?: string }>;
 
@@ -18,6 +24,7 @@ export default async function ClosingPrintPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER" && session.user.role !== "ACCOUNTANT") {
@@ -39,10 +46,10 @@ export default async function ClosingPrintPage({
   const ratio = (n: number) =>
     base.netRevenue > 0 ? n / base.netRevenue : null;
   const ratios: [string, number | null][] = [
-    ["Food %", ratio(base.cogs)],
-    ["Labor %", ratio(base.labor)],
-    ["Prime %", ratio(base.cogs + base.labor)],
-    ["Fixed %", ratio(base.fixed)],
+    [ui("Food %"), ratio(base.cogs)],
+    [ui("Labor %"), ratio(base.labor)],
+    [ui("Prime %"), ratio(base.cogs + base.labor)],
+    [ui("Fixed %"), ratio(base.fixed)],
   ];
 
   const money = (n: number) => fmtTHB(n);
@@ -58,7 +65,7 @@ export default async function ClosingPrintPage({
           href={`/closing?month=${monthId}`}
           className="text-sm text-neutral-500 hover:text-black"
         >
-          ← กลับ
+          {ui("← กลับ")}
         </a>
         <PrintButton />
       </div>
@@ -72,13 +79,15 @@ export default async function ClosingPrintPage({
               {business.name}
             </div>
             <div className="mt-1 text-sm text-neutral-600">
-              งบกำไรขาดทุน (Profit &amp; Loss Statement)
+              {ui("งบกำไรขาดทุน (Profit & Loss Statement)")}
             </div>
           </div>
           <div className="text-right text-sm">
-            <div className="font-semibold">{view.month.fullLabel}</div>
+            <div className="font-semibold">
+              {displayMonth(view.month.fullLabel, uiLocale)}
+            </div>
             <div className="text-neutral-500">
-              ออกเมื่อ {now.toLocaleDateString("th-TH")}
+              {ui("ออกเมื่อ")} {now.toLocaleDateString(dateLocale(uiLocale))}
             </div>
             <div
               className={
@@ -88,15 +97,15 @@ export default async function ClosingPrintPage({
                   : "bg-neutral-200 text-neutral-700")
               }
             >
-              {isClosed ? "ปิดงบแล้ว (FINALIZED)" : "ฉบับร่าง (DRAFT)"}
+              {isClosed ? ui("ปิดงบแล้ว (FINALIZED)") : ui("ฉบับร่าง (DRAFT)")}
             </div>
           </div>
         </div>
 
         {isClosed && view.closing && (
           <div className="mt-2 text-xs text-neutral-500">
-            ปิดงบโดย {view.closing.closedByName ?? "—"} เมื่อ{" "}
-            {view.closing.closedAt.toLocaleString("th-TH")}
+            {ui("ปิดงบโดย")} {view.closing.closedByName ?? "—"} {ui("เมื่อ")}{" "}
+            {view.closing.closedAt.toLocaleString(dateLocale(uiLocale))}
           </div>
         )}
 
@@ -121,14 +130,15 @@ export default async function ClosingPrintPage({
         {view.adjustments.length > 0 && (
           <div className="mt-6">
             <div className="text-xs font-semibold uppercase text-neutral-500">
-              รายการปรับปรุง
+              {ui("รายการปรับปรุง")}
             </div>
             <table className="mt-1 w-full text-sm">
               <tbody>
                 {view.adjustments.map((a) => (
                   <tr key={a.id} className="border-b border-neutral-200">
                     <td className="py-1">
-                      [{a.kind === "REVENUE" ? "รายได้" : "ต้นทุน"}] {a.label}
+                      [{a.kind === "REVENUE" ? ui("รายได้") : ui("ต้นทุน")}]{" "}
+                      {a.label}
                     </td>
                     <td className="py-1 text-right tabular-nums">
                       {money(a.amount)}
@@ -143,7 +153,7 @@ export default async function ClosingPrintPage({
         {/* Validation summary */}
         <div className="mt-6">
           <div className="text-xs font-semibold uppercase text-neutral-500">
-            ผลการตรวจสอบ
+            {ui("ผลการตรวจสอบ")}
           </div>
           <ul className="mt-1 text-xs text-neutral-700">
             {view.checks.map((c) => (
@@ -153,9 +163,9 @@ export default async function ClosingPrintPage({
               >
                 <span>
                   {c.status === "pass" ? "✓" : c.status === "warn" ? "!" : "✗"}{" "}
-                  {c.label}
+                  {ui(c.label)}
                 </span>
-                <span className="text-neutral-500">{c.detail}</span>
+                <span className="text-neutral-500">{ui(c.detail)}</span>
               </li>
             ))}
           </ul>
@@ -163,7 +173,7 @@ export default async function ClosingPrintPage({
 
         {view.closing?.note && (
           <div className="mt-5 text-sm">
-            <span className="text-neutral-500">หมายเหตุ: </span>
+            <span className="text-neutral-500">{ui("หมายเหตุ:")} </span>
             {view.closing.note}
           </div>
         )}
@@ -172,18 +182,19 @@ export default async function ClosingPrintPage({
         <div className="mt-12 grid grid-cols-2 gap-10 text-center text-xs text-neutral-600">
           <div>
             <div className="border-t border-neutral-400 pt-1">
-              ผู้จัดทำ (Accountant)
+              {ui("ผู้จัดทำ (Accountant)")}
             </div>
           </div>
           <div>
             <div className="border-t border-neutral-400 pt-1">
-              ผู้อนุมัติ / เจ้าของร้าน (Owner)
+              {ui("ผู้อนุมัติ / เจ้าของร้าน (Owner)")}
             </div>
           </div>
         </div>
 
         <div className="mt-8 text-center text-[10px] text-neutral-400">
-          เอกสารนี้สร้างจากระบบบัญชี 61 Bistro — {now.toLocaleString("th-TH")}
+          {ui("เอกสารนี้สร้างจากระบบบัญชี 61 Bistro —")}{" "}
+          {now.toLocaleString(dateLocale(uiLocale))}
         </div>
       </div>
     </div>

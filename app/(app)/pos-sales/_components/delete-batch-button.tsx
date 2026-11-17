@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Trash2, AlertCircle, Lock } from "lucide-react";
 import { deletePosBatch } from "../actions";
@@ -13,6 +15,7 @@ export function DeleteBatchButton({
   fileName: string;
   rowCount: number;
 }) {
+  const { ui } = useUi();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +49,7 @@ export function DeleteBatchButton({
       if (r.ok) {
         close();
       } else {
-        setError(r.message ?? "ลบไม่สำเร็จ");
+        setError(r.message ?? ui("ลบไม่สำเร็จ"));
       }
     });
   };
@@ -57,8 +60,8 @@ export function DeleteBatchButton({
         type="button"
         onClick={() => setOpen(true)}
         className="text-muted-soft hover:text-red-600 transition-colors"
-        aria-label={`ลบ ${fileName}`}
-        title="ลบ batch นี้"
+        aria-label={ui("ลบ {v0}", { v0: fileName })}
+        title={ui("ลบ batch นี้")}
       >
         <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
       </button>
@@ -79,23 +82,23 @@ export function DeleteBatchButton({
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-semibold">
-                ยืนยันการลบ Import Batch
+                {ui("ยืนยันการลบ Import Batch")}
               </h3>
               <p className="text-sm text-muted mt-1">
-                จะลบไฟล์{" "}
+                {ui("จะลบไฟล์")}{" "}
                 <span className="font-medium text-ink break-all">
                   {fileName}
                 </span>{" "}
-                และ
+                {ui("และ")}{" "}
                 <span className="font-medium text-ink">
-                  {" "}
-                  {rowCount} บิล
+                  {rowCount} {ui("บิล")}
                 </span>{" "}
-                ที่เกี่ยวข้องออกจากระบบ
+                {ui("ที่เกี่ยวข้องออกจากระบบ")}
               </p>
               <p className="text-xs text-muted mt-1.5">
-                ⚠️ การลบนี้ไม่สามารถย้อนกลับได้ — Dashboard / Daily P&L / Bank
-                reconciliation จะอัปเดตทันที
+                {ui(
+                  "⚠️ การลบนี้ไม่สามารถย้อนกลับได้ — Dashboard / Daily P&L / Bank reconciliation จะอัปเดตทันที"
+                )}
               </p>
             </div>
           </div>
@@ -106,7 +109,7 @@ export function DeleteBatchButton({
               className="flex items-center gap-1.5 text-xs font-medium text-muted mb-1.5 uppercase tracking-wide"
             >
               <Lock className="h-3 w-3" strokeWidth={2} />
-              รหัสผ่านยืนยันการลบ
+              {ui("รหัสผ่านยืนยันการลบ")}
             </label>
             <input
               ref={inputRef}
@@ -124,7 +127,7 @@ export function DeleteBatchButton({
           {error && (
             <div className="flex items-center gap-1.5 rounded-input bg-pink px-3 py-2 text-sm text-black">
               <AlertCircle className="h-4 w-4 shrink-0" strokeWidth={2} />
-              {error}
+              {ui(error)}
             </div>
           )}
 
@@ -135,14 +138,14 @@ export function DeleteBatchButton({
               disabled={pending}
               className="rounded-pill px-4 py-2 text-sm text-muted hover:text-ink hover:bg-surface disabled:opacity-50 transition-colors"
             >
-              ยกเลิก
+              {ui("ยกเลิก")}
             </button>
             <button
               type="submit"
               disabled={pending || !password}
               className="rounded-pill bg-red-600 text-white px-4 py-2 text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors"
             >
-              {pending ? "กำลังลบ…" : "ลบ Batch + บิล"}
+              {pending ? ui("กำลังลบ…") : ui("ลบ Batch + บิล")}
             </button>
           </div>
         </form>

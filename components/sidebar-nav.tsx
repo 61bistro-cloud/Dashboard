@@ -1,6 +1,9 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import Link from "next/link";
+import { LanguageSwitcher } from "./language-switcher";
 import { usePathname } from "next/navigation";
 import type { Role } from "@prisma/client";
 import { NAV_ITEMS } from "@/lib/rbac";
@@ -8,38 +11,40 @@ import { NAV_ITEMS } from "@/lib/rbac";
 const REPORT_PATHS = new Set(["/", "/daily-pl", "/monthly-pl", "/closing"]);
 
 export function SidebarNav({ role }: { role: Role }) {
+  const { ui } = useUi();
   const pathname = usePathname();
   const items = NAV_ITEMS.filter((item) => item.roles.includes(role));
   const sections = [
     {
-      label: "ภาพรวมและรายงาน",
+      label: ui("ภาพรวมและรายงาน"),
       items: items.filter((item) => REPORT_PATHS.has(item.href)),
     },
     {
-      label: "บันทึกและกระทบยอด",
+      label: ui("บันทึกและกระทบยอด"),
       items: items.filter(
         (item) =>
           !REPORT_PATHS.has(item.href) && !item.href.startsWith("/admin/")
       ),
     },
     {
-      label: "จัดการระบบ",
+      label: ui("จัดการระบบ"),
       items: items.filter((item) => item.href.startsWith("/admin/")),
     },
   ];
 
   return (
-    <nav aria-label="เมนูหลัก" className="pb-3">
+    <nav aria-label={ui("เมนูหลัก")} className="pb-3">
+      <LanguageSwitcher />
       {sections
         .filter((section) => section.items.length > 0)
         .map((section) => (
           <section
-            key={section.label}
-            aria-label={section.label}
+            key={ui(section.label)}
+            aria-label={ui(section.label)}
             className="pb-2"
           >
             <h2 className="border-y border-hairline-soft bg-surface px-5 py-2 text-[11px] font-medium leading-5 text-muted">
-              {section.label}
+              {ui(section.label)}
             </h2>
             <div className="space-y-0.5 pt-1.5">
               {section.items.map((item) => {
@@ -70,7 +75,9 @@ export function SidebarNav({ role }: { role: Role }) {
                       }
                       strokeWidth={1.6}
                     />
-                    <span className="min-w-0 break-words">{item.label}</span>
+                    <span className="min-w-0 break-words">
+                      {ui(item.label)}
+                    </span>
                   </Link>
                 );
               })}

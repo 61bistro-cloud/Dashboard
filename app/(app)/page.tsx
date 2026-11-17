@@ -1,3 +1,7 @@
+import { displayMonth } from "@/lib/i18n/core";
+
+import { useUi } from "@/lib/i18n/use-ui";
+import { getUi } from "@/lib/i18n/server";
 import { CostSourceNotice } from "@/components/cost-source-notice";
 import { redirect } from "next/navigation";
 import {
@@ -38,6 +42,7 @@ import { StatusDot } from "@/lib/icons";
 import type { LucideIcon } from "lucide-react";
 
 export default async function DashboardPage() {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
 
@@ -45,9 +50,11 @@ export default async function DashboardPage() {
   if (!business) {
     return (
       <div className="p-8">
-        <PageHeader icon={LayoutDashboard} title="Dashboard" />
+        <PageHeader icon={LayoutDashboard} title={ui("Dashboard")} />
         <p className="mt-4 text-red-600">
-          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้านเพื่อขอสิทธิ์
+          {ui(
+            "คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้านเพื่อขอสิทธิ์"
+          )}
         </p>
       </div>
     );
@@ -60,8 +67,8 @@ export default async function DashboardPage() {
   if (!latestYear) {
     return (
       <div className="p-8">
-        <PageHeader icon={LayoutDashboard} title="Dashboard" />
-        <p className="mt-4 text-red-600">ยังไม่มีข้อมูลปีงบในระบบ</p>
+        <PageHeader icon={LayoutDashboard} title={ui("Dashboard")} />
+        <p className="mt-4 text-red-600">{ui("ยังไม่มีข้อมูลปีงบในระบบ")}</p>
       </div>
     );
   }
@@ -75,8 +82,8 @@ export default async function DashboardPage() {
   if (!data) {
     return (
       <div className="p-8">
-        <PageHeader icon={LayoutDashboard} title="Dashboard" />
-        <p className="mt-4 text-red-600">ไม่สามารถคำนวณ P&L ได้</p>
+        <PageHeader icon={LayoutDashboard} title={ui("Dashboard")} />
+        <p className="mt-4 text-red-600">{ui("ไม่สามารถคำนวณ P&L ได้")}</p>
       </div>
     );
   }
@@ -91,8 +98,11 @@ export default async function DashboardPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
       <PageHeader
         icon={LayoutDashboard}
-        title="Dashboard"
-        description={`${business.name} — ปีงบ ${latestYear.label}`}
+        title={ui("Dashboard")}
+        description={ui("{v0} — ปีงบ {v1}", {
+          v0: business.name,
+          v1: displayMonth(latestYear.label, uiLocale),
+        })}
       />
 
       <CostSourceNotice
@@ -102,40 +112,40 @@ export default async function DashboardPage() {
 
       <SectionTitle
         icon={ChartBar}
-        title="ภาพรวมทั้งปี"
-        description="Year-to-Date"
+        title={ui("ภาพรวมทั้งปี")}
+        description={ui("Year-to-Date")}
       />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <BigCard
           icon={Wallet}
-          label="รายได้รวมทั้งปี"
+          label={ui("รายได้รวมทั้งปี")}
           value={fmtTHB(total.netRevenue)}
-          sub="YTD"
+          sub={ui("YTD")}
           tone="mint"
         />
         <BigCard
           icon={Banknote}
-          label="รายจ่ายรวมทั้งปี"
+          label={ui("รายจ่ายรวมทั้งปี")}
           value={fmtTHB(total.totalCost)}
-          sub="YTD"
+          sub={ui("YTD")}
           tone="cream"
         />
         <BigCard
           icon={TrendingUp}
-          label="กำไรสุทธิทั้งปี"
+          label={ui("กำไรสุทธิทั้งปี")}
           value={fmtTHB(total.netProfit)}
-          sub="YTD"
+          sub={ui("YTD")}
           tone={total.netProfit >= 0 ? "lime" : "coral"}
         />
         <BigCard
           icon={Percent}
-          label="Net Margin %"
+          label={ui("Net Margin %")}
           value={
             total.marginPct == null
               ? "-"
               : `${(total.marginPct * 100).toFixed(1)}%`
           }
-          sub="YTD • เป้า ≥ 10%"
+          sub={ui("YTD • เป้า ≥ 10%")}
           tone={
             total.marginPct != null && total.marginPct >= 0.05
               ? "lilac"
@@ -146,34 +156,34 @@ export default async function DashboardPage() {
 
       <SectionTitle
         icon={ChefHat}
-        title="โครงสร้างต้นทุน YTD"
-        description="เทียบกับเกณฑ์มาตรฐานร้านอาหาร"
+        title={ui("โครงสร้างต้นทุน YTD")}
+        description={ui("เทียบกับเกณฑ์มาตรฐานร้านอาหาร")}
       />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard
           icon={ChefHat}
-          label="Food % (YTD)"
+          label={ui("Food % (YTD)")}
           pct={total.foodPct}
           status={kpiStatusLowerBetter(total.foodPct, KPI_THRESHOLDS.food)}
           bench="≤ 32%"
         />
         <KpiCard
           icon={Users}
-          label="Labor % (YTD)"
+          label={ui("Labor % (YTD)")}
           pct={total.laborPct}
           status={kpiStatusLowerBetter(total.laborPct, KPI_THRESHOLDS.labor)}
           bench="≤ 30%"
         />
         <KpiCard
           icon={Home}
-          label="Fixed % (YTD)"
+          label={ui("Fixed % (YTD)")}
           pct={total.fixedPct}
           status={kpiStatusLowerBetter(total.fixedPct, KPI_THRESHOLDS.fixed)}
           bench="≤ 15%"
         />
         <KpiCard
           icon={Zap}
-          label="Prime % (YTD)"
+          label={ui("Prime % (YTD)")}
           pct={total.primePct}
           status={kpiStatusLowerBetter(total.primePct, KPI_THRESHOLDS.prime)}
           bench="≤ 60%"
@@ -182,40 +192,40 @@ export default async function DashboardPage() {
 
       <SectionTitle
         icon={CalendarRange}
-        title="เดือนปัจจุบัน"
-        description="Month-To-Date"
+        title={ui("เดือนปัจจุบัน")}
+        description={ui("Month-To-Date")}
       />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <BigCard
           icon={CalendarIcon}
-          label="เดือนนี้"
-          value={mtd ? mtd.label : "-"}
-          sub="ตามวันที่ปัจจุบัน"
+          label={ui("เดือนนี้")}
+          value={mtd ? displayMonth(mtd.label, uiLocale) : "-"}
+          sub={ui("ตามวันที่ปัจจุบัน")}
           tone="neutral"
         />
         <BigCard
           icon={Wallet}
-          label="รายได้เดือนนี้"
+          label={ui("รายได้เดือนนี้")}
           value={mtd ? fmtTHB(mtd.netRevenue) : "-"}
-          sub={mtd ? `${mtd.posBillCount} บิล` : ""}
+          sub={mtd ? ui("{v0} บิล", { v0: mtd.posBillCount }) : ""}
           tone="mint"
         />
         <BigCard
           icon={TrendingUp}
-          label="กำไรเดือนนี้"
+          label={ui("กำไรเดือนนี้")}
           value={mtd ? fmtTHB(mtd.netProfit) : "-"}
-          sub="Revenue − Cost"
+          sub={ui("Revenue − Cost")}
           tone={mtd ? (mtd.netProfit >= 0 ? "lime" : "coral") : "neutral"}
         />
         <BigCard
           icon={Percent}
-          label="Margin เดือนนี้"
+          label={ui("Margin เดือนนี้")}
           value={
             mtd?.marginPct == null
               ? "-"
               : `${(mtd.marginPct * 100).toFixed(1)}%`
           }
-          sub="Real-time"
+          sub={ui("Real-time")}
           tone={
             mtd?.marginPct != null
               ? mtd.marginPct >= 0.05
@@ -228,15 +238,15 @@ export default async function DashboardPage() {
 
       <SectionTitle
         icon={ChartBar}
-        title="% ต้นทุน-กำไร รายเดือน"
-        description="Real-time"
+        title={ui("% ต้นทุน-กำไร รายเดือน")}
+        description={ui("Real-time")}
       />
       <MonthlyStatusTable months={months} total={total} />
 
       <SectionTitle
         icon={AlertTriangle}
-        title="Data Quality"
-        description="สถานะการกรอกข้อมูล POS"
+        title={ui("Data Quality")}
+        description={ui("สถานะการกรอกข้อมูล POS")}
       />
       <DataQualityTable
         months={months}
@@ -246,12 +256,12 @@ export default async function DashboardPage() {
 
       <SectionTitle
         icon={Receipt}
-        title="สรุปรายเดือน"
-        description="P&L absolute amounts"
+        title={ui("สรุปรายเดือน")}
+        description={ui("P&L absolute amounts")}
       />
       <MonthlyPLSummary months={months} total={total} dqByMonth={dqByMonth} />
 
-      <SectionTitle icon={ChartBar} title="Revenue vs Profit รายเดือน" />
+      <SectionTitle icon={ChartBar} title={ui("Revenue vs Profit รายเดือน")} />
       <RevenueProfitChart months={months} />
     </div>
   );
@@ -331,6 +341,7 @@ function KpiCard({
   status: KpiStatus;
   bench: string;
 }) {
+  const { ui } = useUi();
   const style = KPI_STATUS_STYLE[status];
   return (
     <div className="rounded-card border border-hairline bg-canvas p-5">
@@ -338,7 +349,7 @@ function KpiCard({
         <Icon className="h-5 w-5 text-muted" strokeWidth={1.6} />
         <span className="inline-flex items-center gap-1.5 rounded-pill bg-surface px-2.5 py-1 text-[11px] font-medium">
           <StatusDot tone={style.tone} />
-          {style.label}
+          {ui(style.label)}
         </span>
       </div>
       <div className="mt-3 text-[11px] uppercase tracking-[0.06em] text-muted font-medium">
@@ -347,7 +358,9 @@ function KpiCard({
       <div className="mt-1 text-[26px] font-semibold tabular-nums tracking-tight leading-none">
         {pct == null ? "-" : `${(pct * 100).toFixed(1)}%`}
       </div>
-      <div className="mt-2 text-xs text-muted">เกณฑ์ {bench}</div>
+      <div className="mt-2 text-xs text-muted">
+        {ui("เกณฑ์")} {bench}
+      </div>
     </div>
   );
 }
@@ -359,6 +372,7 @@ function MonthlyStatusTable({
   months: MonthlyTotals[];
   total: MonthlyTotals;
 }) {
+  const { ui, uiLocale } = useUi();
   const cell = (
     m: MonthlyTotals,
     valFn: (m: MonthlyTotals) => number | null,
@@ -388,19 +402,23 @@ function MonthlyStatusTable({
         <table className="w-full text-xs">
           <thead className="bg-surface text-center">
             <tr>
-              <th className="px-3 py-2 font-medium text-left">เดือน</th>
-              <th className="px-3 py-2 font-medium text-right">รายได้</th>
-              <th className="px-2 py-2 font-medium">Food %</th>
-              <th className="px-2 py-2 font-medium">Labor %</th>
-              <th className="px-2 py-2 font-medium">Fixed %</th>
-              <th className="px-2 py-2 font-medium">Prime %</th>
-              <th className="px-2 py-2 font-medium">Margin %</th>
+              <th className="px-3 py-2 font-medium text-left">{ui("เดือน")}</th>
+              <th className="px-3 py-2 font-medium text-right">
+                {ui("รายได้")}
+              </th>
+              <th className="px-2 py-2 font-medium">{ui("Food %")}</th>
+              <th className="px-2 py-2 font-medium">{ui("Labor %")}</th>
+              <th className="px-2 py-2 font-medium">{ui("Fixed %")}</th>
+              <th className="px-2 py-2 font-medium">{ui("Prime %")}</th>
+              <th className="px-2 py-2 font-medium">{ui("Margin %")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-hairline-soft">
             {months.map((m) => (
               <tr key={m.fiscalMonthId} className="hover:bg-surface">
-                <td className="px-3 py-1.5 font-medium">{m.label}</td>
+                <td className="px-3 py-1.5 font-medium">
+                  {displayMonth(m.label, uiLocale)}
+                </td>
                 <td className="px-3 py-1.5 text-right tabular-nums">
                   {m.netRevenue > 0 ? fmtTHB(m.netRevenue) : "-"}
                 </td>
@@ -433,7 +451,7 @@ function MonthlyStatusTable({
               </tr>
             ))}
             <tr className="bg-surface font-semibold">
-              <td className="px-3 py-2">รวมทั้งปี</td>
+              <td className="px-3 py-2">{ui("รวมทั้งปี")}</td>
               <td className="px-3 py-2 text-right tabular-nums">
                 {fmtTHB(total.netRevenue)}
               </td>
@@ -468,20 +486,22 @@ function MonthlyStatusTable({
       </div>
       <div className="px-4 py-2 text-xs text-muted border-t border-hairline-soft flex items-center gap-3 flex-wrap">
         <span className="inline-flex items-center gap-1.5">
-          <StatusDot tone="emerald" /> ดีมาก
+          <StatusDot tone="emerald" /> {ui("ดีมาก")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <StatusDot tone="sky" /> ดี
+          <StatusDot tone="sky" /> {ui("ดี")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <StatusDot tone="amber" /> พอใช้
+          <StatusDot tone="amber" /> {ui("พอใช้")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <StatusDot tone="red" /> ต้องปรับ
+          <StatusDot tone="red" /> {ui("ต้องปรับ")}
         </span>
         <span className="text-muted-soft">|</span>
         <span>
-          Food 28/32/35% • Labor 25/30/35% • Prime 55/60/65% • Margin ≥15/10/5%
+          {ui(
+            "Food 28/32/35% • Labor 25/30/35% • Prime 55/60/65% • Margin ≥15/10/5%"
+          )}
         </span>
       </div>
     </section>
@@ -497,6 +517,7 @@ function DataQualityTable({
   dqByMonth: Map<number, { daysWithSales: number; daysInMonth: number }>;
   total: number;
 }) {
+  const { ui, uiLocale } = useUi();
   const statusFor = (
     ratio: number
   ): { tone: "emerald" | "amber" | "red" | "slate"; icon: typeof Check } => {
@@ -512,18 +533,18 @@ function DataQualityTable({
         <table className="w-full text-xs text-center">
           <thead className="bg-surface">
             <tr>
-              <th className="px-3 py-2 font-medium text-left">เดือน</th>
+              <th className="px-3 py-2 font-medium text-left">{ui("เดือน")}</th>
               {months.map((m) => (
                 <th key={m.fiscalMonthId} className="px-2 py-2 font-medium">
-                  {m.label}
+                  {displayMonth(m.label, uiLocale)}
                 </th>
               ))}
-              <th className="px-3 py-2 font-medium bg-surface">รวม</th>
+              <th className="px-3 py-2 font-medium bg-surface">{ui("รวม")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-hairline-soft">
             <tr>
-              <td className="px-3 py-1.5 text-left">วันมี POS</td>
+              <td className="px-3 py-1.5 text-left">{ui("วันมี POS")}</td>
               {months.map((m) => {
                 const d = dqByMonth.get(m.fiscalMonthId);
                 return (
@@ -540,7 +561,7 @@ function DataQualityTable({
               </td>
             </tr>
             <tr>
-              <td className="px-3 py-1.5 text-left">สถานะ</td>
+              <td className="px-3 py-1.5 text-left">{ui("สถานะ")}</td>
               {months.map((m) => {
                 const d = dqByMonth.get(m.fiscalMonthId);
                 const ratio = d ? d.daysWithSales / d.daysInMonth : 0;
@@ -573,19 +594,20 @@ function DataQualityTable({
       </div>
       <div className="px-4 py-2 text-xs text-muted border-t border-hairline-soft flex items-center gap-3 flex-wrap">
         <span className="inline-flex items-center gap-1.5">
-          <Check className="h-3 w-3 text-emerald-600" strokeWidth={2.5} /> ครบ
-          (≥90%)
+          <Check className="h-3 w-3 text-emerald-600" strokeWidth={2.5} />
+          {ui("ครบ (≥90%)")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Circle className="h-3 w-3 text-amber-500" strokeWidth={2} /> พอใช้
-          (≥50%)
+          <Circle className="h-3 w-3 text-amber-500" strokeWidth={2} />
+          {ui("พอใช้ (≥50%)")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Circle className="h-3 w-3 text-red-500" strokeWidth={2} /> น้อย
+          <Circle className="h-3 w-3 text-red-500" strokeWidth={2} />
+          {ui("น้อย")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Circle className="h-3 w-3 text-muted-soft" strokeWidth={2} />{" "}
-          ยังไม่กรอก
+          <Circle className="h-3 w-3 text-muted-soft" strokeWidth={2} />
+          {ui("ยังไม่กรอก")}
         </span>
       </div>
     </section>
@@ -601,28 +623,31 @@ function MonthlyPLSummary({
   total: MonthlyTotals;
   dqByMonth: Map<number, { daysWithSales: number }>;
 }) {
+  const { ui, uiLocale } = useUi();
   return (
     <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead className="bg-surface text-right">
             <tr>
-              <th className="px-3 py-2 font-medium text-left">เดือน</th>
-              <th className="px-2 py-2 font-medium">วันขาย</th>
-              <th className="px-2 py-2 font-medium">บิล</th>
-              <th className="px-2 py-2 font-medium">รายได้</th>
-              <th className="px-2 py-2 font-medium">COGS</th>
-              <th className="px-2 py-2 font-medium">Labor</th>
-              <th className="px-2 py-2 font-medium">Fixed</th>
-              <th className="px-2 py-2 font-medium">รวมต้นทุน</th>
-              <th className="px-2 py-2 font-medium">กำไรสุทธิ</th>
-              <th className="px-2 py-2 font-medium">Margin %</th>
+              <th className="px-3 py-2 font-medium text-left">{ui("เดือน")}</th>
+              <th className="px-2 py-2 font-medium">{ui("วันขาย")}</th>
+              <th className="px-2 py-2 font-medium">{ui("บิล")}</th>
+              <th className="px-2 py-2 font-medium">{ui("รายได้")}</th>
+              <th className="px-2 py-2 font-medium">{ui("COGS")}</th>
+              <th className="px-2 py-2 font-medium">{ui("Labor")}</th>
+              <th className="px-2 py-2 font-medium">{ui("Fixed")}</th>
+              <th className="px-2 py-2 font-medium">{ui("รวมต้นทุน")}</th>
+              <th className="px-2 py-2 font-medium">{ui("กำไรสุทธิ")}</th>
+              <th className="px-2 py-2 font-medium">{ui("Margin %")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-hairline-soft">
             {months.map((m) => (
               <tr key={m.fiscalMonthId} className="hover:bg-surface">
-                <td className="px-3 py-1.5 font-medium">{m.label}</td>
+                <td className="px-3 py-1.5 font-medium">
+                  {displayMonth(m.label, uiLocale)}
+                </td>
                 <td className="px-2 py-1.5 text-right tabular-nums">
                   {dqByMonth.get(m.fiscalMonthId)?.daysWithSales || "-"}
                 </td>
@@ -675,7 +700,7 @@ function MonthlyPLSummary({
               </tr>
             ))}
             <tr className="bg-surface font-semibold">
-              <td className="px-3 py-2">รวมทั้งปี</td>
+              <td className="px-3 py-2">{ui("รวมทั้งปี")}</td>
               <td className="px-2 py-2 text-right tabular-nums">
                 {[...dqByMonth.values()].reduce(
                   (s, x) => s + x.daysWithSales,
@@ -731,6 +756,7 @@ function MonthlyPLSummary({
 }
 
 function RevenueProfitChart({ months }: { months: MonthlyTotals[] }) {
+  const { ui, uiLocale } = useUi();
   const maxVal = Math.max(
     ...months.flatMap((m) => [
       Math.abs(m.netRevenue),
@@ -743,9 +769,9 @@ function RevenueProfitChart({ months }: { months: MonthlyTotals[] }) {
   return (
     <section className="rounded-card border border-hairline bg-canvas p-5">
       <div className="flex items-center gap-4 text-xs mb-4 flex-wrap">
-        <Legend color="bg-emerald-500" label="รายได้" />
-        <Legend color="bg-red-400" label="รายจ่าย" />
-        <Legend color="bg-sky-500" label="กำไรสุทธิ" />
+        <Legend color="bg-emerald-500" label={ui("รายได้")} />
+        <Legend color="bg-red-400" label={ui("รายจ่าย")} />
+        <Legend color="bg-sky-500" label={ui("กำไรสุทธิ")} />
       </div>
       <div className="grid grid-cols-12 gap-2">
         {months.map((m) => {
@@ -760,23 +786,25 @@ function RevenueProfitChart({ months }: { months: MonthlyTotals[] }) {
                   v={m.netRevenue}
                   max={maxVal}
                   color="bg-emerald-500"
-                  title={`รายได้ ${fmtTHB(m.netRevenue)}`}
+                  title={ui("รายได้ {v0}", { v0: fmtTHB(m.netRevenue) })}
                 />
                 <Bar
                   v={m.totalCost}
                   max={maxVal}
                   color="bg-red-400"
-                  title={`รายจ่าย ${fmtTHB(m.totalCost)}`}
+                  title={ui("รายจ่าย {v0}", { v0: fmtTHB(m.totalCost) })}
                 />
                 <Bar
                   v={Math.max(m.netProfit, 0)}
                   max={maxVal}
                   color="bg-sky-500"
-                  title={`กำไร ${fmtTHB(m.netProfit)}`}
+                  title={ui("กำไร {v0}", { v0: fmtTHB(m.netProfit) })}
                   negative={m.netProfit < 0 ? Math.abs(m.netProfit) : 0}
                 />
               </div>
-              <div className="text-[10px] text-muted">{m.label}</div>
+              <div className="text-[10px] text-muted">
+                {displayMonth(m.label, uiLocale)}
+              </div>
               {hasData && (
                 <div
                   className={

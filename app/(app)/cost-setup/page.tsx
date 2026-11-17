@@ -1,3 +1,6 @@
+import { displayMonth } from "@/lib/i18n/core";
+
+import { getUi } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
 import { Settings } from "lucide-react";
 import { auth } from "@/auth";
@@ -26,6 +29,7 @@ export default async function CostSetupPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER" && session.user.role !== "ACCOUNTANT") {
@@ -36,9 +40,9 @@ export default async function CostSetupPage({
   if (!business) {
     return (
       <div className="p-8">
-        <PageHeader icon={Settings} title="Cost Setup" />
+        <PageHeader icon={Settings} title={ui("Cost Setup")} />
         <p className="mt-4 text-red-600">
-          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+          {ui("คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน")}
         </p>
       </div>
     );
@@ -62,9 +66,9 @@ export default async function CostSetupPage({
   if (!currentMonth) {
     return (
       <div className="p-8">
-        <PageHeader icon={Settings} title="Cost Setup" />
+        <PageHeader icon={Settings} title={ui("Cost Setup")} />
         <p className="mt-4 text-red-600">
-          ไม่พบข้อมูลปีงบในระบบ กรุณา seed ก่อน
+          {ui("ไม่พบข้อมูลปีงบในระบบ กรุณา seed ก่อน")}
         </p>
       </div>
     );
@@ -157,13 +161,18 @@ export default async function CostSetupPage({
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       <PageHeader
         icon={Settings}
-        title="Cost Setup"
-        description="สรุปค่าใช้จ่ายรายเดือนจาก Bank & Reconcile — ใช้ยอดเดียวกันใน Dashboard และ P&L"
+        title={ui("Cost Setup")}
+        description={ui(
+          "สรุปค่าใช้จ่ายรายเดือนจาก Bank & Reconcile — ใช้ยอดเดียวกันใน Dashboard และ P&L"
+        )}
         action={
           <MonthPicker
             months={allMonths.map((m) => ({
               id: m.id,
-              label: `${m.label} ${m.year.yearBE}`,
+              label: displayMonth(
+                `${displayMonth(m.label, uiLocale)} ${m.year.yearBE}`,
+                uiLocale
+              ),
             }))}
             currentId={currentMonth.id}
           />
@@ -172,10 +181,12 @@ export default async function CostSetupPage({
 
       <div className="rounded-input border border-hairline bg-canvas p-4">
         <div className="text-sm">
-          <span className="text-muted">เดือนที่กำลังดู:</span>{" "}
-          <span className="font-semibold">{currentMonth.fullLabel}</span>{" "}
+          <span className="text-muted">{ui("เดือนที่กำลังดู:")}</span>{" "}
+          <span className="font-semibold">
+            {displayMonth(currentMonth.fullLabel, uiLocale)}
+          </span>{" "}
           <span className="text-muted">
-            • จำนวนวัน {currentMonth.daysInMonth} วัน
+            {ui("• จำนวนวัน")} {currentMonth.daysInMonth} {ui("วัน")}
           </span>
         </div>
       </div>
@@ -184,12 +195,17 @@ export default async function CostSetupPage({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold">
-              ค่าใช้จ่ายที่ใช้คำนวณ P&L — {currentMonth.fullLabel}
+              {ui("ค่าใช้จ่ายที่ใช้คำนวณ P&L —")}{" "}
+              {displayMonth(currentMonth.fullLabel, uiLocale)}
             </h2>
             <p className="mt-1 text-xs text-muted">
               {statementExpenses.hasTransactions
-                ? "ใช้รายจ่ายที่จัดหมวดใน Bank & Reconcile เป็นหลัก • ไม่บวกยอดกรอกเดิมซ้ำ"
-                : "ยังไม่มีรายการใน Bank & Reconcile • ใช้ยอดกรอกเองด้านล่างชั่วคราว"}
+                ? ui(
+                    "ใช้รายจ่ายที่จัดหมวดใน Bank & Reconcile เป็นหลัก • ไม่บวกยอดกรอกเดิมซ้ำ"
+                  )
+                : ui(
+                    "ยังไม่มีรายการใน Bank & Reconcile • ใช้ยอดกรอกเองด้านล่างชั่วคราว"
+                  )}
             </p>
           </div>
           <strong className="text-xl tabular-nums">{fmtTHB(totalCost)}</strong>
@@ -201,7 +217,7 @@ export default async function CostSetupPage({
               className="rounded-input border border-hairline p-3"
             >
               <div className="text-xs text-muted">
-                {COST_BUCKET_LABELS[bucket]}
+                {ui(COST_BUCKET_LABELS[bucket])}
               </div>
               <div className="mt-1 font-semibold tabular-nums">
                 {fmtTHB(effectiveCosts[bucket])}
@@ -220,15 +236,19 @@ export default async function CostSetupPage({
         open={!statementExpenses.hasTransactions}
       >
         <summary className="cursor-pointer text-sm font-medium">
-          ยอดกรอกเองเดิม — {fmtTHB(manualTotal)}{" "}
+          {ui("ยอดกรอกเองเดิม —")} {fmtTHB(manualTotal)}{" "}
           {statementExpenses.hasTransactions
-            ? "(เก็บไว้เทียบ ไม่นับซ้ำใน P&L)"
-            : "(ใช้ใน P&L จนกว่าจะมีรายการธนาคาร)"}
+            ? ui("(เก็บไว้เทียบ ไม่นับซ้ำใน P&L)")
+            : ui("(ใช้ใน P&L จนกว่าจะมีรายการธนาคาร)")}
         </summary>
         <p className="text-xs text-muted mt-3 mb-4">
           {statementExpenses.hasTransactions
-            ? "เดือนนี้ใช้ยอดจาก Bank & Reconcile แล้ว หากมีรายจ่ายเงินสดให้บันทึกในบัญชีเงินสดของ Bank & Reconcile และจัดหมวด เพื่อรวมในสรุปเดียวกัน"
-            : "กรอกค่าใช้จ่ายได้เมื่อยังไม่มีข้อมูลธนาคาร เมื่อเริ่มลง Bank & Reconcile ระบบจะเปลี่ยนมาใช้ยอดธนาคารทั้งเดือน กรุณาลงให้ครบทุกบัญชีรวมถึงเงินสด"}
+            ? ui(
+                "เดือนนี้ใช้ยอดจาก Bank & Reconcile แล้ว หากมีรายจ่ายเงินสดให้บันทึกในบัญชีเงินสดของ Bank & Reconcile และจัดหมวด เพื่อรวมในสรุปเดียวกัน"
+              )
+            : ui(
+                "กรอกค่าใช้จ่ายได้เมื่อยังไม่มีข้อมูลธนาคาร เมื่อเริ่มลง Bank & Reconcile ระบบจะเปลี่ยนมาใช้ยอดธนาคารทั้งเดือน กรุณาลงให้ครบทุกบัญชีรวมถึงเงินสด"
+              )}
         </p>
         <fieldset
           disabled={statementExpenses.hasTransactions}

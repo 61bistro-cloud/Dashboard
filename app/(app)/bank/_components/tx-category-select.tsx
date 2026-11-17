@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { setTransactionCategory } from "../actions";
@@ -16,6 +18,7 @@ export function TxCategorySelect({
   categoryId: number | null;
   categories: Cat[];
 }) {
+  const { ui } = useUi();
   const [val, setVal] = useState(categoryId ? String(categoryId) : "");
   const [pending, start] = useTransition();
 
@@ -25,7 +28,7 @@ export function TxCategorySelect({
       try {
         await setTransactionCategory({ txId, categoryId: next || null });
       } catch (e) {
-        alert((e as Error).message);
+        alert(ui((e as Error).message));
         setVal(categoryId ? String(categoryId) : "");
       }
     });
@@ -43,9 +46,9 @@ export function TxCategorySelect({
         disabled={pending}
         className="w-full max-w-[210px] rounded border border-hairline-soft bg-canvas px-1.5 py-1 text-xs focus:border-ink focus:outline-none disabled:opacity-60"
       >
-        <option value="">— ไม่ระบุ —</option>
+        <option value="">{ui("— ไม่ระบุ —")}</option>
         {income.length > 0 && (
-          <optgroup label="รายรับ">
+          <optgroup label={ui("รายรับ")}>
             {income.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -54,7 +57,7 @@ export function TxCategorySelect({
           </optgroup>
         )}
         {expense.length > 0 && (
-          <optgroup label="รายจ่าย">
+          <optgroup label={ui("รายจ่าย")}>
             {expense.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -63,7 +66,7 @@ export function TxCategorySelect({
           </optgroup>
         )}
         {transfer.length > 0 && (
-          <optgroup label="โอน/ไม่นับ P&L">
+          <optgroup label={ui("โอน/ไม่นับ P&L")}>
             {transfer.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}

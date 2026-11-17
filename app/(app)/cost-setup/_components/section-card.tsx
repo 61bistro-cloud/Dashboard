@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { Check } from "lucide-react";
 import { fmt } from "./money-input";
@@ -18,6 +20,7 @@ export function SectionCard({
   onSave: () => Promise<void>;
   children: React.ReactNode;
 }) {
+  const { ui } = useUi();
   const [pending, start] = useTransition();
   const [saved, setSaved] = useState(false);
 
@@ -31,7 +34,7 @@ export function SectionCard({
         <div className="flex items-center gap-5">
           <div className="text-right">
             <div className="text-[10px] uppercase tracking-[0.08em] text-muted">
-              รวม
+              {ui("รวม")}
             </div>
             <div className="text-[18px] font-semibold tabular-nums">
               {fmt(total)}
@@ -51,7 +54,11 @@ export function SectionCard({
             className="inline-flex items-center gap-1.5 rounded-pill bg-ink px-5 py-2.5 text-[14px] font-medium text-canvas hover:bg-ink-2 disabled:opacity-50 transition-colors"
           >
             {saved && <Check className="h-4 w-4" strokeWidth={2.5} />}
-            {pending ? "กำลังบันทึก…" : saved ? "บันทึกแล้ว" : "บันทึก"}
+            {pending
+              ? ui("กำลังบันทึก…")
+              : saved
+                ? ui("บันทึกแล้ว")
+                : ui("บันทึก")}
           </button>
         </div>
       </header>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import {
   Plus,
@@ -30,6 +32,7 @@ const KINDS: { key: Kind; label: string }[] = [
 ];
 
 export function CategoryManager({ categories }: { categories: Cat[] }) {
+  const { ui } = useUi();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
@@ -70,7 +73,10 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
   function onDelete(cat: Cat) {
     if (
       !confirm(
-        `ลบหมวด "${cat.name}" ?\nถ้ามีรายการใช้หมวดนี้อยู่ ระบบจะซ่อนแทนการลบ (เก็บประวัติ)`
+        ui(
+          'ลบหมวด "{v0}" ?\nถ้ามีรายการใช้หมวดนี้อยู่ ระบบจะซ่อนแทนการลบ (เก็บประวัติ)',
+          { v0: cat.name }
+        )
       )
     )
       return;
@@ -83,11 +89,14 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
         <summary className="cursor-pointer px-5 py-3 flex items-center justify-between hover:bg-surface">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <Tags className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
-            จัดการหมวดหมู่ (ต้นทุน/รายรับ) ({categories.length})
+            {ui("จัดการหมวดหมู่ (ต้นทุน/รายรับ) (")}
+            {categories.length})
           </div>
-          <span className="text-xs text-muted group-open:hidden">เปิด ▾</span>
+          <span className="text-xs text-muted group-open:hidden">
+            {ui("เปิด ▾")}
+          </span>
           <span className="text-xs text-muted hidden group-open:inline">
-            ปิด ▴
+            {ui("ปิด ▴")}
           </span>
         </summary>
 
@@ -98,18 +107,22 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
             className="flex flex-wrap items-end gap-3 rounded-card bg-surface p-3"
           >
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-xs text-muted mb-1">ชื่อหมวด</label>
+              <label className="block text-xs text-muted mb-1">
+                {ui("ชื่อหมวด")}
+              </label>
               <input
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="เช่น 🥩 ต้นทุน - เนื้อสัตว์"
+                placeholder={ui("เช่น 🥩 ต้นทุน - เนื้อสัตว์")}
                 maxLength={80}
                 className="w-full rounded-input border border-hairline bg-canvas px-3 py-2 text-sm focus:border-ink focus:outline-none"
               />
             </div>
             <div className="w-44">
-              <label className="block text-xs text-muted mb-1">ประเภท</label>
+              <label className="block text-xs text-muted mb-1">
+                {ui("ประเภท")}
+              </label>
               <select
                 value={newKind}
                 onChange={(e) => setNewKind(e.target.value as Kind)}
@@ -117,7 +130,7 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
               >
                 {KINDS.map((k) => (
                   <option key={k.key} value={k.key}>
-                    {k.label}
+                    {ui(k.label)}
                   </option>
                 ))}
               </select>
@@ -131,15 +144,15 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <Plus className="h-3.5 w-3.5" />
-              )}
-              เพิ่มหมวด
+              )}{" "}
+              {ui("เพิ่มหมวด")}
             </button>
           </form>
 
           {error && (
             <div className="flex items-center gap-1.5 rounded-input bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-800">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-              {error}
+              {ui(error)}
             </div>
           )}
 
@@ -151,7 +164,7 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
               return (
                 <div key={k.key}>
                   <div className="text-xs font-medium uppercase tracking-wide text-muted mb-1.5 px-1">
-                    {k.label} ({list.length})
+                    {ui(k.label)} ({list.length})
                   </div>
                   <ul className="divide-y divide-hairline-soft rounded-card border border-hairline">
                     {list.map((cat, i) => (
@@ -173,7 +186,7 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
                               onClick={() => onRename(cat)}
                               disabled={pending}
                               className="text-emerald-700 hover:text-emerald-800 p-1"
-                              aria-label="บันทึก"
+                              aria-label={ui("บันทึก")}
                             >
                               <Check className="h-4 w-4" strokeWidth={2.5} />
                             </button>
@@ -181,7 +194,7 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
                               type="button"
                               onClick={() => setEditingId(null)}
                               className="text-muted hover:text-ink p-1"
-                              aria-label="ยกเลิก"
+                              aria-label={ui("ยกเลิก")}
                             >
                               <X className="h-4 w-4" strokeWidth={2} />
                             </button>
@@ -199,7 +212,7 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
                                 }
                                 disabled={pending || i === 0}
                                 className="text-muted-soft hover:text-ink disabled:opacity-25 p-1"
-                                aria-label="เลื่อนขึ้น"
+                                aria-label={ui("เลื่อนขึ้น")}
                               >
                                 <ArrowUp
                                   className="h-3.5 w-3.5"
@@ -213,7 +226,7 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
                                 }
                                 disabled={pending || i === list.length - 1}
                                 className="text-muted-soft hover:text-ink disabled:opacity-25 p-1"
-                                aria-label="เลื่อนลง"
+                                aria-label={ui("เลื่อนลง")}
                               >
                                 <ArrowDown
                                   className="h-3.5 w-3.5"
@@ -227,7 +240,7 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
                                   setEditName(cat.name);
                                 }}
                                 className="text-muted-soft hover:text-ink p-1"
-                                aria-label="แก้ชื่อ"
+                                aria-label={ui("แก้ชื่อ")}
                               >
                                 <Pencil
                                   className="h-3.5 w-3.5"
@@ -239,7 +252,7 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
                                 onClick={() => onDelete(cat)}
                                 disabled={pending}
                                 className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-1"
-                                aria-label="ลบ"
+                                aria-label={ui("ลบ")}
                               >
                                 <Trash2
                                   className="h-3.5 w-3.5"
@@ -258,8 +271,9 @@ export function CategoryManager({ categories }: { categories: Cat[] }) {
           </div>
 
           <p className="text-xs text-muted">
-            💡 ลำดับที่จัดเรียงนี้คือลำดับที่จะแสดงใน dropdown ตอนเลือกหมวด —
-            จัดของที่ใช้บ่อยไว้บนสุดเพื่อหาง่าย
+            {ui(
+              "💡 ลำดับที่จัดเรียงนี้คือลำดับที่จะแสดงใน dropdown ตอนเลือกหมวด — จัดของที่ใช้บ่อยไว้บนสุดเพื่อหาง่าย"
+            )}
           </p>
         </div>
       </details>

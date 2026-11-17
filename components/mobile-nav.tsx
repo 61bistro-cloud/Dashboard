@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useEffect, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X, UtensilsCrossed } from "lucide-react";
@@ -17,6 +19,7 @@ export function MobileNav({
   title: string;
   children: ReactNode;
 }) {
+  const { ui } = useUi();
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -41,7 +44,7 @@ export function MobileNav({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            aria-label="เปิดเมนู"
+            aria-label={ui("เปิดเมนู")}
             className="flex h-10 w-10 items-center justify-center rounded-pill hover:bg-surface active:bg-surface"
           >
             <Menu className="h-6 w-6" strokeWidth={1.75} />
@@ -83,7 +86,7 @@ export function MobileNav({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="ปิดเมนู"
+              aria-label={ui("ปิดเมนู")}
               className="flex h-10 w-10 items-center justify-center rounded-pill hover:bg-surface"
             >
               <X className="h-5 w-5" strokeWidth={1.75} />

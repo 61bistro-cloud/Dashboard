@@ -1,3 +1,6 @@
+import { displayMonth, dateLocale } from "@/lib/i18n/core";
+
+import { getUi } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
 import {
   ClipboardCheck,
@@ -38,6 +41,7 @@ export default async function ClosingPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER" && session.user.role !== "ACCOUNTANT") {
@@ -48,9 +52,9 @@ export default async function ClosingPage({
   if (!business) {
     return (
       <div className="p-8">
-        <PageHeader icon={ClipboardCheck} title="ปิดงบรายเดือน" />
+        <PageHeader icon={ClipboardCheck} title={ui("ปิดงบรายเดือน")} />
         <p className="mt-4 text-red-600">
-          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+          {ui("คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน")}
         </p>
       </div>
     );
@@ -64,8 +68,8 @@ export default async function ClosingPage({
   if (allMonths.length === 0) {
     return (
       <div className="p-8">
-        <PageHeader icon={ClipboardCheck} title="ปิดงบรายเดือน" />
-        <p className="mt-4 text-red-600">ไม่พบข้อมูลปีงบ</p>
+        <PageHeader icon={ClipboardCheck} title={ui("ปิดงบรายเดือน")} />
+        <p className="mt-4 text-red-600">{ui("ไม่พบข้อมูลปีงบ")}</p>
       </div>
     );
   }
@@ -80,8 +84,8 @@ export default async function ClosingPage({
   if (!view) {
     return (
       <div className="p-8">
-        <PageHeader icon={ClipboardCheck} title="ปิดงบรายเดือน" />
-        <p className="mt-4 text-red-600">คำนวณข้อมูลไม่ได้</p>
+        <PageHeader icon={ClipboardCheck} title={ui("ปิดงบรายเดือน")} />
+        <p className="mt-4 text-red-600">{ui("คำนวณข้อมูลไม่ได้")}</p>
       </div>
     );
   }
@@ -106,13 +110,19 @@ export default async function ClosingPage({
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1100px] mx-auto space-y-6">
       <PageHeader
         icon={ClipboardCheck}
-        title="ปิดงบรายเดือน"
-        description={`${business.name} — งบกำไรขาดทุน ${currentMonth.fullLabel}`}
+        title={ui("ปิดงบรายเดือน")}
+        description={ui("{v0} — งบกำไรขาดทุน {v1}", {
+          v0: business.name,
+          v1: displayMonth(currentMonth.fullLabel, uiLocale),
+        })}
         action={
           <MonthPicker
             months={allMonths.map((m) => ({
               id: m.id,
-              label: `${m.label} ${m.year.yearBE}`,
+              label: displayMonth(
+                `${displayMonth(m.label, uiLocale)} ${m.year.yearBE}`,
+                uiLocale
+              ),
             }))}
             currentId={currentMonth.id}
           />
@@ -144,21 +154,28 @@ export default async function ClosingPage({
           <div>
             <div className="text-sm font-semibold">
               {isClosed
-                ? "ปิดงบแล้ว (Finalized)"
+                ? ui("ปิดงบแล้ว (Finalized)")
                 : recordExists
-                  ? "เปิดแก้ไขอยู่ (ยังไม่ Finalize)"
-                  : "ยังไม่ได้ปิดงบเดือนนี้"}
+                  ? ui("เปิดแก้ไขอยู่ (ยังไม่ Finalize)")
+                  : ui("ยังไม่ได้ปิดงบเดือนนี้")}
             </div>
             <div className="text-xs text-muted mt-0.5">
               {isClosed && view.closing
-                ? `โดย ${view.closing.closedByName ?? "—"} • ${view.closing.closedAt.toLocaleString("th-TH")}`
-                : "กดปุ่มด้านขวาเพื่อปิดงบ เมื่อตรวจสอบความถูกต้องเรียบร้อย"}
+                ? ui("โดย {v0} • {v1}", {
+                    v0: view.closing.closedByName ?? "—",
+                    v1: view.closing.closedAt.toLocaleString(
+                      dateLocale(uiLocale)
+                    ),
+                  })
+                : ui(
+                    "กดปุ่มด้านขวาเพื่อปิดงบ เมื่อตรวจสอบความถูกต้องเรียบร้อย"
+                  )}
             </div>
           </div>
         </div>
         <ClosingControls
           fiscalMonthId={currentMonth.id}
-          monthLabel={currentMonth.fullLabel}
+          monthLabel={displayMonth(currentMonth.fullLabel, uiLocale)}
           isClosed={isClosed}
           hasDrift={view.drift.length > 0}
           exportHref={exportHref}
@@ -173,15 +190,19 @@ export default async function ClosingPage({
               className="h-4 w-4 text-muted-soft"
               strokeWidth={1.75}
             />
-            ตรวจสอบความถูกต้องก่อนปิดงบ
+            {ui("ตรวจสอบความถูกต้องก่อนปิดงบ")}
           </h2>
           <span className="text-xs text-muted">
             {fails > 0 ? (
-              <span className="text-red-600">ต้องแก้ {fails} จุด</span>
+              <span className="text-red-600">
+                {ui("ต้องแก้")} {fails} {ui("จุด")}
+              </span>
             ) : warns > 0 ? (
-              <span className="text-amber-600">เตือน {warns} จุด</span>
+              <span className="text-amber-600">
+                {ui("เตือน")} {warns} {ui("จุด")}
+              </span>
             ) : (
-              <span className="text-emerald-600">ผ่านทั้งหมด ✓</span>
+              <span className="text-emerald-600">{ui("ผ่านทั้งหมด ✓")}</span>
             )}
           </span>
         </header>
@@ -194,9 +215,9 @@ export default async function ClosingPage({
                   className={"h-4 w-4 shrink-0 " + CHECK_CLS[c.status]}
                   strokeWidth={2}
                 />
-                <span className="flex-1 text-sm">{c.label}</span>
+                <span className="flex-1 text-sm">{ui(c.label)}</span>
                 <span className="text-xs text-muted text-right">
-                  {c.detail}
+                  {ui(c.detail)}
                 </span>
               </li>
             );
@@ -208,22 +229,23 @@ export default async function ClosingPage({
       <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
         <header className="border-b border-hairline-soft px-5 py-3">
           <h2 className="text-sm font-semibold">
-            งบกำไรขาดทุน — {currentMonth.fullLabel}
+            {ui("งบกำไรขาดทุน —")}{" "}
+            {displayMonth(currentMonth.fullLabel, uiLocale)}
           </h2>
           <p className="text-xs text-muted mt-0.5">
             {isClosed
-              ? "ตัวเลข ณ วันที่ปิดงบ (snapshot)"
-              : "ตัวเลขปัจจุบันจากบัญชีรายวัน (ยังไม่ปิด)"}
+              ? ui("ตัวเลข ณ วันที่ปิดงบ (snapshot)")
+              : ui("ตัวเลขปัจจุบันจากบัญชีรายวัน (ยังไม่ปิด)")}
           </p>
         </header>
         <div className="px-3 sm:px-5 py-4">
           <PLStatement view={view} />
 
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <Kpi label="Food %" v={ratios.food} />
-            <Kpi label="Labor %" v={ratios.labor} />
-            <Kpi label="Prime %" v={ratios.prime} />
-            <Kpi label="Fixed %" v={ratios.fixed} />
+            <Kpi label={ui("Food %")} v={ratios.food} />
+            <Kpi label={ui("Labor %")} v={ratios.labor} />
+            <Kpi label={ui("Prime %")} v={ratios.prime} />
+            <Kpi label={ui("Fixed %")} v={ratios.fixed} />
           </div>
         </div>
       </section>
@@ -242,7 +264,7 @@ export default async function ClosingPage({
           <header className="border-b border-hairline-soft px-5 py-3">
             <h2 className="flex items-center gap-2 text-sm font-semibold">
               <History className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
-              ประวัติการปิดงบ / แก้ไข
+              {ui("ประวัติการปิดงบ / แก้ไข")}
             </h2>
           </header>
           <ul className="divide-y divide-hairline-soft text-xs">
@@ -252,7 +274,7 @@ export default async function ClosingPage({
                 className="flex items-center gap-3 px-5 py-2 text-muted"
               >
                 <span className="tabular-nums whitespace-nowrap">
-                  {l.createdAt.toLocaleString("th-TH")}
+                  {l.createdAt.toLocaleString(dateLocale(uiLocale))}
                 </span>
                 <span className="flex-1 text-ink/80">
                   {l.detail ?? l.action}

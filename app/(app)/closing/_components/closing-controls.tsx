@@ -1,4 +1,7 @@
 "use client";
+import { displayMonth } from "@/lib/i18n/core";
+
+import { useUi } from "@/lib/i18n/use-ui";
 
 import { useState, useTransition } from "react";
 import {
@@ -33,6 +36,7 @@ export function ClosingControls({
   hasDrift: boolean;
   exportHref: string;
 }) {
+  const { ui, uiLocale } = useUi();
   const [mode, setMode] = useState<Mode>(null);
   const [password, setPassword] = useState("");
   const [note, setNote] = useState("");
@@ -74,7 +78,7 @@ export function ClosingControls({
           className="inline-flex items-center gap-1.5 rounded-pill bg-ink px-4 py-2 text-sm font-medium text-canvas hover:bg-ink-2"
         >
           <Lock className="h-4 w-4" strokeWidth={2} />
-          ปิดงบเดือนนี้
+          {ui("ปิดงบเดือนนี้")}
         </button>
       )}
       {isClosed && (
@@ -86,7 +90,7 @@ export function ClosingControls({
               className="inline-flex items-center gap-1.5 rounded-pill bg-amber-100 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-200"
             >
               <RefreshCw className="h-4 w-4" strokeWidth={2} />
-              Re-sync ตัวเลข
+              {ui("Re-sync ตัวเลข")}
             </button>
           )}
           <button
@@ -95,7 +99,7 @@ export function ClosingControls({
             className="inline-flex items-center gap-1.5 rounded-pill border border-hairline px-4 py-2 text-sm font-medium hover:bg-surface"
           >
             <Unlock className="h-4 w-4" strokeWidth={2} />
-            เปิดแก้ไข
+            {ui("เปิดแก้ไข")}
           </button>
         </>
       )}
@@ -105,8 +109,7 @@ export function ClosingControls({
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 rounded-pill border border-hairline px-4 py-2 text-sm font-medium hover:bg-surface"
       >
-        <FileDown className="h-4 w-4" strokeWidth={2} />
-        Export PDF
+        <FileDown className="h-4 w-4" strokeWidth={2} /> {ui("Export PDF")}
       </a>
 
       {/* Approval modal */}
@@ -122,28 +125,28 @@ export function ClosingControls({
                 className="h-5 w-5 text-amber-600"
                 strokeWidth={1.75}
               />
-              {TITLES[mode]} — {monthLabel}
+              {ui(TITLES[mode])} — {displayMonth(monthLabel, uiLocale)}
             </div>
             <p className="mt-1.5 text-xs text-muted">
               {mode === "close" &&
-                "บันทึกตัวเลข P&L ของเดือนนี้เป็นทางการ (freeze)"}
+                ui("บันทึกตัวเลข P&L ของเดือนนี้เป็นทางการ (freeze)")}
               {mode === "reopen" &&
-                "ปลดล็อกเพื่อแก้ไข — ตัวเลขอาจเปลี่ยนได้จนกว่าจะปิดใหม่"}
+                ui("ปลดล็อกเพื่อแก้ไข — ตัวเลขอาจเปลี่ยนได้จนกว่าจะปิดใหม่")}
               {mode === "resync" &&
-                "อัปเดต snapshot ให้ตรงกับข้อมูลรายวันล่าสุด"}
+                ui("อัปเดต snapshot ให้ตรงกับข้อมูลรายวันล่าสุด")}
             </p>
 
             {mode === "close" && (
               <div className="mt-3">
                 <label className="block text-xs text-muted mb-1">
-                  หมายเหตุการปิดงบ (ไม่บังคับ)
+                  {ui("หมายเหตุการปิดงบ (ไม่บังคับ)")}
                 </label>
                 <input
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   maxLength={500}
-                  placeholder="เช่น ตรวจสอบครบแล้ว"
+                  placeholder={ui("เช่น ตรวจสอบครบแล้ว")}
                   className="w-full rounded-input border border-hairline bg-canvas px-3 py-2 text-sm focus:border-ink focus:outline-none"
                 />
               </div>
@@ -151,7 +154,7 @@ export function ClosingControls({
 
             <div className="mt-3">
               <label className="block text-xs text-muted mb-1">
-                รหัสอนุมัติเจ้าของ
+                {ui("รหัสอนุมัติเจ้าของ")}
               </label>
               <input
                 type="password"
@@ -169,7 +172,7 @@ export function ClosingControls({
             {error && (
               <div className="mt-2 flex items-center gap-1.5 text-xs text-red-600">
                 <AlertCircle className="h-3.5 w-3.5" strokeWidth={2} />
-                {error}
+                {ui(error)}
               </div>
             )}
 
@@ -180,7 +183,7 @@ export function ClosingControls({
                 disabled={pending}
                 className="rounded-pill px-3 py-1.5 text-sm text-muted hover:text-ink"
               >
-                ยกเลิก
+                {ui("ยกเลิก")}
               </button>
               <button
                 type="button"
@@ -192,8 +195,8 @@ export function ClosingControls({
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
                   <ShieldCheck className="h-3.5 w-3.5" />
-                )}
-                อนุมัติ
+                )}{" "}
+                {ui("อนุมัติ")}
               </button>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
 import * as jsxRuntime from "react/jsx-runtime";
+import { createUi, displayMonth } from "../lib/i18n/core";
 
 // Exercise the component's event flow with isolated hooks and a fake action.
 async function setup(
@@ -34,6 +35,10 @@ async function setup(
       ],
     },
     "react/jsx-runtime": jsxRuntime,
+    "@/lib/i18n/use-ui": {
+      useUi: () => ({ ui: createUi("th"), uiLocale: "th" }),
+    },
+    "@/lib/i18n/core": { displayMonth },
     "lucide-react": { Pencil: "icon", Trash2: "icon", Loader2: "icon" },
     "../actions": {
       bulkDeleteTransactions: async (input: any) => {
@@ -118,7 +123,7 @@ async function setup(
     return node;
   };
   const click = (label: string) => {
-    const node = find((n) => n.type === "button" && text(n) === label);
+    const node = find((n) => n.type === "button" && text(n).trim() === label);
     assert.ok(!node.props.disabled);
     node.props.onClick();
   };

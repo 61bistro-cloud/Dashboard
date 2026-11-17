@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import type { ReactNode } from "react";
 import {
   DndContext,
@@ -74,6 +76,7 @@ export function SortableRow({
   id: number;
   children: (args: { dragHandle: ReactNode; isDragging: boolean }) => ReactNode;
 }) {
+  const { ui } = useUi();
   const {
     attributes,
     listeners,
@@ -97,8 +100,8 @@ export function SortableRow({
       {...attributes}
       {...listeners}
       className="cursor-grab active:cursor-grabbing touch-none text-muted-soft hover:text-ink p-1 -ml-1 shrink-0"
-      aria-label="ลากเพื่อจัดลำดับ"
-      title="ลากเพื่อจัดลำดับ"
+      aria-label={ui("ลากเพื่อจัดลำดับ")}
+      title={ui("ลากเพื่อจัดลำดับ")}
     >
       <GripVertical className="h-4 w-4" strokeWidth={1.75} />
     </button>

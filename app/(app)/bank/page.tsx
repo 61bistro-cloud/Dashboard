@@ -1,3 +1,7 @@
+import { displayMonth } from "@/lib/i18n/core";
+
+import { useUi } from "@/lib/i18n/use-ui";
+import { getUi } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
@@ -57,16 +61,17 @@ function KindBadge({
 }: {
   kind: "INCOME" | "EXPENSE" | "TRANSFER" | "UNCATEGORIZED";
 }) {
+  const { ui, uiLocale } = useUi();
   const map = {
-    INCOME: { label: "รายรับ", cls: "bg-emerald-50 text-emerald-700" },
-    EXPENSE: { label: "รายจ่าย", cls: "bg-red-50 text-red-700" },
-    TRANSFER: { label: "โอน", cls: "bg-surface text-ink/75" },
-    UNCATEGORIZED: { label: "ไม่ระบุ", cls: "bg-surface text-muted" },
+    INCOME: { label: ui("รายรับ"), cls: "bg-emerald-50 text-emerald-700" },
+    EXPENSE: { label: ui("รายจ่าย"), cls: "bg-red-50 text-red-700" },
+    TRANSFER: { label: ui("โอน"), cls: "bg-surface text-ink/75" },
+    UNCATEGORIZED: { label: ui("ไม่ระบุ"), cls: "bg-surface text-muted" },
   } as const;
   const m = map[kind];
   return (
     <span className={`inline-flex rounded-pill px-2 py-0.5 text-xs ${m.cls}`}>
-      {m.label}
+      {displayMonth(m.label, uiLocale)}
     </span>
   );
 }
@@ -78,6 +83,7 @@ export default async function BankPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER" && session.user.role !== "ACCOUNTANT") {
@@ -88,9 +94,9 @@ export default async function BankPage({
   if (!business) {
     return (
       <div className="p-8">
-        <PageHeader icon={Landmark} title="Bank & Reconciliation" />
+        <PageHeader icon={Landmark} title={ui("Bank & Reconciliation")} />
         <p className="mt-4 text-red-600">
-          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+          {ui("คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน")}
         </p>
       </div>
     );
@@ -116,8 +122,10 @@ export default async function BankPage({
   if (allMonths.length === 0) {
     return (
       <div className="p-8">
-        <PageHeader icon={Landmark} title="Bank & Reconciliation" />
-        <p className="mt-4 text-red-600">ไม่พบข้อมูลปีงบ กรุณา seed ก่อน</p>
+        <PageHeader icon={Landmark} title={ui("Bank & Reconciliation")} />
+        <p className="mt-4 text-red-600">
+          {ui("ไม่พบข้อมูลปีงบ กรุณา seed ก่อน")}
+        </p>
       </div>
     );
   }
@@ -128,8 +136,11 @@ export default async function BankPage({
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
         <PageHeader
           icon={Landmark}
-          title="Bank & Reconciliation"
-          description={`${business.name} — ยังไม่มีบัญชี เพิ่มบัญชี/ช่องทางแรกได้เลยด้านล่าง`}
+          title={ui("Bank & Reconciliation")}
+          description={ui(
+            "{v0} — ยังไม่มีบัญชี เพิ่มบัญชี/ช่องทางแรกได้เลยด้านล่าง",
+            { v0: business.name }
+          )}
         />
         <AccountManager accounts={[]} />
       </div>
@@ -174,13 +185,18 @@ export default async function BankPage({
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
       <PageHeader
         icon={Landmark}
-        title="Bank & Reconciliation"
-        description="สมุดเดินบัญชี 3 บัญชี + จับคู่ POS ↔ Statement ต่อช่องทาง"
+        title={ui("Bank & Reconciliation")}
+        description={ui(
+          "สมุดเดินบัญชี 3 บัญชี + จับคู่ POS ↔ Statement ต่อช่องทาง"
+        )}
         action={
           <MonthPicker
             months={allMonths.map((m) => ({
               id: m.id,
-              label: `${m.label} ${m.year.yearBE}`,
+              label: displayMonth(
+                `${displayMonth(m.label, uiLocale)} ${m.year.yearBE}`,
+                uiLocale
+              ),
             }))}
             currentId={currentMonth.id}
           />
@@ -199,7 +215,7 @@ export default async function BankPage({
               key={a.account.id}
               href={`/bank?month=${currentMonth.id}&account=${a.account.code}`}
               scroll={false}
-              aria-label={`เลือกบัญชี ${a.account.name}`}
+              aria-label={ui("เลือกบัญชี {v0}", { v0: a.account.name })}
               aria-current={isActive ? "page" : undefined}
               className={
                 "block rounded-card border p-4 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-ink/30 " +
@@ -219,17 +235,19 @@ export default async function BankPage({
                     {a.account.name}
                     {isCard && (
                       <span className="ml-2 inline-flex items-center rounded-pill bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-900">
-                        บัตรเครดิต
+                        {ui("บัตรเครดิต")}
                       </span>
                     )}
                   </span>
                 </div>
-                <div className="text-xs text-muted">{a.txCount} รายการ</div>
+                <div className="text-xs text-muted">
+                  {a.txCount} {ui("รายการ")}
+                </div>
               </div>
               <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
                 <div>
                   <div className="text-muted">
-                    {isCard ? "ยกมาค้างชำระ" : "ยกมา"}
+                    {isCard ? ui("ยกมาค้างชำระ") : ui("ยกมา")}
                   </div>
                   <div className="font-medium tabular-nums">
                     {fmtTHB(isCard ? -a.opening : a.opening)}
@@ -237,8 +255,8 @@ export default async function BankPage({
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-emerald-600">
-                    <ArrowUpRight className="h-3 w-3" strokeWidth={2.5} />{" "}
-                    {isCard ? "ชำระคืน" : "IN"}
+                    <ArrowUpRight className="h-3 w-3" strokeWidth={2.5} />
+                    {isCard ? ui("ชำระคืน") : "IN"}
                   </div>
                   <div className="font-medium tabular-nums text-emerald-700">
                     {fmtTHB(a.inflow)}
@@ -246,8 +264,8 @@ export default async function BankPage({
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-red-600">
-                    <ArrowDownRight className="h-3 w-3" strokeWidth={2.5} />{" "}
-                    {isCard ? "ใช้จ่าย" : "OUT"}
+                    <ArrowDownRight className="h-3 w-3" strokeWidth={2.5} />
+                    {isCard ? ui("ใช้จ่าย") : "OUT"}
                   </div>
                   <div className="font-medium tabular-nums text-red-700">
                     {fmtTHB(a.outflow)}
@@ -256,7 +274,7 @@ export default async function BankPage({
               </div>
               <div className="mt-2 pt-2 border-t border-hairline flex items-center justify-between">
                 <div className="text-xs text-muted">
-                  {isCard ? "ยอดค้างชำระ" : "คงเหลือ"}
+                  {isCard ? ui("ยอดค้างชำระ") : ui("คงเหลือ")}
                 </div>
                 <div
                   className={
@@ -286,26 +304,33 @@ export default async function BankPage({
               className="h-4 w-4 text-muted-soft"
               strokeWidth={1.75}
             />
-            กระทบยอด POS vs Statement — {currentMonth.fullLabel}
+            {ui("กระทบยอด POS vs Statement —")}{" "}
+            {displayMonth(currentMonth.fullLabel, uiLocale)}
           </h2>
           <p className="text-xs text-muted mt-0.5">
-            เทียบยอด POS (จากบิล Foodstory) กับยอดเข้าบัญชี (จาก Bank
-            Transaction ที่ categorized) — diff อาจเป็นค่าธรรมเนียม / ยังไม่ลง
-            statement
+            {ui(
+              "เทียบยอด POS (จากบิล Foodstory) กับยอดเข้าบัญชี (จาก Bank Transaction ที่ categorized) — diff อาจเป็นค่าธรรมเนียม / ยังไม่ลง statement"
+            )}
           </p>
         </header>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-surface text-left">
               <tr>
-                <th className="px-3 py-2 font-medium">ช่องทาง</th>
-                <th className="px-3 py-2 font-medium text-right">POS (Net)</th>
+                <th className="px-3 py-2 font-medium">{ui("ช่องทาง")}</th>
                 <th className="px-3 py-2 font-medium text-right">
-                  Statement (Credit)
+                  {ui("POS (Net)")}
                 </th>
-                <th className="px-3 py-2 font-medium text-right">ส่วนต่าง</th>
-                <th className="px-3 py-2 font-medium text-right">%Diff</th>
-                <th className="px-3 py-2 font-medium">สถานะ</th>
+                <th className="px-3 py-2 font-medium text-right">
+                  {ui("Statement (Credit)")}
+                </th>
+                <th className="px-3 py-2 font-medium text-right">
+                  {ui("ส่วนต่าง")}
+                </th>
+                <th className="px-3 py-2 font-medium text-right">
+                  {ui("%Diff")}
+                </th>
+                <th className="px-3 py-2 font-medium">{ui("สถานะ")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-hairline-soft">
@@ -354,7 +379,7 @@ export default async function BankPage({
                         className={`inline-flex items-center gap-1.5 text-xs rounded-pill px-2 py-0.5 ${style.bg}`}
                       >
                         <StatusIcon className="h-3 w-3" strokeWidth={2.5} />
-                        {style.label}
+                        {ui(style.label)}
                       </span>
                     </td>
                   </tr>
@@ -399,18 +424,19 @@ export default async function BankPage({
         <header className="border-b border-hairline-soft px-5 py-3 flex items-center justify-between flex-wrap gap-3">
           <div>
             <h2 className="text-sm font-semibold flex items-center gap-2">
-              {currentAccount.name} — {currentMonth.fullLabel}
+              {currentAccount.name} —{" "}
+              {displayMonth(currentMonth.fullLabel, uiLocale)}
               {currentAccount.accountType === "CREDIT_CARD" && (
                 <span className="inline-flex items-center rounded-pill bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-900">
-                  บัตรเครดิต
+                  {ui("บัตรเครดิต")}
                 </span>
               )}
             </h2>
             <p className="text-xs text-muted mt-0.5">
               {currentAccount.accountType === "CREDIT_CARD" ? (
                 <>
-                  ยกมาค้างชำระ {fmtTHB(-selectedData.opening)} •{" "}
-                  {selectedData.txCount} รายการ • ยอดค้างชำระ{" "}
+                  {ui("ยกมาค้างชำระ")} {fmtTHB(-selectedData.opening)} •{" "}
+                  {selectedData.txCount} {ui("รายการ • ยอดค้างชำระ")}{" "}
                   <span
                     className={
                       "font-medium " +
@@ -422,8 +448,8 @@ export default async function BankPage({
                 </>
               ) : (
                 <>
-                  ยกมา {fmtTHB(selectedData.opening)} • {selectedData.txCount}{" "}
-                  รายการ • คงเหลือ{" "}
+                  {ui("ยกมา")} {fmtTHB(selectedData.opening)} •{" "}
+                  {selectedData.txCount} {ui("รายการ • คงเหลือ")}{" "}
                   <span
                     className={
                       "font-medium " +
@@ -448,10 +474,12 @@ export default async function BankPage({
             className="underline font-medium"
             href={`/bank/evidence?month=${currentMonth.id}&account=${encodeURIComponent(currentAccount.code)}`}
           >
-            จับคู่สลิป / ใบเสร็จกับ Statement เดือนนี้ →
+            {ui("จับคู่สลิป / ใบเสร็จกับ Statement เดือนนี้ →")}
           </Link>
           <p className="mt-1 text-muted">
-            อ่านข้อความจากหลักฐาน แล้วตรวจและยืนยันคู่เพื่อแนบกับรายการด้านล่าง
+            {ui(
+              "อ่านข้อความจากหลักฐาน แล้วตรวจและยืนยันคู่เพื่อแนบกับรายการด้านล่าง"
+            )}
           </p>
         </div>
 
@@ -484,7 +512,7 @@ export default async function BankPage({
           fiscalMonthId={currentMonth.id}
           accountId={currentAccount.id}
           accountName={currentAccount.name}
-          monthLabel={currentMonth.fullLabel}
+          monthLabel={displayMonth(currentMonth.fullLabel, uiLocale)}
           accountType={currentAccount.accountType}
           rows={selectedData.rows.map((row) => ({
             ...row,
@@ -506,23 +534,29 @@ export default async function BankPage({
         <header className="border-b border-hairline-soft px-5 py-3">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
             <ChartBar className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
-            สรุปตามหมวดหมู่ — ทั้งเดือน (ทุกบัญชี)
+            {ui("สรุปตามหมวดหมู่ — ทั้งเดือน (ทุกบัญชี)")}
           </h2>
         </header>
         {catSummary.length === 0 ? (
           <div className="p-10 text-center text-sm text-muted">
-            ยังไม่มีรายการในเดือนนี้
+            {ui("ยังไม่มีรายการในเดือนนี้")}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-surface text-left">
                 <tr>
-                  <th className="px-3 py-2 font-medium">หมวด</th>
-                  <th className="px-3 py-2 font-medium">ประเภท</th>
-                  <th className="px-3 py-2 font-medium text-right">รายรับ</th>
-                  <th className="px-3 py-2 font-medium text-right">รายจ่าย</th>
-                  <th className="px-3 py-2 font-medium text-right">รายการ</th>
+                  <th className="px-3 py-2 font-medium">{ui("หมวด")}</th>
+                  <th className="px-3 py-2 font-medium">{ui("ประเภท")}</th>
+                  <th className="px-3 py-2 font-medium text-right">
+                    {ui("รายรับ")}
+                  </th>
+                  <th className="px-3 py-2 font-medium text-right">
+                    {ui("รายจ่าย")}
+                  </th>
+                  <th className="px-3 py-2 font-medium text-right">
+                    {ui("รายการ")}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline-soft">

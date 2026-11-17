@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { Trash2, Loader2 } from "lucide-react";
 import { updateUserRole, deleteUser } from "../actions";
@@ -14,6 +16,7 @@ export function RoleSelect({
   currentRole: Role;
   isMe: boolean;
 }) {
+  const { ui } = useUi();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -36,15 +39,15 @@ export function RoleSelect({
         disabled={pending || isMe}
         onChange={(e) => onChange(e.target.value as Role)}
         className="rounded-input border border-hairline bg-canvas px-2 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed"
-        title={isMe ? "เปลี่ยนสิทธิ์ของตัวเองไม่ได้" : undefined}
+        title={isMe ? ui("เปลี่ยนสิทธิ์ของตัวเองไม่ได้") : undefined}
       >
-        <option value="OWNER">เจ้าของร้าน</option>
-        <option value="ACCOUNTANT">บัญชี</option>
-        <option value="STAFF">พนักงาน</option>
+        <option value="OWNER">{ui("เจ้าของร้าน")}</option>
+        <option value="ACCOUNTANT">{ui("บัญชี")}</option>
+        <option value="STAFF">{ui("พนักงาน")}</option>
       </select>
       {pending && <Loader2 className="h-3 w-3 animate-spin text-muted-soft" />}
       {error && (
-        <span className="text-xs text-red-600" title={error}>
+        <span className="text-xs text-red-600" title={ui(error)}>
           ⚠️
         </span>
       )}
@@ -61,6 +64,7 @@ export function DeleteUserButton({
   email: string;
   isMe: boolean;
 }) {
+  const { ui } = useUi();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -68,7 +72,9 @@ export function DeleteUserButton({
     if (isMe) return;
     if (
       !confirm(
-        `ลบผู้ใช้ ${email} จริงหรือไม่? ผู้ใช้คนนี้จะไม่สามารถ login ได้อีก`
+        ui("ลบผู้ใช้ {v0} จริงหรือไม่? ผู้ใช้คนนี้จะไม่สามารถ login ได้อีก", {
+          v0: email,
+        })
       )
     ) {
       return;
@@ -79,7 +85,7 @@ export function DeleteUserButton({
         await deleteUser(id);
       } catch (e) {
         setError((e as Error).message);
-        alert((e as Error).message);
+        alert(ui((e as Error).message));
       }
     });
   }
@@ -89,7 +95,7 @@ export function DeleteUserButton({
       type="button"
       onClick={onDelete}
       disabled={pending || isMe}
-      title={isMe ? "ลบบัญชีตัวเองไม่ได้" : "ลบผู้ใช้"}
+      title={isMe ? ui("ลบบัญชีตัวเองไม่ได้") : ui("ลบผู้ใช้")}
       className="inline-flex items-center justify-center rounded-pill border border-hairline px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed"
     >
       {pending ? (

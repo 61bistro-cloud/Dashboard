@@ -1,3 +1,6 @@
+import { displayMonth } from "@/lib/i18n/core";
+
+import { getUi } from "@/lib/i18n/server";
 import { readAutoEvidenceStatus } from "@/lib/evidence-auto";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -17,11 +20,12 @@ export default async function EvidencePage({
 }: {
   searchParams: Promise<{ month?: string; account?: string; page?: string }>;
 }) {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (!["OWNER", "ACCOUNTANT"].includes(session.user.role)) redirect("/");
   const business = await getCurrentBusiness();
-  if (!business) return <p className="p-8">ไม่มีสิทธิ์เข้าถึงธุรกิจ</p>;
+  if (!business) return <p className="p-8">{ui("ไม่มีสิทธิ์เข้าถึงธุรกิจ")}</p>;
   const sp = await searchParams;
   const [months, accounts, categories] = await Promise.all([
     prisma.fiscalMonth.findMany({
@@ -42,7 +46,7 @@ export default async function EvidencePage({
     months.find((m) => m.id === Number(sp.month)) ??
     (await getCurrentFiscalMonth()) ??
     months[0];
-  if (!month) return <p className="p-8">ยังไม่มีเดือนในระบบ</p>;
+  if (!month) return <p className="p-8">{ui("ยังไม่มีเดือนในระบบ")}</p>;
   const account = accounts.find((a) => a.code === sp.account);
   const page = Math.max(
     1,
@@ -83,13 +87,16 @@ export default async function EvidencePage({
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-5">
       <PageHeader
         icon={Paperclip}
-        title="จับคู่หลักฐานกับ Statement"
-        description={`${business.name} — ${month.fullLabel}`}
+        title={ui("จับคู่หลักฐานกับ Statement")}
+        description={`${business.name} — ${displayMonth(month.fullLabel, uiLocale)}`}
         action={
           <MonthPicker
             months={months.map((m) => ({
               id: m.id,
-              label: `${m.label} ${m.year.yearBE}`,
+              label: displayMonth(
+                `${displayMonth(m.label, uiLocale)} ${m.year.yearBE}`,
+                uiLocale
+              ),
             }))}
             currentId={month.id}
           />
@@ -100,34 +107,34 @@ export default async function EvidencePage({
           className="underline"
           href={`/bank?month=${month.id}${account ? `&account=${encodeURIComponent(account.code)}` : ""}`}
         >
-          กลับ Bank & Reconcile
+          {ui("กลับ Bank & Reconcile")}
         </Link>
         <Link className="underline" href="/admin/google">
-          อัปโหลดหลักฐานเพิ่ม
+          {ui("อัปโหลดหลักฐานเพิ่ม")}
         </Link>
       </div>
       <div className="rounded-card border border-hairline bg-surface p-4 text-xs space-y-2">
         <p>
-          เลือกเดือนและบัญชี แล้วกด “ตรวจและจัดหมวดอัตโนมัติทั้งเดือน”
-          ระบบจะอ่านสลิป จับคู่ และลงหมวดให้รายการที่ชัดเจน
-          ส่วนที่กำกวมจะอยู่ในรายการรอตรวจ
+          {ui(
+            "เลือกเดือนและบัญชี แล้วกด “ตรวจและจัดหมวดอัตโนมัติทั้งเดือน” ระบบจะอ่านสลิป จับคู่ และลงหมวดให้รายการที่ชัดเจน ส่วนที่กำกวมจะอยู่ในรายการรอตรวจ"
+          )}
         </p>
         <p className="text-muted">
-          ลงอัตโนมัติเฉพาะคู่เดียวที่ยอดและวันตรง พร้อมเวลาและข้อมูลคู่โอน
-          หรือเลขอ้างอิงที่ตรงกัน และ Remark ระบุหมวดได้หมวดเดียว
-          กรณีอื่นให้ตรวจเอง ระบบไม่ตรวจว่าสลิปแท้และไม่สร้างรายจ่ายซ้ำ
+          {ui(
+            "ลงอัตโนมัติเฉพาะคู่เดียวที่ยอดและวันตรง พร้อมเวลาและข้อมูลคู่โอน หรือเลขอ้างอิงที่ตรงกัน และ Remark ระบุหมวดได้หมวดเดียว กรณีอื่นให้ตรวจเอง ระบบไม่ตรวจว่าสลิปแท้และไม่สร้างรายจ่ายซ้ำ"
+          )}
         </p>
       </div>
       <form className="flex flex-wrap gap-3 items-end text-xs">
         <input type="hidden" name="month" value={month.id} />
         <label>
-          รายการธนาคารที่จะค้นหา
+          {ui("รายการธนาคารที่จะค้นหา")}{" "}
           <select
             name="account"
             defaultValue={account?.code ?? ""}
             className="block mt-1 rounded border border-hairline bg-canvas px-3 py-2"
           >
-            <option value="">ทุกบัญชีของธุรกิจนี้</option>
+            <option value="">{ui("ทุกบัญชีของธุรกิจนี้")}</option>
             {accounts.map((a) => (
               <option key={a.id} value={a.code}>
                 {a.name}
@@ -136,10 +143,11 @@ export default async function EvidencePage({
           </select>
         </label>
         <button className="rounded-pill bg-ink text-canvas px-4 py-2">
-          แสดงรายการ
+          {ui("แสดงรายการ")}
         </button>
         <span className="text-muted">
-          หลักฐาน {total} ไฟล์ • Statement {transactions.length} รายการ
+          {ui("หลักฐาน")} {total} {ui("ไฟล์ • Statement")} {transactions.length}{" "}
+          {ui("รายการ")}
         </span>
       </form>
       <EvidenceMatcher
@@ -185,18 +193,18 @@ export default async function EvidencePage({
           .filter(Number.isSafeInteger)}
       />
       {total > 50 && (
-        <nav aria-label="หน้าหลักฐาน" className="flex gap-4 text-sm">
+        <nav aria-label={ui("หน้าหลักฐาน")} className="flex gap-4 text-sm">
           {page > 1 && (
             <Link className="underline" href={`${base}&page=${page - 1}`}>
-              หน้าก่อนหน้า
+              {ui("หน้าก่อนหน้า")}
             </Link>
           )}
           <span>
-            หน้า {page} / {Math.ceil(total / 50)}
+            {ui("หน้า")} {page} / {Math.ceil(total / 50)}
           </span>
           {page * 50 < total && (
             <Link className="underline" href={`${base}&page=${page + 1}`}>
-              หน้าถัดไป
+              {ui("หน้าถัดไป")}
             </Link>
           )}
         </nav>

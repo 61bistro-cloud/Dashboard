@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import {
   suggestRemarkCategories,
   getConfirmedRemark,
@@ -52,6 +54,7 @@ export function EvidenceMatcher({
   linkedTransactionIds: number[];
   categories: EvidenceCategory[];
 }) {
+  const { ui } = useUi();
   const router = useRouter();
   const [reading, setReading] = useState<number | "all" | "auto" | null>(null);
   const [autoResults, setAutoResults] = useState<
@@ -82,14 +85,14 @@ export function EvidenceMatcher({
         } catch {
           result = {
             status: "review",
-            message: "การเชื่อมต่อขัดข้อง กรุณาตรวจใหม่",
+            message: ui("การเชื่อมต่อขัดข้อง กรุณาตรวจใหม่"),
           };
         }
         setAutoResults((previous) => [...previous, { ...file, ...result }]);
       }
       router.refresh();
     } catch {
-      setAutoError("เริ่มตรวจทั้งเดือนไม่สำเร็จ โปรดตรวจธุรกิจและสิทธิ์");
+      setAutoError(ui("เริ่มตรวจทั้งเดือนไม่สำเร็จ โปรดตรวจธุรกิจและสิทธิ์"));
     } finally {
       automaticRunning.current = false;
       setReading(null);
@@ -118,7 +121,7 @@ export function EvidenceMatcher({
     } catch {
       setErrors((previous) => ({
         ...previous,
-        [file.id]: "การเชื่อมต่อขัดข้อง กรอกยอดและวันที่เองได้",
+        [file.id]: ui("การเชื่อมต่อขัดข้อง กรอกยอดและวันที่เองได้"),
       }));
     }
   }
@@ -161,7 +164,7 @@ export function EvidenceMatcher({
     <div className="space-y-4">
       <section className="rounded-card border border-hairline bg-surface p-4 space-y-3 text-xs">
         <h2 className="font-semibold text-sm">
-          อ่านสลิป → จับคู่ Statement → ลงหมวด → อัปเดต Dashboard
+          {ui("อ่านสลิป → จับคู่ Statement → ลงหมวด → อัปเดต Dashboard")}
         </h2>
         <button
           type="button"
@@ -170,35 +173,40 @@ export function EvidenceMatcher({
           className="rounded-pill bg-ink text-canvas px-4 py-2 disabled:opacity-50"
         >
           {reading === "auto"
-            ? `กำลังตรวจ ${autoResults.length} / ${autoTotal} ไฟล์`
-            : "ตรวจและจัดหมวดอัตโนมัติทั้งเดือน"}
+            ? ui("กำลังตรวจ {v0} / {v1} ไฟล์", {
+                v0: autoResults.length,
+                v1: autoTotal,
+              })
+            : ui("ตรวจและจัดหมวดอัตโนมัติทั้งเดือน")}
         </button>
         <p className="text-muted">
-          เริ่มครั้งเดียวสำหรับไฟล์ทุกหน้าในเดือนนี้ โปรดเปิดหน้าไว้จนเสร็จ
-          คู่หรือหมวดที่กำกวมจะไม่ลงอัตโนมัติ
-          หมวดเฉพาะเดิมที่ต่างจากคำแนะนำจะคงไว้ให้ตรวจ
+          {ui(
+            "เริ่มครั้งเดียวสำหรับไฟล์ทุกหน้าในเดือนนี้ โปรดเปิดหน้าไว้จนเสร็จ คู่หรือหมวดที่กำกวมจะไม่ลงอัตโนมัติ หมวดเฉพาะเดิมที่ต่างจากคำแนะนำจะคงไว้ให้ตรวจ"
+          )}
         </p>
         {autoTotal > 0 && (
           <p role="status">
-            ดำเนินการ {autoResults.length}/{autoTotal} • ลงอัตโนมัติ{" "}
-            {autoResults.filter((row) => row.status === "applied").length} •
-            รอตรวจ {autoResults.filter((row) => row.status === "review").length}{" "}
-            • คงข้อมูลเดิม{" "}
+            {ui("ดำเนินการ")} {autoResults.length}/{autoTotal}{" "}
+            {ui("• ลงอัตโนมัติ")}{" "}
+            {autoResults.filter((row) => row.status === "applied").length}{" "}
+            {ui("• รอตรวจ")}{" "}
+            {autoResults.filter((row) => row.status === "review").length}{" "}
+            {ui("• คงข้อมูลเดิม")}{" "}
             {autoResults.filter((row) => row.status === "skipped").length}
           </p>
         )}
         {autoError && (
           <p role="alert" className="text-red-600">
-            {autoError}
+            {ui(autoError)}
           </p>
         )}
         {autoResults.length > 0 && (
           <details>
-            <summary className="cursor-pointer">ดูผลรายไฟล์</summary>
+            <summary className="cursor-pointer">{ui("ดูผลรายไฟล์")}</summary>
             <ul className="max-h-64 overflow-y-auto divide-y divide-hairline">
               {autoResults.map((row) => (
                 <li key={row.id} className="py-2">
-                  {row.name} • {row.message}
+                  {row.name} • {ui(row.message)}
                 </li>
               ))}
             </ul>
@@ -213,31 +221,34 @@ export function EvidenceMatcher({
           className="rounded-pill bg-ink text-canvas px-4 py-2 disabled:opacity-50"
         >
           {reading === "all"
-            ? `กำลังอ่าน ${progress} / ${files.length}`
-            : "อ่านข้อความ / Remark ที่ยังไม่ได้อ่านในหน้านี้"}
+            ? ui("กำลังอ่าน {v0} / {v1}", { v0: progress, v1: files.length })
+            : ui("อ่านข้อความ / Remark ที่ยังไม่ได้อ่านในหน้านี้")}
         </button>
         <label>
-          แสดง{" "}
+          {ui("แสดง")}{" "}
           <select
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
             className="rounded border border-hairline bg-canvas p-2"
           >
-            <option value="all">ทั้งหมด</option>
-            <option value="unmatched">ยังไม่จับคู่</option>
-            <option value="matched">ยืนยันคู่แล้ว</option>
-            <option value="review">อัตโนมัติ: รอตรวจ</option>
-            <option value="applied">อัตโนมัติ: ลงหมวดแล้ว</option>
+            <option value="all">{ui("ทั้งหมด")}</option>
+            <option value="unmatched">{ui("ยังไม่จับคู่")}</option>
+            <option value="matched">{ui("ยืนยันคู่แล้ว")}</option>
+            <option value="review">{ui("อัตโนมัติ: รอตรวจ")}</option>
+            <option value="applied">{ui("อัตโนมัติ: ลงหมวดแล้ว")}</option>
           </select>
         </label>
         <span className="text-muted">
-          เปิดหน้านี้ไว้ขณะอ่านรูป • อ่าน JPG / PNG / PDF ผ่าน Google Drive •
-          ปุ่มอ่านข้อความอย่างเดียวจะไม่เปลี่ยนหมวด
+          {ui(
+            "เปิดหน้านี้ไว้ขณะอ่านรูป • อ่าน JPG / PNG / PDF ผ่าน Google Drive • ปุ่มอ่านข้อความอย่างเดียวจะไม่เปลี่ยนหมวด"
+          )}
         </span>
       </div>
       {visible.length === 0 && (
         <p className="rounded-card border border-hairline p-8 text-center text-sm text-muted">
-          ไม่มีหลักฐานในรายการนี้ หากยังไม่พบไฟล์ให้ตรวจเดือนและธุรกิจที่เลือก
+          {ui(
+            "ไม่มีหลักฐานในรายการนี้ หากยังไม่พบไฟล์ให้ตรวจเดือนและธุรกิจที่เลือก"
+          )}
         </p>
       )}
       {visible.map((file) => (
@@ -256,16 +267,18 @@ export function EvidenceMatcher({
       ))}
       <details className="rounded-card border border-hairline p-4">
         <summary className="cursor-pointer text-sm">
-          รายการ Statement ที่ยังไม่มีหลักฐานแนบ ({missing.length})
+          {ui("รายการ Statement ที่ยังไม่มีหลักฐานแนบ (")}
+          {missing.length})
         </summary>
         <p className="mt-2 text-xs text-muted">
-          เป็นรายการในบัญชีที่เลือก ไม่ใช่ข้อสรุปว่าทุกรายการต้องมีสลิป
+          {ui("เป็นรายการในบัญชีที่เลือก ไม่ใช่ข้อสรุปว่าทุกรายการต้องมีสลิป")}
         </p>
         <ul className="mt-3 max-h-80 overflow-y-auto divide-y divide-hairline text-xs">
           {missing.map((tx) => (
             <li key={tx.id} className="py-2">
               {tx.date.slice(0, 10)} {tx.date.slice(11, 16)} • {tx.accountName}{" "}
-              • {tx.description} • {tx.withdraw > 0 ? "เงินออก" : "เงินเข้า"}{" "}
+              • {tx.description} •{" "}
+              {tx.withdraw > 0 ? ui("เงินออก") : ui("เงินเข้า")}{" "}
               {fmtTHB(tx.withdraw || tx.deposit)}
             </li>
           ))}
@@ -295,6 +308,7 @@ function EvidenceCard({
   error?: string;
   categories: EvidenceCategory[];
 }) {
+  const { ui } = useUi();
   const router = useRouter();
   const [amount, setAmount] = useState(file.ocr?.amount?.toString() ?? "");
   const [date, setDate] = useState(file.ocr?.date ?? "");
@@ -347,12 +361,12 @@ function EvidenceCard({
           router.refresh();
         } else setMessage(result.message);
       } catch {
-        setMessage("บันทึกไม่สำเร็จ กรุณาลองใหม่");
+        setMessage(ui("บันทึกไม่สำเร็จ กรุณาลองใหม่"));
       }
     });
   }
   const txLabel = (tx: MatchTransaction) =>
-    `${tx.date.slice(0, 10)} ${tx.date.slice(11, 16)} • ${tx.accountName} • ${tx.withdraw > 0 ? "ออก" : "เข้า"} ${fmtTHB(tx.withdraw || tx.deposit)} • ${tx.description}`;
+    `${tx.date.slice(0, 10)} ${tx.date.slice(11, 16)} • ${tx.accountName} • ${tx.withdraw > 0 ? ui("ออก") : ui("เข้า")} ${fmtTHB(tx.withdraw || tx.deposit)} • ${tx.description}`;
   const chosen = transactions.find((tx) => tx.id === Number(selected));
   const mismatch =
     chosen &&
@@ -372,11 +386,11 @@ function EvidenceCard({
           rel="noreferrer"
           className="underline font-medium break-all"
         >
-          {file.name} ↗ ดูรูปหลักฐาน
+          {file.name} {ui("↗ ดูรูปหลักฐาน")}
         </a>
         <span className={linkedId ? "text-emerald-700" : "text-amber-700"}>
-          {linkedId ? "ยืนยันคู่แล้ว" : "รอตรวจ / ยังไม่จับคู่"} •{" "}
-          {file.kind === "SLIP" ? "สลิป" : "ใบเสร็จ"}
+          {linkedId ? ui("ยืนยันคู่แล้ว") : ui("รอตรวจ / ยังไม่จับคู่")} •{" "}
+          {file.kind === "SLIP" ? ui("สลิป") : ui("ใบเสร็จ")}
         </span>
       </div>
       {file.automatic && (
@@ -387,7 +401,7 @@ function EvidenceCard({
               : "text-amber-700"
           }
         >
-          ผลตรวจอัตโนมัติล่าสุด: {file.automatic.message}
+          {ui("ผลตรวจอัตโนมัติล่าสุด:")} {ui(file.automatic.message)}
         </p>
       )}
       <div className="flex flex-wrap gap-3 items-end rounded-input bg-surface p-3">
@@ -398,33 +412,36 @@ function EvidenceCard({
           className="rounded-pill border border-hairline px-3 py-2 disabled:opacity-50"
         >
           {reading
-            ? "กำลังอ่าน..."
+            ? ui("กำลังอ่าน...")
             : file.ocr
-              ? "ใช้ข้อความที่อ่านไว้"
-              : "อ่านข้อความ / Remark จากรูป"}
+              ? ui("ใช้ข้อความที่อ่านไว้")
+              : ui("อ่านข้อความ / Remark จากรูป")}
         </button>
         <label className="flex-1 min-w-[240px]">
-          Remark / หมายเหตุในสลิป
+          {ui("Remark / หมายเหตุในสลิป")}
           <textarea
             rows={2}
             maxLength={1000}
             value={remark}
             disabled={locked}
             onChange={(event) => setRemark(event.target.value)}
-            placeholder="เช่น ค่าผัก / ค่าไฟ ต.ค. — อ่านไม่ชัดสามารถพิมพ์แก้เองได้"
+            placeholder={ui(
+              "เช่น ค่าผัก / ค่าไฟ ต.ค. — อ่านไม่ชัดสามารถพิมพ์แก้เองได้"
+            )}
             className="block mt-1 w-full rounded border border-hairline bg-canvas p-2"
           />
         </label>
       </div>
       {!remark && (
         <p className="text-muted">
-          ยังไม่พบ Remark ให้กดอ่านข้อความ หรือพิมพ์คำอธิบายเอง
-          ระบบจะแนะนำหมวดจากคำในช่องนี้
+          {ui(
+            "ยังไม่พบ Remark ให้กดอ่านข้อความ หรือพิมพ์คำอธิบายเอง ระบบจะแนะนำหมวดจากคำในช่องนี้"
+          )}
         </p>
       )}
       {error && (
         <p role="status" className="text-amber-700">
-          {error}
+          {ui(error)}
         </p>
       )}
       {linkedId ? (
@@ -432,7 +449,9 @@ function EvidenceCard({
           <p>
             {linked
               ? txLabel(linked)
-              : "รายการคู่เดิมอยู่นอกบัญชีที่เลือกหรือถูกลบแล้ว เลือกทุกบัญชีเพื่อตรวจสอบ"}
+              : ui(
+                  "รายการคู่เดิมอยู่นอกบัญชีที่เลือกหรือถูกลบแล้ว เลือกทุกบัญชีเพื่อตรวจสอบ"
+                )}
           </p>
           <button
             type="button"
@@ -440,14 +459,14 @@ function EvidenceCard({
             disabled={locked}
             className="underline disabled:opacity-50"
           >
-            ยกเลิกคู่
+            {ui("ยกเลิกคู่")}
           </button>
         </div>
       ) : (
         <>
           <div className="flex flex-wrap gap-3 items-end">
             <label>
-              ยอดเงิน
+              {ui("ยอดเงิน")}
               <input
                 type="number"
                 min="0.01"
@@ -459,7 +478,7 @@ function EvidenceCard({
               />
             </label>
             <label>
-              วันที่ในหลักฐาน
+              {ui("วันที่ในหลักฐาน")}
               <input
                 type="date"
                 value={date}
@@ -469,7 +488,7 @@ function EvidenceCard({
               />
             </label>
             <label>
-              เวลา (ถ้ามี)
+              {ui("เวลา (ถ้ามี)")}
               <input
                 type="time"
                 value={time}
@@ -481,20 +500,22 @@ function EvidenceCard({
           </div>
           {!amount || !date ? (
             <p className="text-muted">
-              กรอกหรืออ่านยอดเงินและวันที่ เพื่อแนะนำคู่ใน Statement
+              {ui("กรอกหรืออ่านยอดเงินและวันที่ เพื่อแนะนำคู่ใน Statement")}
             </p>
           ) : candidates.length === 0 ? (
             <p className="text-amber-700">
-              ยังไม่พบคู่ที่ยอดและวันที่ตรงกัน ตรวจข้อมูล บัญชี และเดือน
-              หรือเลือกจากรายการทั้งหมดด้านล่าง
+              {ui(
+                "ยังไม่พบคู่ที่ยอดและวันที่ตรงกัน ตรวจข้อมูล บัญชี และเดือน หรือเลือกจากรายการทั้งหมดด้านล่าง"
+              )}
             </p>
           ) : (
             <div className="rounded-input bg-surface p-3 space-y-2">
               <p className="font-medium">
-                พบ {candidates.length} รายการที่ยอดและวันที่ตรงกัน
+                {ui("พบ")} {candidates.length}{" "}
+                {ui("รายการที่ยอดและวันที่ตรงกัน")}{" "}
                 {candidates.length > 1
-                  ? " — มีหลายคู่ ต้องตรวจรูปและเลือกเอง"
-                  : " — กรุณาตรวจบัญชีและผู้รับก่อนยืนยัน"}
+                  ? ui("— มีหลายคู่ ต้องตรวจรูปและเลือกเอง")
+                  : ui("— กรุณาตรวจบัญชีและผู้รับก่อนยืนยัน")}
               </p>
               {candidates.slice(0, 5).map((candidate) => {
                 const tx = transactions.find(
@@ -512,37 +533,39 @@ function EvidenceCard({
                     <span>
                       {txLabel(tx)}
                       <span className="block text-muted">
-                        {candidate.reasons.join(" • ")}
+                        {candidate.reasons
+                          .map((reason) => ui(reason))
+                          .join(" • ")}
                       </span>
                     </span>
                   </label>
                 );
               })}
               {candidates.length > 5 && (
-                <p>แสดง 5 คู่แรก เลือกรายการอื่นจากช่องด้านล่างได้</p>
+                <p>{ui("แสดง 5 คู่แรก เลือกรายการอื่นจากช่องด้านล่างได้")}</p>
               )}
             </div>
           )}
           <details>
             <summary className="cursor-pointer text-muted">
-              ค้นหาและเลือกคู่เองจาก Statement เดือนนี้
+              {ui("ค้นหาและเลือกคู่เองจาก Statement เดือนนี้")}
             </summary>
             <input
               type="search"
-              placeholder="ค้นหายอดเงิน / ผู้รับ / วันที่"
+              placeholder={ui("ค้นหายอดเงิน / ผู้รับ / วันที่")}
               value={query}
               disabled={locked}
               onChange={(event) => setQuery(event.target.value)}
               className="block mt-2 w-full rounded border border-hairline bg-canvas p-2"
             />
             <select
-              aria-label={`เลือกรายการธนาคารสำหรับ ${file.name}`}
+              aria-label={ui("เลือกรายการธนาคารสำหรับ {v0}", { v0: file.name })}
               value={selected}
               disabled={locked}
               onChange={(event) => setSelected(event.target.value)}
               className="mt-2 w-full rounded border border-hairline bg-canvas p-2"
             >
-              <option value="">— เลือกรายการ —</option>
+              <option value="">{ui("— เลือกรายการ —")}</option>
               {choices.map((tx) => (
                 <option key={tx.id} value={tx.id}>
                   {txLabel(tx)}
@@ -552,18 +575,19 @@ function EvidenceCard({
           </details>
           {selected && (
             <p className="font-medium">
-              คู่ที่จะยืนยัน:{" "}
+              {ui("คู่ที่จะยืนยัน:")}{" "}
               {transactions.find((tx) => tx.id === Number(selected))
                 ? txLabel(
                     transactions.find((tx) => tx.id === Number(selected))!
                   )
-                : "กรุณาเลือกใหม่"}
+                : ui("กรุณาเลือกใหม่")}
             </p>
           )}
           {mismatch && (
             <p className="text-amber-700">
-              ยอดเงินหรือวันที่ของคู่ที่เลือกต่างจากข้อมูลหลักฐาน
-              กรุณาตรวจรูปก่อนยืนยัน
+              {ui(
+                "ยอดเงินหรือวันที่ของคู่ที่เลือกต่างจากข้อมูลหลักฐาน กรุณาตรวจรูปก่อนยืนยัน"
+              )}
             </p>
           )}
           <button
@@ -572,7 +596,7 @@ function EvidenceCard({
             onClick={() => mutate()}
             className="rounded-pill bg-ink text-canvas px-4 py-2 disabled:opacity-50"
           >
-            {pending ? "กำลังบันทึก..." : "ตรวจรูปแล้ว — ยืนยันคู่"}
+            {pending ? ui("กำลังบันทึก...") : ui("ตรวจรูปแล้ว — ยืนยันคู่")}
           </button>
         </>
       )}
@@ -589,7 +613,7 @@ function EvidenceCard({
       />
       {message && (
         <p role="alert" className="text-red-600">
-          {message}
+          {ui(message)}
         </p>
       )}
     </section>
@@ -615,6 +639,7 @@ function EvidenceCategoryEditor({
   categories: EvidenceCategory[];
   disabled: boolean;
 }) {
+  const { ui } = useUi();
   const router = useRouter();
   const [categoryId, setCategoryId] = useState(
     transaction?.categoryId?.toString() ?? ""
@@ -654,28 +679,33 @@ function EvidenceCategoryEditor({
           router.refresh();
         } else setError(result.message);
       } catch {
-        setError("บันทึกหมวดไม่สำเร็จ กรุณาลองใหม่");
+        setError(ui("บันทึกหมวดไม่สำเร็จ กรุณาลองใหม่"));
       }
     });
   }
   return (
     <div className="border-t border-hairline-soft pt-3 space-y-3">
-      <h3 className="font-medium">หมวดบัญชีจาก Remark</h3>
+      <h3 className="font-medium">{ui("หมวดบัญชีจาก Remark")}</h3>
       {!transaction ? (
         <p className="text-muted">
-          เลือกรายการธนาคารก่อน ระบบจะแนะนำหมวดให้ตรงกับเงินเข้า / เงินออก
+          {ui(
+            "เลือกรายการธนาคารก่อน ระบบจะแนะนำหมวดให้ตรงกับเงินเข้า / เงินออก"
+          )}
         </p>
       ) : (
         <>
           <p className="text-muted">
-            หมวดปัจจุบัน: {transaction.categoryName ?? "ยังไม่จัดหมวด"}
+            {ui("หมวดปัจจุบัน:")}{" "}
+            {transaction.categoryName ?? ui("ยังไม่จัดหมวด")}
           </p>
           {suggestions.length > 0 ? (
             <div className="space-y-2">
               <p>
                 {suggestions.length > 1
-                  ? "มีหลายหมวดที่อาจเกี่ยวข้อง กรุณาเลือกให้ตรงกับการจ่ายจริง"
-                  : "หมวดที่แนะนำจากคำใน Remark (ยังไม่บันทึกอัตโนมัติ)"}
+                  ? ui(
+                      "มีหลายหมวดที่อาจเกี่ยวข้อง กรุณาเลือกให้ตรงกับการจ่ายจริง"
+                    )
+                  : ui("หมวดที่แนะนำจากคำใน Remark (ยังไม่บันทึกอัตโนมัติ)")}
               </p>
               {suggestions.map((suggestion) => (
                 <button
@@ -690,18 +720,18 @@ function EvidenceCategoryEditor({
                 >
                   <span className="font-medium">{suggestion.name}</span>
                   <span className="block text-muted">
-                    {suggestion.reason} • กดเพื่อเลือก
+                    {ui(suggestion.reason)} {ui("• กดเพื่อเลือก")}
                   </span>
                 </button>
               ))}
             </div>
           ) : (
             <p className="text-muted">
-              ยังแนะนำหมวดจาก Remark นี้ไม่ได้ เลือกหมวดเองได้ด้านล่าง
+              {ui("ยังแนะนำหมวดจาก Remark นี้ไม่ได้ เลือกหมวดเองได้ด้านล่าง")}
             </p>
           )}
           <label className="block">
-            หมวดที่จะบันทึก
+            {ui("หมวดที่จะบันทึก")}{" "}
             <select
               value={categoryId}
               disabled={disabled || pending}
@@ -711,10 +741,10 @@ function EvidenceCategoryEditor({
               }}
               className="block mt-1 rounded border border-hairline bg-canvas p-2 max-w-full"
             >
-              <option value="">— ยังไม่จัดหมวด —</option>
+              <option value="">{ui("— ยังไม่จัดหมวด —")}</option>
               {categoryId && !selected && (
                 <option value={categoryId}>
-                  {transaction.categoryName ?? "หมวดเดิม (ซ่อน)"}
+                  {transaction.categoryName ?? ui("หมวดเดิม (ซ่อน)")}
                 </option>
               )}
               {["INCOME", "EXPENSE", "TRANSFER"].map((kind) => (
@@ -722,10 +752,10 @@ function EvidenceCategoryEditor({
                   key={kind}
                   label={
                     kind === "INCOME"
-                      ? "เงินเข้า"
+                      ? ui("เงินเข้า")
                       : kind === "EXPENSE"
-                        ? "รายจ่าย"
-                        : "โอน / ไม่นับ P&L"
+                        ? ui("รายจ่าย")
+                        : ui("โอน / ไม่นับ P&L")
                   }
                 >
                   {categories
@@ -742,17 +772,19 @@ function EvidenceCategoryEditor({
           {selected && (
             <p className="text-muted">
               {selected.kind === "INCOME"
-                ? "หมวดเงินเข้า — ยอดขาย P&L ยังคงอ้างอิง POS"
+                ? ui("หมวดเงินเข้า — ยอดขาย P&L ยังคงอ้างอิง POS")
                 : status === "excluded"
-                  ? "หมวดนี้ไม่นับเป็นค่าใช้จ่าย P&L"
+                  ? ui("หมวดนี้ไม่นับเป็นค่าใช้จ่าย P&L")
                   : status === "pending"
-                    ? "รอจัดหมวด / ตรวจสอบ"
-                    : `ค่าใช้จ่ายเข้า Cost Setup / P&L → ${COST_BUCKET_LABELS[status]}`}
+                    ? ui("รอจัดหมวด / ตรวจสอบ")
+                    : ui("ค่าใช้จ่ายเข้า Cost Setup / P&L → {v0}", {
+                        v0: ui(COST_BUCKET_LABELS[status]),
+                      })}
             </p>
           )}
           {!linked && (
             <p className="text-amber-700">
-              ยืนยันคู่หลักฐานก่อน แล้วจึงบันทึกหมวดและ Remark ได้
+              {ui("ยืนยันคู่หลักฐานก่อน แล้วจึงบันทึกหมวดและ Remark ได้")}
             </p>
           )}
           <button
@@ -761,22 +793,23 @@ function EvidenceCategoryEditor({
             onClick={save}
             className="rounded-pill bg-ink text-canvas px-4 py-2 disabled:opacity-50"
           >
-            {pending ? "กำลังบันทึก..." : "ยืนยันบันทึกหมวดและ Remark"}
+            {pending ? ui("กำลังบันทึก...") : ui("ยืนยันบันทึกหมวดและ Remark")}
           </button>
           <p className="text-muted">
-            Remark ที่ยืนยันจะอยู่ในบันทึกรายการธนาคาร เมื่อเปลี่ยนหมวด Cost
-            Setup และ P&L จะคำนวณตามหมวดใหม่
+            {ui(
+              "Remark ที่ยืนยันจะอยู่ในบันทึกรายการธนาคาร เมื่อเปลี่ยนหมวด Cost Setup และ P&L จะคำนวณตามหมวดใหม่"
+            )}
           </p>
         </>
       )}
       {error && (
         <p role="alert" className="text-red-600">
-          {error}
+          {ui(error)}
         </p>
       )}
       {success && (
         <p role="status" className="text-emerald-700">
-          บันทึกหมวดและ Remark แล้ว
+          {ui("บันทึกหมวดและ Remark แล้ว")}
         </p>
       )}
     </div>

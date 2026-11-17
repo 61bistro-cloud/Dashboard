@@ -1,3 +1,7 @@
+import { displayMonth, dateLocale } from "@/lib/i18n/core";
+
+import { useUi } from "@/lib/i18n/use-ui";
+import { getUi } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
 import {
   ReceiptText,
@@ -32,6 +36,7 @@ export default async function PosSalesPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
 
@@ -39,9 +44,9 @@ export default async function PosSalesPage({
   if (!business) {
     return (
       <div className="p-8">
-        <PageHeader icon={ReceiptText} title="POS Sales" />
+        <PageHeader icon={ReceiptText} title={ui("POS Sales")} />
         <p className="mt-4 text-red-600">
-          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+          {ui("คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน")}
         </p>
       </div>
     );
@@ -168,14 +173,19 @@ export default async function PosSalesPage({
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <PageHeader
         icon={ReceiptText}
-        title="POS Sales"
-        description="ข้อมูลบิลจาก Foodstory — Upload .xlsx แล้วระบบจะ parse + dedupe ตามเลขบิล"
+        title={ui("POS Sales")}
+        description={ui(
+          "ข้อมูลบิลจาก Foodstory — Upload .xlsx แล้วระบบจะ parse + dedupe ตามเลขบิล"
+        )}
         action={
           selectedMonthId ? (
             <MonthPicker
               months={allMonths.map((m) => ({
                 id: m.id,
-                label: `${m.label} ${m.year.yearBE}`,
+                label: displayMonth(
+                  `${displayMonth(m.label, uiLocale)} ${m.year.yearBE}`,
+                  uiLocale
+                ),
               }))}
               currentId={selectedMonthId}
             />
@@ -187,28 +197,28 @@ export default async function PosSalesPage({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat
           icon={Receipt}
-          label="จำนวนบิล"
+          label={ui("จำนวนบิล")}
           value={(stats._count.id - cancelledCountVal).toLocaleString("th-TH")}
           sub={
             cancelledCountVal > 0
-              ? `+ ${cancelledCountVal} ยกเลิก (refund / void)`
-              : "ทั้งหมด"
+              ? ui("+ {v0} ยกเลิก (refund / void)", { v0: cancelledCountVal })
+              : ui("ทั้งหมด")
           }
         />
         <Stat
           icon={Wallet}
-          label="ยอดขายสุทธิ"
+          label={ui("ยอดขายสุทธิ")}
           value={fmtTHB(stats._sum.grandTotal ?? 0)}
-          sub="ตรงกับ Foodstory dashboard"
+          sub={ui("ตรงกับ Foodstory dashboard")}
         />
         <Stat
           icon={Tag}
-          label="ส่วนลดรวม"
+          label={ui("ส่วนลดรวม")}
           value={fmtTHB(stats._sum.totalDiscount ?? 0)}
         />
         <Stat
           icon={Percent}
-          label="VAT รวม"
+          label={ui("VAT รวม")}
           value={fmtTHB(stats._sum.vatAmount ?? 0)}
         />
       </div>
@@ -222,20 +232,28 @@ export default async function PosSalesPage({
           <header className="border-b border-hairline-soft px-5 py-3">
             <h2 className="flex items-center gap-2 text-sm font-semibold">
               <History className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
-              ประวัติการ import (5 ล่าสุด)
+              {ui("ประวัติการ import (5 ล่าสุด)")}
             </h2>
           </header>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-surface text-left">
                 <tr>
-                  <th className="px-4 py-2 font-medium">วันที่</th>
-                  <th className="px-4 py-2 font-medium">ไฟล์</th>
-                  <th className="px-4 py-2 font-medium">โดย</th>
-                  <th className="px-4 py-2 font-medium text-right">ทั้งหมด</th>
-                  <th className="px-4 py-2 font-medium text-right">เพิ่ม</th>
-                  <th className="px-4 py-2 font-medium text-right">อัปเดต</th>
-                  <th className="px-4 py-2 font-medium text-right">Error</th>
+                  <th className="px-4 py-2 font-medium">{ui("วันที่")}</th>
+                  <th className="px-4 py-2 font-medium">{ui("ไฟล์")}</th>
+                  <th className="px-4 py-2 font-medium">{ui("โดย")}</th>
+                  <th className="px-4 py-2 font-medium text-right">
+                    {ui("ทั้งหมด")}
+                  </th>
+                  <th className="px-4 py-2 font-medium text-right">
+                    {ui("เพิ่ม")}
+                  </th>
+                  <th className="px-4 py-2 font-medium text-right">
+                    {ui("อัปเดต")}
+                  </th>
+                  <th className="px-4 py-2 font-medium text-right">
+                    {ui("Error")}
+                  </th>
                   {canDelete && <th className="px-4 py-2 w-10"></th>}
                 </tr>
               </thead>
@@ -243,7 +261,7 @@ export default async function PosSalesPage({
                 {recentBatches.map((b) => (
                   <tr key={b.id}>
                     <td className="px-4 py-2 text-muted whitespace-nowrap">
-                      {b.createdAt.toLocaleString("th-TH")}
+                      {b.createdAt.toLocaleString(dateLocale(uiLocale))}
                     </td>
                     <td className="px-4 py-2 truncate max-w-xs">
                       {b.fileName}
@@ -284,7 +302,8 @@ export default async function PosSalesPage({
       <section className="rounded-card border border-hairline bg-canvas">
         <header className="flex items-center justify-between gap-3 border-b border-hairline-soft px-5 py-3 flex-wrap">
           <h2 className="text-sm font-semibold">
-            บิลในเดือนนี้ ({totalBills.toLocaleString("th-TH")})
+            {ui("บิลในเดือนนี้ (")}
+            {totalBills.toLocaleString("th-TH")})
           </h2>
           <div className="flex items-center gap-2 flex-wrap">
             <form className="flex items-center gap-2 flex-wrap text-sm">
@@ -295,9 +314,9 @@ export default async function PosSalesPage({
                 name="channel"
                 defaultValue={sp.channel ?? ""}
                 className="rounded-input border border-hairline px-2 py-1"
-                aria-label="ช่องทาง"
+                aria-label={ui("ช่องทาง")}
               >
-                <option value="">ทุกช่องทาง</option>
+                <option value="">{ui("ทุกช่องทาง")}</option>
                 {distinctChannels.map((c) =>
                   c.channel ? (
                     <option key={c.channel} value={c.channel}>
@@ -310,9 +329,9 @@ export default async function PosSalesPage({
                 name="payment"
                 defaultValue={sp.payment ?? ""}
                 className="rounded-input border border-hairline px-2 py-1"
-                aria-label="วิธีจ่าย"
+                aria-label={ui("วิธีจ่าย")}
               >
-                <option value="">ทุกวิธีจ่าย</option>
+                <option value="">{ui("ทุกวิธีจ่าย")}</option>
                 {distinctPayments.map((c) =>
                   c.paymentType ? (
                     <option key={c.paymentType} value={c.paymentType}>
@@ -325,7 +344,7 @@ export default async function PosSalesPage({
                 type="submit"
                 className="rounded-input bg-ink px-3 py-1 text-canvas hover:bg-ink-2"
               >
-                กรอง
+                {ui("กรอง")}
               </button>
             </form>
             <a
@@ -339,69 +358,75 @@ export default async function PosSalesPage({
                 return `/api/pos-bills/export${s ? `?${s}` : ""}`;
               })()}
               className="inline-flex items-center gap-1.5 rounded-pill bg-surface hover:bg-hairline px-3 py-1.5 text-xs font-medium text-ink transition-colors"
-              title="Export ทุกบิลที่ตรงกับ filter เป็น .xlsx"
+              title={ui("Export ทุกบิลที่ตรงกับ filter เป็น .xlsx")}
             >
               <FileSpreadsheet className="h-3.5 w-3.5" strokeWidth={1.75} />
-              Export Excel
+              {ui("Export Excel")}
             </a>
           </div>
         </header>
 
         {bills.length === 0 ? (
           <div className="p-10 text-center text-sm text-muted">
-            ยังไม่มีข้อมูลบิล — Upload Foodstory export เพื่อเริ่มต้น
+            {ui("ยังไม่มีข้อมูลบิล — Upload Foodstory export เพื่อเริ่มต้น")}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-max text-xs">
               <thead className="bg-surface text-left">
                 <tr>
-                  <Th sticky>วันที่</Th>
-                  <Th>เวลา</Th>
-                  <Th sticky2>เลขบิล / ID</Th>
-                  <Th>POS ID</Th>
-                  <Th>INV. No</Th>
-                  <Th align="right">ยอดก่อนลด</Th>
-                  <Th align="right">ส่วนลดสินค้า</Th>
-                  <Th align="right">ส่วนลดบิล</Th>
-                  <Th align="right">ยอดรวม</Th>
-                  <Th align="right">ค่าบริการ</Th>
-                  <Th align="right">ภาษี</Th>
-                  <Th align="right">มูลค่า Voucher</Th>
-                  <Th align="right">ส่วนลด Voucher</Th>
-                  <Th align="right">ยอดปัดเศษ</Th>
-                  <Th align="right">ค่าจัดส่ง</Th>
-                  <Th align="right">รวมสุทธิ</Th>
-                  <Th align="right">ทิป</Th>
-                  <Th align="right">คืนเงิน</Th>
-                  <Th>ประเภทการสั่ง</Th>
-                  <Th>ประเภทการชำระ</Th>
-                  <Th>วิธีบันทึก</Th>
-                  <Th>ช่องทาง</Th>
-                  <Th>โต๊ะ</Th>
-                  <Th align="right">จำนวนลูกค้า</Th>
-                  <Th>ชื่อลูกค้า</Th>
-                  <Th>หมายเหตุ</Th>
-                  <Th>LINE MAN วันที่</Th>
-                  <Th align="right">LINE MAN ยอด</Th>
-                  <Th>โปรโมชั่น</Th>
-                  <Th>โค้ด</Th>
-                  <Th>เปิดบิล</Th>
-                  <Th>ปิดบิล</Th>
-                  <Th>สาขา</Th>
+                  <Th sticky>{ui("วันที่")}</Th>
+                  <Th>{ui("เวลา")}</Th>
+                  <Th sticky2>{ui("เลขบิล / ID")}</Th>
+                  <Th>{ui("POS ID")}</Th>
+                  <Th>{ui("INV. No")}</Th>
+                  <Th align="right">{ui("ยอดก่อนลด")}</Th>
+                  <Th align="right">{ui("ส่วนลดสินค้า")}</Th>
+                  <Th align="right">{ui("ส่วนลดบิล")}</Th>
+                  <Th align="right">{ui("ยอดรวม")}</Th>
+                  <Th align="right">{ui("ค่าบริการ")}</Th>
+                  <Th align="right">{ui("ภาษี")}</Th>
+                  <Th align="right">{ui("มูลค่า Voucher")}</Th>
+                  <Th align="right">{ui("ส่วนลด Voucher")}</Th>
+                  <Th align="right">{ui("ยอดปัดเศษ")}</Th>
+                  <Th align="right">{ui("ค่าจัดส่ง")}</Th>
+                  <Th align="right">{ui("รวมสุทธิ")}</Th>
+                  <Th align="right">{ui("ทิป")}</Th>
+                  <Th align="right">{ui("คืนเงิน")}</Th>
+                  <Th>{ui("ประเภทการสั่ง")}</Th>
+                  <Th>{ui("ประเภทการชำระ")}</Th>
+                  <Th>{ui("วิธีบันทึก")}</Th>
+                  <Th>{ui("ช่องทาง")}</Th>
+                  <Th>{ui("โต๊ะ")}</Th>
+                  <Th align="right">{ui("จำนวนลูกค้า")}</Th>
+                  <Th>{ui("ชื่อลูกค้า")}</Th>
+                  <Th>{ui("หมายเหตุ")}</Th>
+                  <Th>{ui("LINE MAN วันที่")}</Th>
+                  <Th align="right">{ui("LINE MAN ยอด")}</Th>
+                  <Th>{ui("โปรโมชั่น")}</Th>
+                  <Th>{ui("โค้ด")}</Th>
+                  <Th>{ui("เปิดบิล")}</Th>
+                  <Th>{ui("ปิดบิล")}</Th>
+                  <Th>{ui("สาขา")}</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline-soft">
                 {bills.map((b) => {
-                  const dateStr = b.paidAt.toLocaleDateString("th-TH", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "2-digit",
-                  });
-                  const timeStr = b.paidAt.toLocaleTimeString("th-TH", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
+                  const dateStr = b.paidAt.toLocaleDateString(
+                    dateLocale(uiLocale),
+                    {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "2-digit",
+                    }
+                  );
+                  const timeStr = b.paidAt.toLocaleTimeString(
+                    dateLocale(uiLocale),
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
+                  );
                   return (
                     <tr key={b.id} className="hover:bg-surface">
                       <Td sticky muted>
@@ -576,6 +601,7 @@ function Pagination({
   totalPages: number;
   sp: Record<string, string | undefined>;
 }) {
+  const { ui } = useUi();
   const mkUrl = (p: number) => {
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(sp)) {
@@ -595,7 +621,7 @@ function Pagination({
             : "hover:bg-surface")
         }
       >
-        ‹ ก่อนหน้า
+        {ui("‹ ก่อนหน้า")}
       </a>
       <span className="px-3 py-1 text-muted tabular-nums">
         {page} / {totalPages}
@@ -609,7 +635,7 @@ function Pagination({
             : "hover:bg-surface")
         }
       >
-        ถัดไป ›
+        {ui("ถัดไป ›")}
       </a>
     </div>
   );

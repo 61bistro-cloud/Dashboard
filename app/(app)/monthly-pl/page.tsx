@@ -1,3 +1,7 @@
+import { displayMonth } from "@/lib/i18n/core";
+
+import { useUi } from "@/lib/i18n/use-ui";
+import { getUi } from "@/lib/i18n/server";
 import { CostSourceNotice } from "@/components/cost-source-notice";
 import { redirect } from "next/navigation";
 import { TrendingUp, ChefHat, Users, Zap, Home, Percent } from "lucide-react";
@@ -24,6 +28,7 @@ export default async function MonthlyPLPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER" && session.user.role !== "ACCOUNTANT") {
@@ -34,9 +39,9 @@ export default async function MonthlyPLPage({
   if (!business) {
     return (
       <div className="p-8">
-        <PageHeader icon={TrendingUp} title="Monthly P&L" />
+        <PageHeader icon={TrendingUp} title={ui("Monthly P&L")} />
         <p className="mt-4 text-red-600">
-          คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน
+          {ui("คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน")}
         </p>
       </div>
     );
@@ -49,8 +54,8 @@ export default async function MonthlyPLPage({
   if (years.length === 0) {
     return (
       <div className="p-8">
-        <PageHeader icon={TrendingUp} title="Monthly P&L" />
-        <p className="mt-4 text-red-600">ไม่พบข้อมูลปีงบ</p>
+        <PageHeader icon={TrendingUp} title={ui("Monthly P&L")} />
+        <p className="mt-4 text-red-600">{ui("ไม่พบข้อมูลปีงบ")}</p>
       </div>
     );
   }
@@ -65,8 +70,8 @@ export default async function MonthlyPLPage({
   if (!data) {
     return (
       <div className="p-8">
-        <PageHeader icon={TrendingUp} title="Monthly P&L" />
-        <p className="mt-4 text-red-600">ไม่สามารถคำนวณข้อมูลได้</p>
+        <PageHeader icon={TrendingUp} title={ui("Monthly P&L")} />
+        <p className="mt-4 text-red-600">{ui("ไม่สามารถคำนวณข้อมูลได้")}</p>
       </div>
     );
   }
@@ -77,8 +82,10 @@ export default async function MonthlyPLPage({
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
       <PageHeader
         icon={TrendingUp}
-        title="Monthly P&L"
-        description="งบกำไรขาดทุน — Revenue, COGS, Labor, Fixed, Net Profit, KPI ratios"
+        title={ui("Monthly P&L")}
+        description={ui(
+          "งบกำไรขาดทุน — Revenue, COGS, Labor, Fixed, Net Profit, KPI ratios"
+        )}
         action={
           years.length > 1 ? (
             <form>
@@ -89,7 +96,7 @@ export default async function MonthlyPLPage({
               >
                 {years.map((y) => (
                   <option key={y.yearBE} value={y.yearBE}>
-                    {y.label}
+                    {displayMonth(y.label, uiLocale)}
                   </option>
                 ))}
               </select>
@@ -113,6 +120,7 @@ export default async function MonthlyPLPage({
 }
 
 function KpiPanel({ total }: { total: MonthlyTotals }) {
+  const { ui } = useUi();
   const kpis: Array<{
     icon: LucideIcon;
     label: string;
@@ -122,38 +130,38 @@ function KpiPanel({ total }: { total: MonthlyTotals }) {
   }> = [
     {
       icon: ChefHat,
-      label: "Food Cost %",
+      label: ui("Food Cost %"),
       pct: total.foodPct,
       status: kpiStatusLowerBetter(total.foodPct, KPI_THRESHOLDS.food),
-      bench: "เป้า ≤ 32%",
+      bench: ui("เป้า ≤ 32%"),
     },
     {
       icon: Users,
-      label: "Labor %",
+      label: ui("Labor %"),
       pct: total.laborPct,
       status: kpiStatusLowerBetter(total.laborPct, KPI_THRESHOLDS.labor),
-      bench: "เป้า ≤ 30%",
+      bench: ui("เป้า ≤ 30%"),
     },
     {
       icon: Zap,
-      label: "Prime % (Food+Labor)",
+      label: ui("Prime % (Food+Labor)"),
       pct: total.primePct,
       status: kpiStatusLowerBetter(total.primePct, KPI_THRESHOLDS.prime),
-      bench: "เป้า ≤ 60%",
+      bench: ui("เป้า ≤ 60%"),
     },
     {
       icon: Home,
-      label: "Fixed %",
+      label: ui("Fixed %"),
       pct: total.fixedPct,
       status: kpiStatusLowerBetter(total.fixedPct, KPI_THRESHOLDS.fixed),
-      bench: "เป้า ≤ 15%",
+      bench: ui("เป้า ≤ 15%"),
     },
     {
       icon: Percent,
-      label: "Net Margin %",
+      label: ui("Net Margin %"),
       pct: total.marginPct,
       status: kpiStatusHigherBetter(total.marginPct, KPI_THRESHOLDS.margin),
-      bench: "เป้า ≥ 10%",
+      bench: ui("เป้า ≥ 10%"),
     },
   ];
 
@@ -164,7 +172,7 @@ function KpiPanel({ total }: { total: MonthlyTotals }) {
         const Icon = k.icon;
         return (
           <div
-            key={k.label}
+            key={ui(k.label)}
             className="rounded-card border border-hairline bg-canvas p-4"
           >
             <div className="flex items-start justify-between">
@@ -173,10 +181,10 @@ function KpiPanel({ total }: { total: MonthlyTotals }) {
                 className={`inline-flex items-center gap-1.5 text-xs rounded-pill px-2 py-0.5 ${style.bg}`}
               >
                 <StatusDot tone={style.tone} />
-                {style.label}
+                {ui(style.label)}
               </span>
             </div>
-            <div className="mt-2 text-xs text-muted">{k.label}</div>
+            <div className="mt-2 text-xs text-muted">{ui(k.label)}</div>
             <div className="mt-0.5 text-xl font-semibold tabular-nums">
               {k.pct == null ? "-" : `${(k.pct * 100).toFixed(1)}%`}
             </div>
@@ -195,6 +203,7 @@ function PLMatrix({
   months: MonthlyTotals[];
   total: MonthlyTotals;
 }) {
+  const { ui, uiLocale } = useUi();
   // Rows in order matching Excel Monthly P&L
   type Row = {
     label: string;
@@ -207,31 +216,35 @@ function PLMatrix({
   };
 
   const rows: Row[] = [
-    { label: "รายได้ (Revenue)", section: true, values: () => ({ num: null }) },
     {
-      label: "ยอดขายสุทธิ (Net Sales)",
+      label: ui("รายได้ (Revenue)"),
+      section: true,
+      values: () => ({ num: null }),
+    },
+    {
+      label: ui("ยอดขายสุทธิ (Net Sales)"),
       indent: 1,
       bold: true,
       values: (m) => ({ num: m.netRevenue }),
       pctOfRevenue: true,
     },
     {
-      label: "ต้นทุนวัตถุดิบ (COGS)",
+      label: ui("ต้นทุนวัตถุดิบ (COGS)"),
       section: true,
       values: () => ({ num: null }),
     },
     {
-      label: "Food + Bev + Pack",
+      label: ui("Food + Bev + Pack"),
       indent: 1,
       values: (m) => ({ num: m.cogs, pct: m.foodPct }),
     },
     {
-      label: "ค่าแรงพนักงาน (Labor)",
+      label: ui("ค่าแรงพนักงาน (Labor)"),
       indent: 1,
       values: (m) => ({ num: m.labor, pct: m.laborPct }),
     },
     {
-      label: "กำไรขั้นต้น (Gross Profit) = Revenue − COGS − Labor",
+      label: ui("กำไรขั้นต้น (Gross Profit) = Revenue − COGS − Labor"),
       indent: 0,
       bold: true,
       cls: "bg-surface",
@@ -244,17 +257,17 @@ function PLMatrix({
       }),
     },
     {
-      label: "Operating Expenses",
+      label: ui("Operating Expenses"),
       section: true,
       values: () => ({ num: null }),
     },
     {
-      label: "Fixed Cost (เช่า/ไฟ/Sub/Platform/อื่นๆ)",
+      label: ui("Fixed Cost (เช่า/ไฟ/Sub/Platform/อื่นๆ)"),
       indent: 1,
       values: (m) => ({ num: m.fixed, pct: m.fixedPct }),
     },
     {
-      label: "รวมรายจ่ายทั้งหมด",
+      label: ui("รวมรายจ่ายทั้งหมด"),
       indent: 0,
       bold: true,
       cls: "bg-surface",
@@ -264,14 +277,14 @@ function PLMatrix({
       }),
     },
     {
-      label: "กำไรสุทธิ (Net Profit)",
+      label: ui("กำไรสุทธิ (Net Profit)"),
       indent: 0,
       bold: true,
       cls: "bg-surface",
       values: (m) => ({ num: m.netProfit, pct: m.marginPct }),
     },
     {
-      label: "Net Profit Margin %",
+      label: ui("Net Profit Margin %"),
       indent: 0,
       values: (m) => ({ num: null, pct: m.marginPct }),
     },
@@ -280,9 +293,9 @@ function PLMatrix({
   return (
     <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
       <header className="border-b border-hairline-soft px-5 py-3">
-        <h2 className="text-sm font-semibold">งบกำไรขาดทุนรายเดือน</h2>
+        <h2 className="text-sm font-semibold">{ui("งบกำไรขาดทุนรายเดือน")}</h2>
         <p className="text-xs text-muted mt-0.5">
-          เปรียบเทียบ 12 เดือน • รวมทั้งปี • % รายรับ
+          {ui("เปรียบเทียบ 12 เดือน • รวมทั้งปี • % รายรับ")}
         </p>
       </header>
       <div className="overflow-x-auto">
@@ -290,18 +303,18 @@ function PLMatrix({
           <thead className="bg-surface text-right">
             <tr>
               <th className="px-3 py-2 font-medium text-left sticky left-0 bg-surface min-w-[260px]">
-                รายการ
+                {ui("รายการ")}
               </th>
               {months.map((m) => (
                 <th
                   key={m.fiscalMonthId}
                   className="px-2 py-2 font-medium whitespace-nowrap min-w-[80px]"
                 >
-                  {m.label}
+                  {displayMonth(m.label, uiLocale)}
                 </th>
               ))}
               <th className="px-3 py-2 font-semibold bg-surface min-w-[100px]">
-                รวมทั้งปี
+                {ui("รวมทั้งปี")}
               </th>
               <th className="px-3 py-2 font-semibold bg-surface min-w-[80px]">
                 %
@@ -310,13 +323,15 @@ function PLMatrix({
           </thead>
           <tbody className="divide-y divide-hairline-soft">
             <tr className="text-muted">
-              <td className="px-3 py-2 sticky left-0 bg-canvas">แหล่งต้นทุน</td>
+              <td className="px-3 py-2 sticky left-0 bg-canvas">
+                {ui("แหล่งต้นทุน")}
+              </td>
               {months.map((m) => (
                 <td
                   key={m.fiscalMonthId}
                   className="px-2 py-2 text-right text-[10px]"
                 >
-                  {m.costSource === "statement" ? "Statement" : "กรอกเอง"}
+                  {m.costSource === "statement" ? "Statement" : ui("กรอกเอง")}
                 </td>
               ))}
               <td colSpan={2} />

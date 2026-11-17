@@ -1,0 +1,3307 @@
+{
+  "เพิ่มธุรกิจใหม่": {
+    "en": "Add business"
+  },
+  "ชื่อธุรกิจ": {
+    "en": "Business name"
+  },
+  "เช่น 61 Café สาขา 2": {
+    "en": "e.g. 61 Café Branch 2"
+  },
+  "สร้างธุรกิจ": {
+    "en": "Create business"
+  },
+  "ระบบจะสร้างบัญชีธนาคาร + หมวดหมู่รายรับรายจ่ายเริ่มต้นให้อัตโนมัติ ส่วนพนักงาน/Supplier/ต้นทุนต้องกรอกเองในแต่ละธุรกิจ": {
+    "en": "Bank accounts and default transaction categories are created automatically. Add employees, suppliers and costs separately for each business.",
+    "th": "ระบบจะสร้างบัญชีธนาคาร + หมวดหมู่รายรับรายจ่ายเริ่มต้นให้อัตโนมัติ ส่วนพนักงาน/ผู้จำหน่าย/ต้นทุนต้องกรอกเองในแต่ละธุรกิจ"
+  },
+  "ธุรกิจ": {
+    "en": "Business"
+  },
+  "พนักงาน": {
+    "en": "Employees"
+  },
+  "บิล POS": {
+    "en": "POS bills",
+    "th": "บิล ระบบขาย"
+  },
+  "รายการธนาคาร": {
+    "en": "Bank transactions"
+  },
+  "สถานะ": {
+    "en": "Status"
+  },
+  "จัดการ": {
+    "en": "Manage"
+  },
+  "บันทึก": {
+    "en": "Save"
+  },
+  "ยกเลิก": {
+    "en": "Cancel"
+  },
+  "ใช้งาน": {
+    "en": "Active"
+  },
+  "ปิด": {
+    "en": "Closed"
+  },
+  "แก้ชื่อ": {
+    "en": "Rename"
+  },
+  "ปิดใช้งาน": {
+    "en": "Deactivate"
+  },
+  "เปิดใช้งาน": {
+    "en": "Activate"
+  },
+  "จัดการธุรกิจ": {
+    "en": "Manage businesses"
+  },
+  "ทั้งหมด {v0} ธุรกิจ — แต่ละธุรกิจแยกข้อมูลกันโดยสมบูรณ์": {
+    "en": "{v0} businesses — each business has separate data"
+  },
+  "กรุณาเลือกเดือนของหลักฐานชุดนี้": {
+    "en": "Select the month for these documents"
+  },
+  "สำเร็จ {v0} ไฟล์{v1}": {
+    "en": "Uploaded {v0} files{v1}"
+  },
+  "• ไม่สำเร็จ {v0} ไฟล์ ดูรายละเอียดด้านล่าง": {
+    "en": " • {v0} failed. See details below."
+  },
+  "อัปโหลดหลักฐานหลายไฟล์เข้า Drive": {
+    "en": "Upload documents to Drive",
+    "th": "อัปโหลดหลักฐานหลายไฟล์เข้า ไดรฟ์"
+  },
+  "ประเภทของทั้งชุด": {
+    "en": "Document type for this batch"
+  },
+  "หลักฐานการโอน (สลิป)": {
+    "en": "Transfer evidence (slips)"
+  },
+  "บิลซื้อ": {
+    "en": "Purchase invoices"
+  },
+  "เดือนของทั้งชุด": {
+    "en": "Month for this batch"
+  },
+  "— เลือกเดือน —": {
+    "en": "— Select month —"
+  },
+  "ไฟล์รูปภาพ / PDF (เลือกหลายไฟล์ได้)": {
+    "en": "Images / PDF (multiple files supported)",
+    "th": "ไฟล์รูปภาพ / พีดีเอฟ (เลือกหลายไฟล์ได้)"
+  },
+  "อัปโหลด": {
+    "en": "Upload"
+  },
+  "ทั้งหมด {v0} ไฟล์": {
+    "en": "{v0} files in total"
+  },
+  "ทั้งหมด": {
+    "en": "All"
+  },
+  "ลองใหม่เฉพาะที่ไม่สำเร็จ (": {
+    "en": "Retry failed files ("
+  },
+  "เลือกไฟล์ชุดใหม่": {
+    "en": "Select new files"
+  },
+  "เลือกหลายรูปพร้อมกันได้ด้วย Ctrl / Cmd หรือ Shift • ไม่เกิน 4 MB ต่อไฟล์ • ทุกไฟล์ใช้ประเภทและเดือนเดียวกัน ระบบยังไม่อ่านวันที่จากรูป": {
+    "en": "Select multiple files with Ctrl / Cmd or Shift. Maximum 4 MB per file. All files use the same type and month; dates are not read from images yet."
+  },
+  "เลือก": {
+    "en": "Selected"
+  },
+  "ไฟล์ •": {
+    "en": "files •"
+  },
+  "สลิป": {
+    "en": "Slips"
+  },
+  "ยังไม่เลือกเดือน": {
+    "en": "No month selected"
+  },
+  "ดำเนินการ": {
+    "en": "Processing"
+  },
+  "ไฟล์ — โปรดเปิดหน้านี้ไว้จนเสร็จ": {
+    "en": "files — keep this page open until complete"
+  },
+  "ความคืบหน้าอัปโหลดหลักฐาน": {
+    "en": "Document upload progress"
+  },
+  "• รวมสำเร็จ": {
+    "en": "• Uploaded"
+  },
+  "ไฟล์": {
+    "en": "files"
+  },
+  "รายการไฟล์อัปโหลด": {
+    "en": "Upload queue"
+  },
+  "รออัปโหลด": {
+    "en": "Waiting"
+  },
+  "กำลังอัปโหลด": {
+    "en": "Uploading"
+  },
+  "สำเร็จ": {
+    "en": "Complete"
+  },
+  "ไม่สำเร็จ": {
+    "en": "Failed"
+  },
+  "เกิดข้อผิดพลาด": {
+    "en": "An error occurred"
+  },
+  "เชื่อม Google Drive ของร้าน": {
+    "en": "Connect your business Google Drive",
+    "th": "เชื่อมกูเกิลไดรฟ์ของร้าน"
+  },
+  "สร้างโฟลเดอร์ + Master Sheet แล้ว": {
+    "en": "Folders and master spreadsheet created",
+    "th": "สร้างโฟลเดอร์และชีตหลักแล้ว"
+  },
+  "สร้างโครงสร้าง Drive + Master Sheet": {
+    "en": "Create folders and master spreadsheet",
+    "th": "สร้างโฟลเดอร์และชีตหลัก"
+  },
+  "ซิงค์เข้า Master Sheet แล้ว ({v0} แท็บ)": {
+    "en": "Synced to master spreadsheet ({v0} tabs)",
+    "th": "ซิงค์เข้าชีตหลักแล้ว ({v0} แท็บ)"
+  },
+  "ซิงค์ข้อมูลเข้า Master Sheet ตอนนี้": {
+    "en": "Sync data to master spreadsheet now",
+    "th": "ซิงค์ข้อมูลเข้าชีตหลักตอนนี้"
+  },
+  "ตัดการเชื่อม Google แล้ว": {
+    "en": "Google disconnected",
+    "th": "ตัดการเชื่อม กูเกิล แล้ว"
+  },
+  "ตัดการเชื่อม": {
+    "en": "Disconnect"
+  },
+  "กรอก Channel secret และ/หรือ Access token": {
+    "en": "Enter a channel secret and/or access token",
+    "th": "กรอก รหัสลับช่องทาง และ/หรือ โทเคนเข้าถึง"
+  },
+  "บันทึกการตั้งค่า LINE แล้ว": {
+    "en": "LINE settings saved",
+    "th": "บันทึกการตั้งค่า ไลน์ แล้ว"
+  },
+  "บันทึกไม่สำเร็จ": {
+    "en": "Could not save"
+  },
+  "รับสลิป/บิลผ่าน LINE": {
+    "en": "Receive slips / invoices via LINE",
+    "th": "รับสลิป/บิลผ่าน ไลน์"
+  },
+  "ตั้งค่าแล้ว": {
+    "en": "Configured"
+  },
+  "ยังไม่ตั้งค่า": {
+    "en": "Not configured"
+  },
+  "Webhook URL (เอาไปวางใน LINE Developers → Messaging API)": {
+    "en": "Webhook URL (paste into LINE Developers → Messaging API)",
+    "th": "ที่อยู่รับข้อมูล (วางใน LINE Developers → Messaging API)"
+  },
+  "คัดลอกแล้ว": {
+    "en": "Copied"
+  },
+  "คัดลอก": {
+    "en": "Copy"
+  },
+  "Channel secret": {
+    "en": "Channel secret",
+    "th": "รหัสลับช่องทาง"
+  },
+  "•••••• (ตั้งไว้แล้ว — เว้นว่างถ้าไม่เปลี่ยน)": {
+    "en": "•••••• (already configured — leave blank to keep)"
+  },
+  "วาง Channel secret": {
+    "en": "Paste channel secret",
+    "th": "วางรหัสลับช่องทาง"
+  },
+  "Channel access token (long-lived)": {
+    "en": "Channel access token (long-lived)",
+    "th": "โทเคนเข้าถึงช่องทาง (ระยะยาว)"
+  },
+  "วาง Access token": {
+    "en": "Paste access token",
+    "th": "วางโทเคนเข้าถึง"
+  },
+  "ลบการตั้งค่า": {
+    "en": "Remove configuration"
+  },
+  "รูปที่ส่งเข้า LINE จะถูกเก็บเป็น “หลักฐานการโอน” ในเดือนปัจจุบัน (ต้องเชื่อม Google Drive + สร้างโครงสร้างก่อน)": {
+    "en": "Images sent to LINE are stored as transfer evidence for the current month. Connect Google Drive and create the folders first.",
+    "th": "รูปที่ส่งเข้า ไลน์ จะถูกเก็บเป็น “หลักฐานการโอน” ในเดือนปัจจุบัน (ต้องเชื่อม กูเกิลไดรฟ์ + สร้างโครงสร้างก่อน)"
+  },
+  "ยังไม่ได้เปิด Google Sheets API ใน Google Cloud — เปิดแล้วรอ 1-2 นาที ลองใหม่": {
+    "en": "Enable Google Sheets API in Google Cloud, wait 1–2 minutes, then retry.",
+    "th": "ยังไม่ได้เปิด กูเกิล Sheets API ใน กูเกิล Cloud — เปิดแล้วรอ 1-2 นาที ลองใหม่"
+  },
+  "ยังไม่ได้เปิด Google Drive API ใน Google Cloud — เปิดแล้วรอ 1-2 นาที ลองใหม่": {
+    "en": "Enable Google Drive API in Google Cloud, wait 1–2 minutes, then retry.",
+    "th": "ยังไม่ได้เปิด กูเกิลไดรฟ์ API ใน กูเกิล Cloud — เปิดแล้วรอ 1-2 นาที ลองใหม่"
+  },
+  "สิทธิ์ไม่พอ — กด ‘ตัดการเชื่อม’ แล้วเชื่อมใหม่ (กดอนุญาตให้ครบ)": {
+    "en": "Insufficient permissions. Disconnect and reconnect, granting all requested permissions."
+  },
+  "การเชื่อมหมดอายุ — กด ‘ตัดการเชื่อม’ แล้วเชื่อมใหม่": {
+    "en": "Connection expired. Disconnect and reconnect."
+  },
+  "ไม่มีไฟล์": {
+    "en": "No file"
+  },
+  "ไฟล์ใหญ่เกิน 4 MB": {
+    "en": "File exceeds 4 MB"
+  },
+  "รองรับไฟล์รูปภาพหรือ PDF เท่านั้น": {
+    "en": "Only images and PDF files are supported",
+    "th": "รองรับไฟล์รูปภาพหรือ พีดีเอฟ เท่านั้น"
+  },
+  "ข้อมูลไม่ถูกต้อง": {
+    "en": "Invalid information"
+  },
+  "ธุรกิจที่เลือกเปลี่ยนไปแล้ว กรุณากลับไปเลือกธุรกิจเดิมก่อนอัปโหลดต่อ": {
+    "en": "The selected business has changed. Switch back to the original business before continuing."
+  },
+  "ไฟล์นี้เคยอัปโหลดด้วยเดือนหรือประเภทอื่นแล้ว กรุณาตรวจรายการก่อน": {
+    "en": "This file was already uploaded with a different month or type. Check the existing record first."
+  },
+  "ไม่พบเดือนที่เลือก กรุณารีเฟรชหน้าแล้วเลือกใหม่": {
+    "en": "Selected month not found. Refresh and select again."
+  },
+  "เชื่อม Google Drive": {
+    "en": "Connect Google Drive",
+    "th": "เชื่อม กูเกิลไดรฟ์"
+  },
+  "ยังไม่มีสิทธิ์เข้าถึงธุรกิจ": {
+    "en": "You do not have access to this business"
+  },
+  "เชื่อมต่อ Google / LINE": {
+    "en": "Google / LINE integration",
+    "th": "เชื่อมต่อกูเกิลและไลน์"
+  },
+  "{v0} — Master Sheet + หลักฐาน/บิล ใน Google Drive + รับสลิปผ่าน LINE": {
+    "en": "{v0} — master spreadsheet, documents in Google Drive and slips via LINE",
+    "th": "{v0} — ชีตหลักและหลักฐานในกูเกิลไดรฟ์ พร้อมรับสลิปผ่านไลน์"
+  },
+  "ยังไม่ได้ตั้งค่า": {
+    "en": "Not configured"
+  },
+  "— ใส่ใน Vercel ก่อน": {
+    "en": "— configure these in Vercel first"
+  },
+  "เชื่อมแล้ว: {v0}": {
+    "en": "Connected: {v0}"
+  },
+  "ยังไม่ได้เชื่อม Google": {
+    "en": "Google is not connected",
+    "th": "ยังไม่ได้เชื่อม กูเกิล"
+  },
+  "ยังไม่ได้สร้างโครงสร้าง": {
+    "en": "Folders have not been created"
+  },
+  "ซิงค์ล่าสุด:": {
+    "en": "Last synced:"
+  },
+  "เปิด Master Sheet": {
+    "en": "Open master spreadsheet",
+    "th": "เปิดชีตหลัก"
+  },
+  "เปิดโฟลเดอร์ใน Drive": {
+    "en": "Open Drive folder",
+    "th": "เปิดโฟลเดอร์ในไดรฟ์"
+  },
+  "ขั้นต่อไป: จับคู่หลักฐานกับ Statement →": {
+    "en": "Next: match documents to your statement →",
+    "th": "ขั้นต่อไป: จับคู่หลักฐานกับรายการเดินบัญชี →"
+  },
+  "เลือกเดือนที่อัปโหลดไว้ อ่านข้อมูลจากรูป แล้วตรวจและยืนยันคู่ใน Bank & Reconcile": {
+    "en": "Select the upload month, read the images, then review and confirm matches in Bank & Reconcile.",
+    "th": "เลือกเดือนที่อัปโหลดไว้ อ่านข้อมูลจากรูป แล้วตรวจและยืนยันคู่ในหน้าบัญชีและกระทบยอด"
+  },
+  "ไฟล์หลักฐานล่าสุดใน Drive": {
+    "en": "Latest documents in Drive",
+    "th": "ไฟล์หลักฐานล่าสุดในไดรฟ์"
+  },
+  "จับคู่": {
+    "en": "Match"
+  },
+  "วิธีตั้งค่า Google Cloud (ทำครั้งเดียว)": {
+    "en": "Google Cloud setup (one time)",
+    "th": "วิธีตั้งค่า กูเกิล Cloud (ทำครั้งเดียว)"
+  },
+  "เปิด": {
+    "en": "Enable"
+  },
+  "และ": {
+    "en": "and"
+  },
+  "ในโปรเจกต์ Google Cloud เดิม (ที่ใช้ทำ login)": {
+    "en": "in the existing Google Cloud project used for sign-in",
+    "th": "ในโปรเจกต์ กูเกิล Cloud เดิม (ที่ใช้ทำ เข้าสู่ระบบ)"
+  },
+  "ใน OAuth consent screen →": {
+    "en": "In OAuth consent screen →"
+  },
+  "เพิ่ม scope:": {
+    "en": "add scope:"
+  },
+  "(อันเดียวพอ)": {
+    "en": "(this scope is sufficient)"
+  },
+  "ใน OAuth Client เพิ่ม": {
+    "en": "In OAuth Client, add"
+  },
+  "กลับมากดปุ่ม": {
+    "en": "Then click"
+  },
+  "“เชื่อม Google Drive ของร้าน”": {
+    "en": "“Connect your business Google Drive”",
+    "th": "“เชื่อม กูเกิลไดรฟ์ ของร้าน”"
+  },
+  "ด้านบน → อนุญาต → กด": {
+    "en": "above → authorize → click"
+  },
+  "“สร้างโครงสร้าง”": {
+    "en": "“Create folders”"
+  },
+  "แล้ว": {
+    "en": "then"
+  },
+  "“ซิงค์”": {
+    "en": "“Sync”"
+  },
+  "เพิ่มผู้ใช้เรียบร้อย — ผู้ใช้สามารถ login ด้วย Google ได้ทันที": {
+    "en": "User added. They can sign in with Google now.",
+    "th": "เพิ่มผู้ใช้เรียบร้อย — ผู้ใช้สามารถเข้าสู่ระบบด้วยกูเกิลได้ทันที"
+  },
+  "เพิ่มผู้ใช้ใหม่": {
+    "en": "Add user"
+  },
+  "อีเมล Google": {
+    "en": "Google email",
+    "th": "อีเมลกูเกิล"
+  },
+  "ชื่อแสดงผล (ไม่บังคับ)": {
+    "en": "Display name (optional)"
+  },
+  "เช่น คุณบีม": {
+    "en": "e.g. Beam"
+  },
+  "สิทธิ์": {
+    "en": "Role"
+  },
+  "เจ้าของร้าน": {
+    "en": "Owner"
+  },
+  "บัญชี": {
+    "en": "Accountant"
+  },
+  "เพิ่มผู้ใช้": {
+    "en": "Add user"
+  },
+  "💡 ผู้ใช้ใหม่ต้องเป็น Gmail (Google account) และต้อง login ผ่านปุ่ม “เข้าสู่ระบบด้วย Google” ในหน้า sign-in": {
+    "en": "💡 New users need a Google account and must use “Sign in with Google” on the sign-in page.",
+    "th": "💡 ผู้ใช้ใหม่ต้องมีบัญชีกูเกิล และเข้าสู่ระบบผ่านปุ่ม “เข้าสู่ระบบด้วยกูเกิล”"
+  },
+  "เห็นทุกธุรกิจ (เจ้าของ)": {
+    "en": "All businesses (owner)"
+  },
+  "เปลี่ยนสิทธิ์ของตัวเองไม่ได้": {
+    "en": "You cannot change your own role"
+  },
+  "ลบผู้ใช้ {v0} จริงหรือไม่? ผู้ใช้คนนี้จะไม่สามารถ login ได้อีก": {
+    "en": "Delete user {v0}? They will no longer be able to sign in.",
+    "th": "ลบผู้ใช้ {v0} จริงหรือไม่? ผู้ใช้คนนี้จะไม่สามารถเข้าสู่ระบบได้อีก"
+  },
+  "ลบบัญชีตัวเองไม่ได้": {
+    "en": "You cannot delete your own account"
+  },
+  "ลบผู้ใช้": {
+    "en": "Delete user"
+  },
+  "เฉพาะเจ้าของร้านเท่านั้นที่จัดการผู้ใช้ได้": {
+    "en": "Only the owner can manage users"
+  },
+  "รูปแบบอีเมลไม่ถูกต้อง": {
+    "en": "Invalid email address"
+  },
+  "อีเมลนี้มีอยู่ในระบบแล้ว": {
+    "en": "This email is already registered"
+  },
+  "เปลี่ยนสิทธิ์ของตัวเองไม่ได้ — ให้คนอื่นที่เป็น OWNER เป็นคนเปลี่ยนให้": {
+    "en": "You cannot change your own role. Ask another owner to change it.",
+    "th": "เปลี่ยนสิทธิ์ของตัวเองไม่ได้ — ให้เจ้าของร้านคนอื่นเป็นผู้เปลี่ยนให้"
+  },
+  "ไม่พบผู้ใช้": {
+    "en": "User not found"
+  },
+  "ต้องมี OWNER อย่างน้อย 1 คนในระบบเสมอ": {
+    "en": "At least one owner must remain in the system",
+    "th": "ต้องมีเจ้าของร้านอย่างน้อย 1 คนในระบบเสมอ"
+  },
+  "จัดการผู้ใช้": {
+    "en": "Manage users"
+  },
+  "รายชื่อผู้ใช้ทั้งหมด {v0} คน — ใช้ Google sign-in เท่านั้น": {
+    "en": "{v0} users — Google sign-in only",
+    "th": "รายชื่อผู้ใช้ทั้งหมด {v0} คน — ใช้การเข้าสู่ระบบด้วยกูเกิลเท่านั้น"
+  },
+  "ชื่อ": {
+    "en": "Name"
+  },
+  "อีเมล": {
+    "en": "Email"
+  },
+  "ธุรกิจที่เข้าถึงได้": {
+    "en": "Business access"
+  },
+  "สร้างเมื่อ": {
+    "en": "Created"
+  },
+  "คุณ": {
+    "en": "You"
+  },
+  "📌 หมายเหตุ": {
+    "en": "📌 Notes"
+  },
+  "เพิ่มอีเมลแล้ว ผู้ใช้นั้นสามารถกดปุ่ม “เข้าสู่ระบบด้วย Google” ได้ทันที": {
+    "en": "Once their email is added, the user can click “Sign in with Google” immediately.",
+    "th": "เพิ่มอีเมลแล้ว ผู้ใช้นั้นสามารถกดปุ่ม “เข้าสู่ระบบด้วยกูเกิล” ได้ทันที"
+  },
+  "เปลี่ยนสิทธิ์ใช้ dropdown ที่คอลัมน์ “สิทธิ์” — เปลี่ยนทันทีเมื่อเลือก": {
+    "en": "Select a role from the Role dropdown. Changes take effect immediately.",
+    "th": "เปลี่ยนสิทธิ์จากตัวเลือกในคอลัมน์ “สิทธิ์” — เปลี่ยนทันทีเมื่อเลือก"
+  },
+  "ลบบัญชีตัวเองไม่ได้ และต้องมี OWNER อย่างน้อย 1 คนเสมอ": {
+    "en": "You cannot delete your own account. At least one owner must remain.",
+    "th": "ลบบัญชีตัวเองไม่ได้ และต้องมีเจ้าของร้านอย่างน้อย 1 คนเสมอ"
+  },
+  ": เจ้าของร้าน = ทุกอย่าง · บัญชี = ยกเว้นจัดการผู้ใช้ · พนักงาน = ดูได้บางส่วน": {
+    "en": ": Owner = all access · Accountant = all except user management · Staff = limited access"
+  },
+  "ต้องเชื่อม Google Drive + สร้างโครงสร้างก่อน (เมนู เชื่อมต่อ Google / LINE)": {
+    "en": "Connect Google Drive and create the folders first (Google / LINE integration).",
+    "th": "ต้องเชื่อมกูเกิลไดรฟ์และสร้างโครงสร้างก่อน (เมนูเชื่อมต่อกูเกิลและไลน์)"
+  },
+  "อัปโหลดไม่สำเร็จ: {v0}": {
+    "en": "Upload failed: {v0}"
+  },
+  "ไม่พบรายการ": {
+    "en": "No transactions found"
+  },
+  "ไฟล์ใหญ่เกิน 15MB": {
+    "en": "File exceeds 15 MB"
+  },
+  "ลบ \"{v0}\" ?\nถ้ามีรายการ/ยอดยกมาบันทึกไว้ ระบบจะซ่อนแทนการลบ (เก็บประวัติไว้)": {
+    "en": "Delete “{v0}”? If transactions or opening balances exist, this account will be hidden to preserve its history."
+  },
+  "จัดการบัญชี & ช่องทาง (": {
+    "en": "Manage accounts & channels ("
+  },
+  "เปิด ▾": {
+    "en": "Show ▾"
+  },
+  "ปิด ▴": {
+    "en": "Hide ▴"
+  },
+  "ชื่อบัญชี / ช่องทาง": {
+    "en": "Account / channel name"
+  },
+  "เช่น ธนาคารกรุงเทพ, Grab, Lineman, Shopee": {
+    "en": "e.g. Bangkok Bank, Grab, LINE MAN, Shopee"
+  },
+  "ประเภท": {
+    "en": "Type"
+  },
+  "บัญชี / ช่องทางเงิน": {
+    "en": "Bank / payment channel"
+  },
+  "บัตรเครดิต": {
+    "en": "Credit card"
+  },
+  "เพิ่ม": {
+    "en": "Add"
+  },
+  "ลบ {v0}": {
+    "en": "Delete {v0}"
+  },
+  "💡 เพิ่มได้ทั้งธนาคาร (กรุงเทพ/กรุงศรี/กรุงไทย ฯลฯ) และช่องทางเงิน (Grab/Lineman/Shopee) — แต่ละธุรกิจมีบัญชีของตัวเองแยกกัน": {
+    "en": "💡 Add banks or payment channels such as Grab, LINE MAN or Shopee. Accounts are separate for each business."
+  },
+  "วันที่": {
+    "en": "Date"
+  },
+  "เวลา": {
+    "en": "Time"
+  },
+  "รายการ": {
+    "en": "Description"
+  },
+  "เช่น โอนซื้อของ Makro": {
+    "en": "e.g. Makro purchase"
+  },
+  "ฝาก": {
+    "en": "Credit"
+  },
+  "ถอน": {
+    "en": "Debit"
+  },
+  "ช่องทาง": {
+    "en": "Channel"
+  },
+  "หมวด": {
+    "en": "Category"
+  },
+  "-- ไม่ระบุ --": {
+    "en": "-- Unspecified --"
+  },
+  "รายรับ": {
+    "en": "Income"
+  },
+  "รายจ่าย": {
+    "en": "Expense"
+  },
+  "โอน": {
+    "en": "Transfer"
+  },
+  "รายจ่าย / ต้นทุน": {
+    "en": "Expense / cost",
+    "th": "รายจ่าย / ต้นทุน"
+  },
+  "โอน / ไม่นับ P&L": {
+    "en": "Transfer / excluded from profit & loss",
+    "th": "โอน / ไม่นับกำไรขาดทุน"
+  },
+  "ลบหมวด \"{v0}\" ?\nถ้ามีรายการใช้หมวดนี้อยู่ ระบบจะซ่อนแทนการลบ (เก็บประวัติ)": {
+    "en": "Delete category “{v0}”? If transactions use it, it will be hidden to preserve history."
+  },
+  "จัดการหมวดหมู่ (ต้นทุน/รายรับ) (": {
+    "en": "Manage categories (cost / income) ("
+  },
+  "ชื่อหมวด": {
+    "en": "Category name"
+  },
+  "เช่น 🥩 ต้นทุน - เนื้อสัตว์": {
+    "en": "e.g. 🥩 Cost - Meat"
+  },
+  "เพิ่มหมวด": {
+    "en": "Add category"
+  },
+  "เลื่อนขึ้น": {
+    "en": "Move up"
+  },
+  "เลื่อนลง": {
+    "en": "Move down"
+  },
+  "ลบ": {
+    "en": "Delete"
+  },
+  "💡 ลำดับที่จัดเรียงนี้คือลำดับที่จะแสดงใน dropdown ตอนเลือกหมวด — จัดของที่ใช้บ่อยไว้บนสุดเพื่อหาง่าย": {
+    "en": "💡 Categories appear in dropdowns in this order. Move frequently used categories to the top.",
+    "th": "💡 หมวดหมู่จะปรากฏตามลำดับนี้ในตัวเลือก — จัดหมวดที่ใช้บ่อยไว้บนสุดเพื่อหาง่าย"
+  },
+  "ลบรายการนี้?": {
+    "en": "Delete this transaction?"
+  },
+  "ลบรายการ": {
+    "en": "Delete transaction"
+  },
+  "ยอดยกมา:": {
+    "en": "Opening balance:"
+  },
+  "อ่าน PDF ไม่ได้": {
+    "en": "Could not read PDF",
+    "th": "อ่าน พีดีเอฟ ไม่ได้"
+  },
+  "ไม่พบรายการใน PDF นี้ — รูปแบบไฟล์อาจไม่รองรับ": {
+    "en": "No transactions found in this PDF — the format may not be supported",
+    "th": "ไม่พบรายการใน พีดีเอฟ นี้ — รูปแบบไฟล์อาจไม่รองรับ"
+  },
+  "กรุณาเลือกอย่างน้อย 1 รายการ": {
+    "en": "Select at least one transaction"
+  },
+  "(ไม่มีรายละเอียด)": {
+    "en": "(No description)"
+  },
+  "นำเข้า PDF Statement (KBANK / SCB / กรุงศรี) —": {
+    "en": "Import PDF statement (KBANK / SCB / Krungsri) —",
+    "th": "นำเข้าไฟล์รายการเดินบัญชี (กสิกร / ไทยพาณิชย์ / กรุงศรี) —"
+  },
+  "ไฟล์ Statement (PDF)": {
+    "en": "Statement file (PDF)",
+    "th": "ไฟล์รายการเดินบัญชี (พีดีเอฟ)"
+  },
+  "รหัสผ่าน PDF": {
+    "en": "PDF password",
+    "th": "รหัสผ่านไฟล์"
+  },
+  "อ่าน PDF": {
+    "en": "Read PDF",
+    "th": "อ่านไฟล์"
+  },
+  "ลองใส่วันเกิด 8 หลัก (วันเดือนปีค.ศ.) เช่น 20051994": {
+    "en": "Try your 8-digit date of birth (ddmmyyyy), e.g. 20051994."
+  },
+  "รหัสผ่านผิด — โปรดตรวจสอบและลองอีกครั้ง": {
+    "en": "Incorrect password. Check and try again."
+  },
+  "รายการเรียบร้อย": {
+    "en": "transactions imported"
+  },
+  "— ข้ามรายการซ้ำ": {
+    "en": "— skipped"
+  },
+  "รายการ (กันยอดเบิ้ล)": {
+    "en": "duplicate transactions"
+  },
+  "ตั้ง": {
+    "en": "Set"
+  },
+  "ยอดยกมา": {
+    "en": "opening balance"
+  },
+  "ของเดือนนี้ =": {
+    "en": "for this month ="
+  },
+  "(จากบรรทัด “ยอดยกมา” ใน statement) — แนะนำให้ติ๊ก เพื่อให้ยอดคงเหลือตรงกับ statement": {
+    "en": "(from the statement opening balance). Recommended to keep balances consistent with the statement.",
+    "th": "(จากบรรทัด “ยอดยกมา” ในรายการเดินบัญชี) — แนะนำให้เลือกเพื่อให้ยอดคงเหลือตรงกัน"
+  },
+  "ตัดรายการซ้ำออก": {
+    "en": "Excluded"
+  },
+  "รายการ (เคยนำเข้าแล้ว หรือซ้ำกันในไฟล์) — ระบบไม่ติ๊กเลือกให้นำเข้า": {
+    "en": "duplicates (already imported or repeated in this file). These are not selected for import."
+  },
+  "แสดงรายการซ้ำ": {
+    "en": "Show duplicates"
+  },
+  "ซ่อนรายการซ้ำ": {
+    "en": "Hide duplicates"
+  },
+  "พบ": {
+    "en": "Found"
+  },
+  "(ซ้ำ {v0})": {
+    "en": "({v0} duplicates)"
+  },
+  "— เลือก": {
+    "en": "— selected"
+  },
+  "รายการ ✓ ตรวจสอบและแก้หมวดก่อนยืนยัน": {
+    "en": "transactions. Review categories before confirming."
+  },
+  "เลือกทั้งหมด": {
+    "en": "Select all"
+  },
+  "ล้างการเลือก": {
+    "en": "Clear selection"
+  },
+  "ซ้ำ": {
+    "en": "Duplicate"
+  },
+  "น.": {
+    "en": "hrs"
+  },
+  "— ไม่ระบุ —": {
+    "en": "— Unspecified —"
+  },
+  "ทุกรายการในไฟล์นี้เคยนำเข้าแล้ว — ไม่มีรายการใหม่ให้บันทึก": {
+    "en": "All transactions in this file have already been imported. No new transactions to save."
+  },
+  "ยืนยันนำเข้า": {
+    "en": "Confirm import"
+  },
+  "ลบ {v0} รายการแล้ว{v1}": {
+    "en": "Deleted {v0} transactions{v1}"
+  },
+  "และล้างยอดยกมาแล้ว": {
+    "en": " and cleared the opening balance"
+  },
+  "ลบไม่สำเร็จ กรุณาลองอีกครั้ง": {
+    "en": "Could not delete. Try again."
+  },
+  "เสร็จสิ้น": {
+    "en": "Done"
+  },
+  "แก้ไข / เลือกรายการ": {
+    "en": "Edit / select transactions"
+  },
+  "ยกเลิกเลือกทั้งหมด": {
+    "en": "Deselect all"
+  },
+  "ลบที่เลือก (": {
+    "en": "Delete selected ("
+  },
+  "เฉพาะ": {
+    "en": "Only"
+  },
+  "ยืนยันลบรายการที่เลือก": {
+    "en": "Confirm deletion of selected transactions"
+  },
+  "ยืนยันลบ": {
+    "en": "Confirm deletion"
+  },
+  "รายการจาก": {
+    "en": "transactions from"
+  },
+  "เมื่อลบแล้วจะกู้คืนไม่ได้ หากลงผิดเดือน สามารถนำเข้า Statement อีกครั้งในเดือนที่ถูกต้องได้": {
+    "en": "Deleted transactions cannot be recovered. If you imported the wrong month, import the statement again in the correct month.",
+    "th": "เมื่อลบแล้วจะกู้คืนไม่ได้ หากลงผิดเดือน สามารถนำเข้ารายการเดินบัญชีอีกครั้งในเดือนที่ถูกต้องได้"
+  },
+  "ล้างยอดยกมาของบัญชีในเดือนนี้ด้วย (กรณีนำเข้าผิดเดือน)": {
+    "en": "Also clear this account’s opening balance for this month (wrong-month import)"
+  },
+  "รหัสอนุมัติเจ้าของร้าน": {
+    "en": "Owner approval code"
+  },
+  "ยังไม่มีรายการในเดือนนี้ — เพิ่มรายการด้านบน": {
+    "en": "No transactions this month. Add a transaction above."
+  },
+  "เลือกทุกรายการในบัญชีและเดือนนี้": {
+    "en": "Select all transactions for this account and month"
+  },
+  "ชำระคืน": {
+    "en": "Repayments"
+  },
+  "ใช้จ่าย": {
+    "en": "Spending"
+  },
+  "ค้างชำระสะสม": {
+    "en": "Cumulative outstanding balance"
+  },
+  "คงเหลือ": {
+    "en": "Balance"
+  },
+  "หลักฐาน": {
+    "en": "Evidence"
+  },
+  "เลือกรายการ {v0}": {
+    "en": "Select transaction {v0}"
+  },
+  "Remark / บันทึก": {
+    "en": "Remark / note",
+    "th": "หมายเหตุ / บันทึก"
+  },
+  "โอน/ไม่นับ P&L": {
+    "en": "Transfer / excluded from profit & loss",
+    "th": "โอน / ไม่นับกำไรขาดทุน"
+  },
+  "วันที่ต้องเป็น YYYY-MM-DD": {
+    "en": "Date must use YYYY-MM-DD format"
+  },
+  "ต้องระบุรายการ": {
+    "en": "Enter a description"
+  },
+  "ต้องระบุยอดฝากหรือถอนอย่างน้อย 1 ฝั่ง": {
+    "en": "Enter either a credit or a debit amount"
+  },
+  "ระบุได้แค่ฝากหรือถอน ไม่ใช่ทั้งสองพร้อมกัน": {
+    "en": "Enter a credit or a debit, not both"
+  },
+  "กรุณาเลือกรายการและระบุรหัสอนุมัติให้ถูกต้อง": {
+    "en": "Select transactions and enter the correct approval code"
+  },
+  "รหัสอนุมัติไม่ถูกต้อง (ต้องใช้รหัสเจ้าของ)": {
+    "en": "Incorrect approval code (owner code required)"
+  },
+  "รายการเปลี่ยนไปแล้ว กรุณารีเฟรชหน้าและเลือกใหม่": {
+    "en": "Transactions have changed. Refresh and select again."
+  },
+  "ต้องเลือกทุกรายการในบัญชีและเดือนนี้ก่อนล้างยอดยกมา": {
+    "en": "Select all transactions for this account and month before clearing the opening balance"
+  },
+  "ต้องระบุชื่อบัญชี/ช่องทาง": {
+    "en": "Enter an account / channel name"
+  },
+  "ไม่พบบัญชีนี้ในธุรกิจปัจจุบัน": {
+    "en": "Account not found in the current business"
+  },
+  "ต้องระบุชื่อหมวด": {
+    "en": "Enter a category name"
+  },
+  "มีหมวดชื่อนี้อยู่แล้ว": {
+    "en": "A category with this name already exists"
+  },
+  "ไม่พบหมวดนี้ในธุรกิจปัจจุบัน": {
+    "en": "Category not found in the current business"
+  },
+  "ไม่พบรายการนี้ในธุรกิจปัจจุบัน": {
+    "en": "Transaction not found in the current business"
+  },
+  "กรุณาเลือกไฟล์ PDF ก่อน": {
+    "en": "Select a PDF file first",
+    "th": "กรุณาเลือกไฟล์ พีดีเอฟ ก่อน"
+  },
+  "ไฟล์ใหญ่เกิน 20MB": {
+    "en": "File exceeds 20 MB"
+  },
+  "อ่านไฟล์ไม่ได้: {v0}": {
+    "en": "Could not read file: {v0}"
+  },
+  "เกิดข้อผิดพลาดในการประมวลผล: {v0}": {
+    "en": "Processing error: {v0}"
+  },
+  "ข้อมูลบางช่องไม่ถูกต้อง ({v0}): {v1}": {
+    "en": "Some fields are invalid ({v0}): {v1}"
+  },
+  "ไม่มีรายการให้บันทึก": {
+    "en": "No transactions to save"
+  },
+  "บันทึก {v0} รายการ — ข้ามรายการซ้ำ {v1} รายการ": {
+    "en": "Saved {v0} transactions — skipped {v1} duplicates"
+  },
+  "บันทึกไม่สำเร็จ: {v0}": {
+    "en": "Could not save: {v0}"
+  },
+  "การเชื่อมต่อขัดข้อง กรุณาตรวจใหม่": {
+    "en": "Connection interrupted. Check again."
+  },
+  "เริ่มตรวจทั้งเดือนไม่สำเร็จ โปรดตรวจธุรกิจและสิทธิ์": {
+    "en": "Could not start monthly processing. Check the selected business and your permissions."
+  },
+  "การเชื่อมต่อขัดข้อง กรอกยอดและวันที่เองได้": {
+    "en": "Connection interrupted. You can enter the amount and date manually."
+  },
+  "อ่านสลิป → จับคู่ Statement → ลงหมวด → อัปเดต Dashboard": {
+    "en": "Read slips → match statements → categorize → update dashboard",
+    "th": "อ่านสลิป → จับคู่รายการเดินบัญชี → ลงหมวด → อัปเดตภาพรวม"
+  },
+  "กำลังตรวจ {v0} / {v1} ไฟล์": {
+    "en": "Checking {v0} / {v1} files"
+  },
+  "ตรวจและจัดหมวดอัตโนมัติทั้งเดือน": {
+    "en": "Automatically match and categorize this month"
+  },
+  "เริ่มครั้งเดียวสำหรับไฟล์ทุกหน้าในเดือนนี้ โปรดเปิดหน้าไว้จนเสร็จ คู่หรือหมวดที่กำกวมจะไม่ลงอัตโนมัติ หมวดเฉพาะเดิมที่ต่างจากคำแนะนำจะคงไว้ให้ตรวจ": {
+    "en": "Start once to process all files across every page of this month. Keep this page open. Ambiguous matches and categories require review; existing specific categories that differ from suggestions are preserved."
+  },
+  "• ลงอัตโนมัติ": {
+    "en": "• Applied automatically"
+  },
+  "• รอตรวจ": {
+    "en": "• Needs review"
+  },
+  "• คงข้อมูลเดิม": {
+    "en": "• Existing data preserved"
+  },
+  "ดูผลรายไฟล์": {
+    "en": "View results by file"
+  },
+  "กำลังอ่าน {v0} / {v1}": {
+    "en": "Reading {v0} / {v1}"
+  },
+  "อ่านข้อความ / Remark ที่ยังไม่ได้อ่านในหน้านี้": {
+    "en": "Read unread text / remarks on this page",
+    "th": "อ่านข้อความและหมายเหตุที่ยังไม่ได้อ่านในหน้านี้"
+  },
+  "แสดง": {
+    "en": "Show"
+  },
+  "ยังไม่จับคู่": {
+    "en": "Unmatched"
+  },
+  "ยืนยันคู่แล้ว": {
+    "en": "Match confirmed"
+  },
+  "อัตโนมัติ: รอตรวจ": {
+    "en": "Automatic: needs review"
+  },
+  "อัตโนมัติ: ลงหมวดแล้ว": {
+    "en": "Automatic: categorized"
+  },
+  "เปิดหน้านี้ไว้ขณะอ่านรูป • อ่าน JPG / PNG / PDF ผ่าน Google Drive • ปุ่มอ่านข้อความอย่างเดียวจะไม่เปลี่ยนหมวด": {
+    "en": "Keep this page open while images are read. JPG / PNG / PDF are read through Google Drive. Reading text alone does not change categories.",
+    "th": "เปิดหน้านี้ไว้ขณะอ่านรูป • รองรับรูปและไฟล์พีดีเอฟผ่านกูเกิลไดรฟ์ • การอ่านข้อความอย่างเดียวไม่เปลี่ยนหมวด"
+  },
+  "ไม่มีหลักฐานในรายการนี้ หากยังไม่พบไฟล์ให้ตรวจเดือนและธุรกิจที่เลือก": {
+    "en": "No documents in this list. Check the selected month and business."
+  },
+  "รายการ Statement ที่ยังไม่มีหลักฐานแนบ (": {
+    "en": "Statement transactions without attached evidence (",
+    "th": "รายการเดินบัญชีที่ยังไม่มีหลักฐานแนบ ("
+  },
+  "เป็นรายการในบัญชีที่เลือก ไม่ใช่ข้อสรุปว่าทุกรายการต้องมีสลิป": {
+    "en": "These are transactions for the selected account. Not every transaction necessarily requires a slip."
+  },
+  "เงินออก": {
+    "en": "Money out"
+  },
+  "เงินเข้า": {
+    "en": "Money in"
+  },
+  "บันทึกไม่สำเร็จ กรุณาลองใหม่": {
+    "en": "Could not save. Try again."
+  },
+  "ออก": {
+    "en": "Out"
+  },
+  "เข้า": {
+    "en": "In"
+  },
+  "↗ ดูรูปหลักฐาน": {
+    "en": "↗ View evidence"
+  },
+  "รอตรวจ / ยังไม่จับคู่": {
+    "en": "Needs review / unmatched"
+  },
+  "ใบเสร็จ": {
+    "en": "Receipt"
+  },
+  "ผลตรวจอัตโนมัติล่าสุด:": {
+    "en": "Latest automatic result:"
+  },
+  "กำลังอ่าน...": {
+    "en": "Reading..."
+  },
+  "ใช้ข้อความที่อ่านไว้": {
+    "en": "Use previously read text"
+  },
+  "อ่านข้อความ / Remark จากรูป": {
+    "en": "Read text / remark from image",
+    "th": "อ่านข้อความและหมายเหตุจากรูป"
+  },
+  "Remark / หมายเหตุในสลิป": {
+    "en": "Remark / note on slip",
+    "th": "หมายเหตุในสลิป"
+  },
+  "เช่น ค่าผัก / ค่าไฟ ต.ค. — อ่านไม่ชัดสามารถพิมพ์แก้เองได้": {
+    "en": "e.g. vegetables / October electricity — edit manually if unclear"
+  },
+  "ยังไม่พบ Remark ให้กดอ่านข้อความ หรือพิมพ์คำอธิบายเอง ระบบจะแนะนำหมวดจากคำในช่องนี้": {
+    "en": "No remark found. Read the image or enter a description to get category suggestions.",
+    "th": "ยังไม่พบหมายเหตุ ให้กดอ่านข้อความหรือพิมพ์คำอธิบายเอง ระบบจะแนะนำหมวดจากข้อความนี้"
+  },
+  "รายการคู่เดิมอยู่นอกบัญชีที่เลือกหรือถูกลบแล้ว เลือกทุกบัญชีเพื่อตรวจสอบ": {
+    "en": "The existing match is outside the selected account or was deleted. Select all accounts to review."
+  },
+  "ยกเลิกคู่": {
+    "en": "Unmatch"
+  },
+  "ยอดเงิน": {
+    "en": "Amount"
+  },
+  "วันที่ในหลักฐาน": {
+    "en": "Document date"
+  },
+  "เวลา (ถ้ามี)": {
+    "en": "Time (if available)"
+  },
+  "กรอกหรืออ่านยอดเงินและวันที่ เพื่อแนะนำคู่ใน Statement": {
+    "en": "Enter or read the amount and date to find statement matches",
+    "th": "กรอกหรืออ่านยอดเงินและวันที่ เพื่อแนะนำคู่ในรายการเดินบัญชี"
+  },
+  "ยังไม่พบคู่ที่ยอดและวันที่ตรงกัน ตรวจข้อมูล บัญชี และเดือน หรือเลือกจากรายการทั้งหมดด้านล่าง": {
+    "en": "No matching amount and date found. Check the information, account and month, or select from all transactions below."
+  },
+  "รายการที่ยอดและวันที่ตรงกัน": {
+    "en": "Transactions with matching amount and date"
+  },
+  "— มีหลายคู่ ต้องตรวจรูปและเลือกเอง": {
+    "en": "— multiple matches; review the image and select one"
+  },
+  "— กรุณาตรวจบัญชีและผู้รับก่อนยืนยัน": {
+    "en": "— check the account and recipient before confirming"
+  },
+  "แสดง 5 คู่แรก เลือกรายการอื่นจากช่องด้านล่างได้": {
+    "en": "Showing the first 5 matches. Select other transactions below."
+  },
+  "ค้นหาและเลือกคู่เองจาก Statement เดือนนี้": {
+    "en": "Search and select from this month’s statement",
+    "th": "ค้นหาและเลือกคู่เองจากรายการเดินบัญชีเดือนนี้"
+  },
+  "ค้นหายอดเงิน / ผู้รับ / วันที่": {
+    "en": "Search amount / recipient / date"
+  },
+  "เลือกรายการธนาคารสำหรับ {v0}": {
+    "en": "Select bank transaction for {v0}"
+  },
+  "— เลือกรายการ —": {
+    "en": "— Select transaction —"
+  },
+  "คู่ที่จะยืนยัน:": {
+    "en": "Match to confirm:"
+  },
+  "กรุณาเลือกใหม่": {
+    "en": "Please select again"
+  },
+  "ยอดเงินหรือวันที่ของคู่ที่เลือกต่างจากข้อมูลหลักฐาน กรุณาตรวจรูปก่อนยืนยัน": {
+    "en": "The selected transaction’s amount or date differs from the document. Check the image before confirming."
+  },
+  "กำลังบันทึก...": {
+    "en": "Saving..."
+  },
+  "ตรวจรูปแล้ว — ยืนยันคู่": {
+    "en": "Image reviewed — confirm match"
+  },
+  "บันทึกหมวดไม่สำเร็จ กรุณาลองใหม่": {
+    "en": "Could not save category. Try again."
+  },
+  "หมวดบัญชีจาก Remark": {
+    "en": "Accounting category from remark",
+    "th": "หมวดบัญชีจากหมายเหตุ"
+  },
+  "เลือกรายการธนาคารก่อน ระบบจะแนะนำหมวดให้ตรงกับเงินเข้า / เงินออก": {
+    "en": "Select a bank transaction first to get suggestions for money in / out"
+  },
+  "หมวดปัจจุบัน:": {
+    "en": "Current category:"
+  },
+  "ยังไม่จัดหมวด": {
+    "en": "Uncategorized"
+  },
+  "มีหลายหมวดที่อาจเกี่ยวข้อง กรุณาเลือกให้ตรงกับการจ่ายจริง": {
+    "en": "Several categories may apply. Select the one that reflects the actual payment."
+  },
+  "หมวดที่แนะนำจากคำใน Remark (ยังไม่บันทึกอัตโนมัติ)": {
+    "en": "Suggestions from the remark (not saved automatically)",
+    "th": "หมวดที่แนะนำจากหมายเหตุ (ยังไม่บันทึกอัตโนมัติ)"
+  },
+  "• กดเพื่อเลือก": {
+    "en": "• Click to select"
+  },
+  "ยังแนะนำหมวดจาก Remark นี้ไม่ได้ เลือกหมวดเองได้ด้านล่าง": {
+    "en": "No suggestion available for this remark. Select a category below.",
+    "th": "ยังแนะนำหมวดจากหมายเหตุนี้ไม่ได้ เลือกหมวดเองได้ด้านล่าง"
+  },
+  "หมวดที่จะบันทึก": {
+    "en": "Category to save"
+  },
+  "— ยังไม่จัดหมวด —": {
+    "en": "— Uncategorized —"
+  },
+  "หมวดเดิม (ซ่อน)": {
+    "en": "Previous category (hidden)"
+  },
+  "หมวดเงินเข้า — ยอดขาย P&L ยังคงอ้างอิง POS": {
+    "en": "Income category — profit & loss revenue still comes from POS",
+    "th": "หมวดเงินเข้า — รายได้ในงบกำไรขาดทุนยังอ้างอิงยอดขายหน้าร้าน"
+  },
+  "หมวดนี้ไม่นับเป็นค่าใช้จ่าย P&L": {
+    "en": "This category is excluded from profit & loss expenses",
+    "th": "หมวดนี้ไม่นับเป็นค่าใช้จ่ายในงบกำไรขาดทุน"
+  },
+  "รอจัดหมวด / ตรวจสอบ": {
+    "en": "Needs categorization / review"
+  },
+  "ค่าใช้จ่ายเข้า Cost Setup / P&L → {v0}": {
+    "en": "Expense included in cost summary / profit & loss → {v0}",
+    "th": "ค่าใช้จ่ายเข้าสรุปต้นทุนและงบกำไรขาดทุน → {v0}"
+  },
+  "ยืนยันคู่หลักฐานก่อน แล้วจึงบันทึกหมวดและ Remark ได้": {
+    "en": "Confirm the evidence match before saving its category and remark",
+    "th": "ยืนยันคู่หลักฐานก่อน แล้วจึงบันทึกหมวดและหมายเหตุได้"
+  },
+  "ยืนยันบันทึกหมวดและ Remark": {
+    "en": "Confirm category and remark",
+    "th": "ยืนยันบันทึกหมวดและหมายเหตุ"
+  },
+  "Remark ที่ยืนยันจะอยู่ในบันทึกรายการธนาคาร เมื่อเปลี่ยนหมวด Cost Setup และ P&L จะคำนวณตามหมวดใหม่": {
+    "en": "The confirmed remark is saved in the bank transaction note. Changing the category recalculates the cost summary and profit & loss.",
+    "th": "หมายเหตุที่ยืนยันจะอยู่ในบันทึกรายการธนาคาร เมื่อเปลี่ยนหมวด สรุปต้นทุนและงบกำไรขาดทุนจะคำนวณตามหมวดใหม่"
+  },
+  "บันทึกหมวดและ Remark แล้ว": {
+    "en": "Category and remark saved",
+    "th": "บันทึกหมวดและหมายเหตุแล้ว"
+  },
+  "ไม่มีสิทธิ์จัดการหลักฐาน": {
+    "en": "You do not have permission to manage evidence"
+  },
+  "ธุรกิจเปลี่ยนไปแล้ว กรุณารีเฟรชหน้า": {
+    "en": "Business changed. Refresh the page."
+  },
+  "ไม่พบหลักฐานในธุรกิจและเดือนที่เลือก": {
+    "en": "Document not found in the selected business and month"
+  },
+  "อ่านตัวอักษรไม่ชัด กรอกยอดและวันที่เองเพื่อหาคู่ได้ครับ": {
+    "en": "Text is unclear. Enter the amount and date manually to find matches."
+  },
+  "อ่านรูปจาก Drive ไม่สำเร็จ ตรวจการเชื่อมต่อ Google หรือกรอกยอดและวันที่เองเพื่อหาคู่": {
+    "en": "Could not read the Drive image. Check Google connection or enter amount and date manually.",
+    "th": "อ่านรูปจาก ไดรฟ์ ไม่สำเร็จ ตรวจการเชื่อมต่อ กูเกิล หรือกรอกยอดและวันที่เองเพื่อหาคู่"
+  },
+  "หลักฐานนี้มีคู่เดิมอยู่ กรุณายกเลิกคู่เดิมก่อน": {
+    "en": "This document is already matched. Remove the existing match first."
+  },
+  "ไม่พบรายการธนาคารในธุรกิจและเดือนนี้ กรุณารีเฟรชหน้า": {
+    "en": "Bank transaction not found in this business and month. Refresh the page."
+  },
+  "คู่หลักฐานเปลี่ยนไปแล้ว กรุณารีเฟรชหน้า": {
+    "en": "The evidence match has changed. Refresh the page."
+  },
+  "บันทึกคู่ไม่สำเร็จ โปรดตรวจสิทธิ์และธุรกิจที่เลือก": {
+    "en": "Could not save the match. Check permissions and the selected business."
+  },
+  "ยกเลิกคู่ไม่สำเร็จ": {
+    "en": "Could not remove the match"
+  },
+  "ยืนยันคู่หลักฐานกับรายการนี้ก่อนบันทึกหมวด": {
+    "en": "Confirm the evidence match to this transaction before saving the category"
+  },
+  "รายการหรือหมวดเปลี่ยนไปแล้ว กรุณารีเฟรชและตรวจใหม่": {
+    "en": "The transaction or category changed. Refresh and review again."
+  },
+  "ไม่พบหมวดที่เลือกในธุรกิจนี้": {
+    "en": "Selected category not found in this business"
+  },
+  "ข้อมูลเปลี่ยนไประหว่างบันทึก กรุณารีเฟรชและตรวจใหม่": {
+    "en": "Data changed while saving. Refresh and review again."
+  },
+  "บันทึกหมวดไม่สำเร็จ โปรดตรวจสิทธิ์และธุรกิจที่เลือก": {
+    "en": "Could not save category. Check permissions and selected business."
+  },
+  "ตรวจอัตโนมัติไม่สำเร็จ หรือข้อมูลเปลี่ยนไประหว่างทำรายการ กรุณาตรวจใหม่": {
+    "en": "Automatic processing failed or data changed. Review again."
+  },
+  "ไม่มีสิทธิ์": {
+    "en": "Access denied"
+  },
+  "ธุรกิจเปลี่ยนไปแล้ว": {
+    "en": "Business changed"
+  },
+  "ไม่มีสิทธิ์เข้าถึงธุรกิจ": {
+    "en": "You do not have access to this business"
+  },
+  "ยังไม่มีเดือนในระบบ": {
+    "en": "No months available"
+  },
+  "จับคู่หลักฐานกับ Statement": {
+    "en": "Match evidence to statements",
+    "th": "จับคู่หลักฐานกับรายการเดินบัญชี"
+  },
+  "กลับ Bank & Reconcile": {
+    "en": "Back to Bank & Reconcile",
+    "th": "กลับหน้าบัญชีและกระทบยอด"
+  },
+  "อัปโหลดหลักฐานเพิ่ม": {
+    "en": "Upload more evidence"
+  },
+  "เลือกเดือนและบัญชี แล้วกด “ตรวจและจัดหมวดอัตโนมัติทั้งเดือน” ระบบจะอ่านสลิป จับคู่ และลงหมวดให้รายการที่ชัดเจน ส่วนที่กำกวมจะอยู่ในรายการรอตรวจ": {
+    "en": "Select a month and account, then click “Automatically match and categorize this month”. Clear matches are applied; ambiguous results remain for review."
+  },
+  "ลงอัตโนมัติเฉพาะคู่เดียวที่ยอดและวันตรง พร้อมเวลาและข้อมูลคู่โอน หรือเลขอ้างอิงที่ตรงกัน และ Remark ระบุหมวดได้หมวดเดียว กรณีอื่นให้ตรวจเอง ระบบไม่ตรวจว่าสลิปแท้และไม่สร้างรายจ่ายซ้ำ": {
+    "en": "Automatic confirmation requires one exact amount/date match, supporting time and counterparty details or a matching reference, and a remark pointing to one category. Other cases require review. This does not verify slip authenticity or create duplicate expenses.",
+    "th": "ลงอัตโนมัติเฉพาะคู่เดียวที่ยอดและวันตรง พร้อมเวลาและข้อมูลคู่โอน หรือเลขอ้างอิงที่ตรงกัน และ หมายเหตุ ระบุหมวดได้หมวดเดียว กรณีอื่นให้ตรวจเอง ระบบไม่ตรวจว่าสลิปแท้และไม่สร้างรายจ่ายซ้ำ"
+  },
+  "รายการธนาคารที่จะค้นหา": {
+    "en": "Bank transactions to search"
+  },
+  "ทุกบัญชีของธุรกิจนี้": {
+    "en": "All accounts in this business"
+  },
+  "แสดงรายการ": {
+    "en": "Showing"
+  },
+  "ไฟล์ • Statement": {
+    "en": "files • Statement",
+    "th": "ไฟล์ • รายการเดินบัญชี"
+  },
+  "หน้าหลักฐาน": {
+    "en": "Evidence pages"
+  },
+  "หน้าก่อนหน้า": {
+    "en": "Previous page"
+  },
+  "หน้า": {
+    "en": "Page"
+  },
+  "หน้าถัดไป": {
+    "en": "Next page"
+  },
+  "ไม่ระบุ": {
+    "en": "Unspecified"
+  },
+  "Bank & Reconciliation": {
+    "en": "Bank & Reconciliation",
+    "th": "บัญชีและกระทบยอด"
+  },
+  "คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน": {
+    "en": "You do not have access to any business. Contact the owner."
+  },
+  "ไม่พบข้อมูลปีงบ กรุณา seed ก่อน": {
+    "en": "Fiscal year data not found. Contact the administrator.",
+    "th": "ไม่พบข้อมูลปีงบ กรุณาติดต่อผู้ดูแลระบบ"
+  },
+  "{v0} — ยังไม่มีบัญชี เพิ่มบัญชี/ช่องทางแรกได้เลยด้านล่าง": {
+    "en": "{v0} — no accounts yet. Add the first account / channel below."
+  },
+  "สมุดเดินบัญชี 3 บัญชี + จับคู่ POS ↔ Statement ต่อช่องทาง": {
+    "en": "Account ledger and POS ↔ statement matching by channel",
+    "th": "สมุดบัญชีและการจับคู่ยอดขายกับรายการเดินบัญชีแต่ละช่องทาง"
+  },
+  "เลือกบัญชี {v0}": {
+    "en": "Select account {v0}"
+  },
+  "ยกมาค้างชำระ": {
+    "en": "Opening amount due"
+  },
+  "ยกมา": {
+    "en": "Opening"
+  },
+  "ยอดค้างชำระ": {
+    "en": "Amount due"
+  },
+  "กระทบยอด POS vs Statement —": {
+    "en": "POS vs statement reconciliation —",
+    "th": "กระทบยอดขายกับรายการเดินบัญชี —"
+  },
+  "เทียบยอด POS (จากบิล Foodstory) กับยอดเข้าบัญชี (จาก Bank Transaction ที่ categorized) — diff อาจเป็นค่าธรรมเนียม / ยังไม่ลง statement": {
+    "en": "Compare POS net sales from Foodstory bills with categorized bank credits. Differences may be fees or missing statement entries.",
+    "th": "เทียบยอดขายสุทธิกับยอดเข้าบัญชีที่จัดหมวดแล้ว — ส่วนต่างอาจเป็นค่าธรรมเนียมหรือรายการเดินบัญชีที่ยังไม่ได้ลง"
+  },
+  "POS (Net)": {
+    "en": "POS (net)",
+    "th": "ยอดขายสุทธิ"
+  },
+  "Statement (Credit)": {
+    "en": "Statement (credit)",
+    "th": "ยอดเงินเข้าตามบัญชี"
+  },
+  "ส่วนต่าง": {
+    "en": "Difference"
+  },
+  "%Diff": {
+    "en": "Difference %",
+    "th": "ส่วนต่าง %"
+  },
+  "รายการ • ยอดค้างชำระ": {
+    "en": "transactions • Amount due"
+  },
+  "รายการ • คงเหลือ": {
+    "en": "transactions • Balance"
+  },
+  "จับคู่สลิป / ใบเสร็จกับ Statement เดือนนี้ →": {
+    "en": "Match slips / receipts to this month’s statement →",
+    "th": "จับคู่สลิป / ใบเสร็จกับรายการเดินบัญชีเดือนนี้ →"
+  },
+  "อ่านข้อความจากหลักฐาน แล้วตรวจและยืนยันคู่เพื่อแนบกับรายการด้านล่าง": {
+    "en": "Read document text, then review and confirm a match to attach it to a transaction below."
+  },
+  "สรุปตามหมวดหมู่ — ทั้งเดือน (ทุกบัญชี)": {
+    "en": "Summary by category — all accounts this month"
+  },
+  "ยังไม่มีรายการในเดือนนี้": {
+    "en": "No transactions this month"
+  },
+  "เฉพาะเจ้าของร้านเท่านั้นที่จัดการธุรกิจได้": {
+    "en": "Only the owner can manage businesses"
+  },
+  "ไม่มีสิทธิ์เข้าถึงธุรกิจนี้": {
+    "en": "You do not have access to this business"
+  },
+  "ต้องระบุชื่อธุรกิจ": {
+    "en": "Enter a business name"
+  },
+  "ต้องมีธุรกิจที่ใช้งานอยู่อย่างน้อย 1 แห่ง": {
+    "en": "At least one active business is required"
+  },
+  "ใส่รหัสอนุมัติก่อน": {
+    "en": "Enter an approval code first"
+  },
+  "ใส่รหัสอนุมัติก่อนจึงจะลบได้": {
+    "en": "Enter an approval code before deleting"
+  },
+  "รายการปรับปรุง (Adjustments)": {
+    "en": "Adjustments",
+    "th": "รายการปรับปรุง"
+  },
+  "แก้ไขเพิ่มเติม เช่น ปรับรายได้/ต้นทุนที่ตกหล่น — ทุกครั้งต้องใส่ รหัสอนุมัติเจ้าของ": {
+    "en": "Add missing revenue or costs. Every addition or deletion requires the owner approval code."
+  },
+  "รหัสอนุมัติเจ้าของ (ใส่ครั้งเดียวใช้ได้ทั้งเพิ่ม/ลบ)": {
+    "en": "Owner approval code (used for both additions and deletions)"
+  },
+  "รายได้": {
+    "en": "Revenue"
+  },
+  "ต้นทุน": {
+    "en": "Cost"
+  },
+  "ต้นทุน/ค่าใช้จ่าย": {
+    "en": "Cost / expense"
+  },
+  "รายละเอียด": {
+    "en": "Description"
+  },
+  "เช่น ค่าปรับ, ส่วนลดพิเศษ, รายได้อื่น": {
+    "en": "e.g. penalty, special discount, other income"
+  },
+  "จำนวน (± ได้)": {
+    "en": "Amount (positive or negative)"
+  },
+  "ปิดงบประจำเดือน": {
+    "en": "Monthly closing"
+  },
+  "เปิดงบเพื่อแก้ไข": {
+    "en": "Reopen for editing"
+  },
+  "ดึงตัวเลขล่าสุดมาปิดใหม่": {
+    "en": "Close again with latest figures"
+  },
+  "ปิดงบเดือนนี้": {
+    "en": "Close this month"
+  },
+  "Re-sync ตัวเลข": {
+    "en": "Refresh figures",
+    "th": "อัปเดตตัวเลขล่าสุด"
+  },
+  "เปิดแก้ไข": {
+    "en": "Reopen"
+  },
+  "Export PDF": {
+    "en": "Export PDF",
+    "th": "ส่งออกไฟล์พีดีเอฟ"
+  },
+  "บันทึกตัวเลข P&L ของเดือนนี้เป็นทางการ (freeze)": {
+    "en": "Finalize this month’s profit & loss figures",
+    "th": "บันทึกตัวเลขกำไรขาดทุนของเดือนนี้เป็นทางการ"
+  },
+  "ปลดล็อกเพื่อแก้ไข — ตัวเลขอาจเปลี่ยนได้จนกว่าจะปิดใหม่": {
+    "en": "Unlock for editing. Figures may change until finalized again."
+  },
+  "อัปเดต snapshot ให้ตรงกับข้อมูลรายวันล่าสุด": {
+    "en": "Update the snapshot with the latest daily data",
+    "th": "อัปเดตยอดที่บันทึกไว้ให้ตรงกับข้อมูลรายวันล่าสุด"
+  },
+  "หมายเหตุการปิดงบ (ไม่บังคับ)": {
+    "en": "Closing note (optional)"
+  },
+  "เช่น ตรวจสอบครบแล้ว": {
+    "en": "e.g. All checks completed"
+  },
+  "รหัสอนุมัติเจ้าของ": {
+    "en": "Owner approval code"
+  },
+  "อนุมัติ": {
+    "en": "Approve"
+  },
+  "ไม่พบเดือนนี้": {
+    "en": "Month not found"
+  },
+  "คำนวณ P&L ไม่ได้": {
+    "en": "Could not calculate profit & loss",
+    "th": "คำนวณกำไรขาดทุนไม่ได้"
+  },
+  "ยังไม่ได้ปิดงบเดือนนี้": {
+    "en": "This month is not finalized"
+  },
+  "ปิดงบ — กำไรสุทธิ {v0}": {
+    "en": "Month finalized — net profit {v0}"
+  },
+  "ดึงตัวเลขล่าสุดมาปิดงบใหม่": {
+    "en": "Finalized again with latest figures"
+  },
+  "แก้ไขหมายเหตุ": {
+    "en": "Edit note"
+  },
+  "ต้องระบุรายละเอียด": {
+    "en": "Enter a description"
+  },
+  "ปรับรายได้": {
+    "en": "Revenue adjustment"
+  },
+  "ปรับต้นทุน": {
+    "en": "Cost adjustment"
+  },
+  "ไม่พบรายการปรับปรุงนี้": {
+    "en": "Adjustment not found"
+  },
+  "ลบรายการปรับปรุง: {v0}": {
+    "en": "Deleted adjustment: {v0}"
+  },
+  "ปิดงบรายเดือน": {
+    "en": "Monthly closing"
+  },
+  "ไม่พบข้อมูลปีงบ": {
+    "en": "Fiscal year data not found"
+  },
+  "คำนวณข้อมูลไม่ได้": {
+    "en": "Could not calculate data"
+  },
+  "{v0} — งบกำไรขาดทุน {v1}": {
+    "en": "{v0} — income statement {v1}"
+  },
+  "ปิดงบแล้ว (Finalized)": {
+    "en": "Finalized",
+    "th": "ปิดงบแล้ว"
+  },
+  "เปิดแก้ไขอยู่ (ยังไม่ Finalize)": {
+    "en": "Open for editing (not finalized)",
+    "th": "เปิดแก้ไขอยู่ (ยังไม่ปิดงบ)"
+  },
+  "โดย {v0} • {v1}": {
+    "en": "By {v0} • {v1}"
+  },
+  "กดปุ่มด้านขวาเพื่อปิดงบ เมื่อตรวจสอบความถูกต้องเรียบร้อย": {
+    "en": "After checking the figures, use the button on the right to finalize"
+  },
+  "ตรวจสอบความถูกต้องก่อนปิดงบ": {
+    "en": "Check accuracy before finalizing"
+  },
+  "ต้องแก้": {
+    "en": "Issues"
+  },
+  "จุด": {
+    "en": "items"
+  },
+  "เตือน": {
+    "en": "Warnings"
+  },
+  "ผ่านทั้งหมด ✓": {
+    "en": "All checks passed ✓"
+  },
+  "งบกำไรขาดทุน —": {
+    "en": "Income statement —"
+  },
+  "ตัวเลข ณ วันที่ปิดงบ (snapshot)": {
+    "en": "Figures at closing (snapshot)",
+    "th": "ตัวเลข ณ วันที่ปิดงบ"
+  },
+  "ตัวเลขปัจจุบันจากบัญชีรายวัน (ยังไม่ปิด)": {
+    "en": "Current figures from daily accounts (not finalized)"
+  },
+  "Food %": {
+    "en": "Food %",
+    "th": "วัตถุดิบ %"
+  },
+  "Labor %": {
+    "en": "Labor %",
+    "th": "ค่าแรง %"
+  },
+  "Prime %": {
+    "en": "Prime %",
+    "th": "ต้นทุนหลัก %"
+  },
+  "Fixed %": {
+    "en": "Fixed %",
+    "th": "ค่าใช้จ่ายประจำ %"
+  },
+  "ประวัติการปิดงบ / แก้ไข": {
+    "en": "Closing / editing history"
+  },
+  "ลบหมวด \"{v0}\"?\nถ้าหมวดนี้มีค่าใช้จ่ายที่บันทึกไว้ ระบบจะซ่อนแทนการลบ (เพื่อรักษาประวัติ)": {
+    "en": "Delete category “{v0}”? If it has recorded expenses, it will be hidden to preserve history."
+  },
+  "ค่าใช้จ่ายประจำ (Fixed Cost)": {
+    "en": "Fixed costs",
+    "th": "ค่าใช้จ่ายประจำ"
+  },
+  "จำนวน (บาท)": {
+    "en": "Amount (THB)"
+  },
+  "ลบหมวด {v0}": {
+    "en": "Delete category {v0}"
+  },
+  "ชื่อหมวดใหม่ — เช่น ค่าซ่อมแซม, ค่าน้ำมัน, ภาษีโรงเรือน": {
+    "en": "New category name — e.g. repairs, fuel, property tax"
+  },
+  "Revenue Override (ใช้เมื่อ POS ยังไม่ครบ)": {
+    "en": "Revenue override (when POS data is incomplete)",
+    "th": "ปรับยอดรายได้ (ใช้เมื่อข้อมูลยอดขายยังไม่ครบ)"
+  },
+  "ถ้าเดือนนี้ POS ยังไม่ครบ ใส่ยอดขายสุทธิรายเดือนที่นี่ — ระบบจะใช้ค่าที่มากกว่าระหว่าง POS sum กับ Override": {
+    "en": "If POS data is incomplete, enter monthly net sales here. The higher of the POS total and the override is used.",
+    "th": "ถ้าข้อมูลยอดขายยังไม่ครบ ใส่ยอดขายสุทธิรายเดือนที่นี่ — ระบบจะใช้ค่าที่มากกว่าระหว่างยอดขายที่บันทึกกับยอดที่กรอก"
+  },
+  "ยอดขายสุทธิรายเดือน": {
+    "en": "Monthly net sales"
+  },
+  "หมายเหตุ (option)": {
+    "en": "Note (optional)",
+    "th": "หมายเหตุ (ไม่บังคับ)"
+  },
+  "เช่น Manual จาก Excel เดิม": {
+    "en": "e.g. manually copied from previous Excel file",
+    "th": "เช่น ยอดจากตารางเดิม"
+  },
+  "ลบพนักงาน \"{v0}\"?\nถ้ามีประวัติเงินเดือนบันทึกไว้ ระบบจะซ่อนแทนการลบ (รักษาประวัติ)": {
+    "en": "Delete employee “{v0}”? If payroll history exists, the employee will be hidden to preserve it."
+  },
+  "ค่าแรงพนักงาน (Payroll)": {
+    "en": "Payroll",
+    "th": "ค่าแรงพนักงาน"
+  },
+  "เงินเดือน (บาท)": {
+    "en": "Salary (THB)"
+  },
+  "ชื่อพนักงาน {v0}": {
+    "en": "Employee name {v0}"
+  },
+  "แก้ชื่อสำหรับเดือนนี้เท่านั้น — เดือนอื่นไม่ได้รับผลกระทบ": {
+    "en": "Rename for this month only. Other months are unaffected."
+  },
+  "เฉพาะเดือนนี้": {
+    "en": "This month only"
+  },
+  "เงินเดือน {v0}": {
+    "en": "Salary {v0}"
+  },
+  "ลบพนักงาน {v0}": {
+    "en": "Delete employee {v0}"
+  },
+  "ชื่อพนักงาน — เช่น Boom (Service) 17:00-02:00": {
+    "en": "Employee name — e.g. Boom (Service) 17:00–02:00"
+  },
+  "เพิ่มพนักงาน": {
+    "en": "Add employee"
+  },
+  "OT / โบนัส / ค่าจ้างพิเศษ": {
+    "en": "Overtime / bonuses / extra wages",
+    "th": "ล่วงเวลา / โบนัส / ค่าจ้างพิเศษ"
+  },
+  "รวม": {
+    "en": "Total"
+  },
+  "กำลังบันทึก…": {
+    "en": "Saving…"
+  },
+  "บันทึกแล้ว": {
+    "en": "Saved"
+  },
+  "ลากเพื่อจัดลำดับ": {
+    "en": "Drag to reorder"
+  },
+  "สรุปรายจ่ายจาก Bank & Reconcile": {
+    "en": "Expense summary from Bank & Reconcile",
+    "th": "สรุปรายจ่ายจากบัญชีและกระทบยอด"
+  },
+  "รวมทุกบัญชีและบัตรเครดิตตามเดือนที่บันทึก • จัดหมวดหรือแก้ไขรายการที่": {
+    "en": "All accounts and credit cards by recorded month. Categorize or edit transactions in"
+  },
+  "Bank & Reconcile": {
+    "en": "Bank & Reconcile",
+    "th": "บัญชีและกระทบยอด"
+  },
+  "แล้วสรุปจะอัปเดตอัตโนมัติ": {
+    "en": "to update the summary automatically"
+  },
+  "เงินออกทั้งหมด": {
+    "en": "Total money out"
+  },
+  "ค่าใช้จ่ายเข้า P&L": {
+    "en": "Expenses included in profit & loss",
+    "th": "ค่าใช้จ่ายในงบกำไรขาดทุน"
+  },
+  "โอน / ชำระบัตร / เบิกเงิน (ไม่นับ P&L)": {
+    "en": "Transfers / card repayments / advances (excluded)",
+    "th": "โอน / ชำระบัตร / เบิกเงิน (ไม่นับกำไรขาดทุน)"
+  },
+  "ยังมีเงินออก": {
+    "en": "There is still"
+  },
+  "บาทที่ไม่ได้จัดหมวดรายจ่าย หรือถูกจัดเป็นรายรับ โปรดตรวจใน Bank & Reconcile ยอดนี้ยังไม่รวมในต้นทุนและกำไรที่แสดงจึงยังไม่ครบ": {
+    "en": "THB uncategorized or categorized as income. Review in Bank & Reconcile. This amount is excluded from costs, so the profit shown is incomplete.",
+    "th": "บาทที่ไม่ได้จัดหมวดรายจ่าย หรือถูกจัดเป็นรายรับ โปรดตรวจในหน้าบัญชีและกระทบยอด ยอดนี้ยังไม่รวมในต้นทุน จึงทำให้กำไรที่แสดงยังไม่ครบ"
+  },
+  "ยังไม่มีรายการเงินออกในเดือนนี้": {
+    "en": "No money-out transactions this month"
+  },
+  "หมวดธนาคาร": {
+    "en": "Bank category"
+  },
+  "หมวดใน P&L": {
+    "en": "Profit & loss category",
+    "th": "หมวดในงบกำไรขาดทุน"
+  },
+  "ธนาคาร / เงินสด": {
+    "en": "Bank / cash"
+  },
+  "รอตรวจสอบ — ยังไม่นับ P&L": {
+    "en": "Needs review — excluded from profit & loss",
+    "th": "รอตรวจสอบ — ยังไม่นับกำไรขาดทุน"
+  },
+  "ไม่นับ P&L": {
+    "en": "Excluded from profit & loss",
+    "th": "ไม่นับกำไรขาดทุน"
+  },
+  "ค่าใช้จ่ายที่นับใน P&L: ธนาคาร / เงินสด": {
+    "en": "Expenses included in profit & loss: bank / cash",
+    "th": "ค่าใช้จ่ายที่นับในกำไรขาดทุน: ธนาคาร / เงินสด"
+  },
+  "+ บัตรเครดิต": {
+    "en": "+ credit cards"
+  },
+  "บาท": {
+    "en": "THB"
+  },
+  "เงินออกทั้งหมด = ค่าใช้จ่ายเข้า P&L + รอตรวจสอบ + รายการไม่นับ P&L • ชำระบัตรเครดิตไม่นับซ้ำกับยอดซื้อผ่านบัตร • ยอดยกมาและเงินรับเข้าไม่ใช่รายจ่าย": {
+    "en": "Total money out = expenses + pending review + excluded transactions. Card repayments do not duplicate card purchases. Opening balances and money received are not expenses.",
+    "th": "เงินออกทั้งหมด = ค่าใช้จ่ายในกำไรขาดทุน + รอตรวจสอบ + รายการไม่นับกำไรขาดทุน • ชำระบัตรเครดิตไม่นับซ้ำกับยอดซื้อผ่านบัตร • ยอดยกมาและเงินรับเข้าไม่ใช่รายจ่าย"
+  },
+  "ยอดกรอกเองเดิม": {
+    "en": "Previously entered manual amounts"
+  },
+  "เก็บไว้เทียบเท่านั้น ไม่บวกซ้ำกับ Statement": {
+    "en": "For comparison only; not added to statement amounts",
+    "th": "เก็บไว้เทียบเท่านั้น ไม่บวกซ้ำกับรายการเดินบัญชี"
+  },
+  "ใช้คำนวณชั่วคราวจนกว่าจะลง Bank & Reconcile": {
+    "en": "Used temporarily until bank transactions are recorded",
+    "th": "ใช้คำนวณชั่วคราวจนกว่าจะลง บัญชีและกระทบยอด"
+  },
+  "• กรุณานำเข้าให้ครบทุกบัญชี และบันทึกรายจ่ายเงินสดในบัญชีเงินสด": {
+    "en": "• Import every account and record cash expenses in the cash account"
+  },
+  "ต้นทุนวัตถุดิบ + เครื่องดื่ม + บรรจุภัณฑ์": {
+    "en": "Food, beverage and packaging costs"
+  },
+  "ลบ supplier \"{v0}\"?\nถ้ามีประวัติยอดซื้อ ระบบจะซ่อนแทนการลบ (รักษาประวัติ)": {
+    "en": "Delete supplier “{v0}”? If purchase history exists, the supplier will be hidden to preserve it.",
+    "th": "ลบผู้จำหน่าย “{v0}”? หากมีประวัติยอดซื้อ ระบบจะซ่อนแทนการลบเพื่อรักษาประวัติ"
+  },
+  "ชื่อ supplier {v0}": {
+    "en": "Supplier name {v0}",
+    "th": "ชื่อผู้จำหน่าย {v0}"
+  },
+  "ลบ supplier {v0}": {
+    "en": "Delete supplier {v0}",
+    "th": "ลบผู้จำหน่าย {v0}"
+  },
+  "ชื่อ supplier ใหม่ใน \"{v0}\"": {
+    "en": "New supplier name in “{v0}”",
+    "th": "ชื่อผู้จำหน่ายใหม่ใน “{v0}”"
+  },
+  "เพิ่ม supplier ใน": {
+    "en": "Add supplier in",
+    "th": "เพิ่มผู้จำหน่ายใน"
+  },
+  "ต้องระบุชื่อพนักงาน": {
+    "en": "Enter an employee name"
+  },
+  "มีพนักงานชื่อนี้อยู่แล้ว": {
+    "en": "An employee with this name already exists"
+  },
+  "ไม่พบพนักงานในธุรกิจปัจจุบัน": {
+    "en": "Employee not found in the current business"
+  },
+  "ต้องระบุชื่อ supplier": {
+    "en": "Enter a supplier name",
+    "th": "ต้องระบุชื่อผู้จำหน่าย"
+  },
+  "มี supplier ชื่อนี้ในหมวดนี้อยู่แล้ว": {
+    "en": "This supplier already exists in the category",
+    "th": "มีผู้จำหน่ายชื่อนี้ในหมวดนี้อยู่แล้ว"
+  },
+  "ไม่พบ supplier ในธุรกิจปัจจุบัน": {
+    "en": "Supplier not found in the current business",
+    "th": "ไม่พบผู้จำหน่ายในธุรกิจปัจจุบัน"
+  },
+  "Cost Setup": {
+    "en": "Cost Setup",
+    "th": "สรุปต้นทุน"
+  },
+  "ไม่พบข้อมูลปีงบในระบบ กรุณา seed ก่อน": {
+    "en": "Fiscal year data not found. Contact the administrator.",
+    "th": "ไม่พบข้อมูลปีงบในระบบ กรุณาติดต่อผู้ดูแลระบบ"
+  },
+  "สรุปค่าใช้จ่ายรายเดือนจาก Bank & Reconcile — ใช้ยอดเดียวกันใน Dashboard และ P&L": {
+    "en": "Monthly expense summary from Bank & Reconcile — the same figures are used in the dashboard and profit & loss",
+    "th": "สรุปค่าใช้จ่ายรายเดือนจากบัญชีและกระทบยอด — ใช้ยอดเดียวกันในภาพรวมและงบกำไรขาดทุน"
+  },
+  "เดือนที่กำลังดู:": {
+    "en": "Selected month:"
+  },
+  "• จำนวนวัน": {
+    "en": "• Number of days"
+  },
+  "วัน": {
+    "en": "days"
+  },
+  "ค่าใช้จ่ายที่ใช้คำนวณ P&L —": {
+    "en": "Expenses used in profit & loss —",
+    "th": "ค่าใช้จ่ายที่ใช้คำนวณกำไรขาดทุน —"
+  },
+  "ใช้รายจ่ายที่จัดหมวดใน Bank & Reconcile เป็นหลัก • ไม่บวกยอดกรอกเดิมซ้ำ": {
+    "en": "Categorized bank expenses are the primary source. Previous manual amounts are not added again.",
+    "th": "ใช้รายจ่ายที่จัดหมวดในบัญชีและกระทบยอดเป็นหลัก • ไม่บวกยอดกรอกเดิมซ้ำ"
+  },
+  "ยังไม่มีรายการใน Bank & Reconcile • ใช้ยอดกรอกเองด้านล่างชั่วคราว": {
+    "en": "No bank transactions yet. Manual amounts below are used temporarily.",
+    "th": "ยังไม่มีรายการธนาคาร • ใช้ยอดกรอกเองด้านล่างชั่วคราว"
+  },
+  "ยอดกรอกเองเดิม —": {
+    "en": "Previous manual amounts —"
+  },
+  "(เก็บไว้เทียบ ไม่นับซ้ำใน P&L)": {
+    "en": "(for comparison; not counted again in profit & loss)",
+    "th": "(เก็บไว้เทียบ ไม่นับซ้ำในกำไรขาดทุน)"
+  },
+  "(ใช้ใน P&L จนกว่าจะมีรายการธนาคาร)": {
+    "en": "(used in profit & loss until bank transactions exist)",
+    "th": "(ใช้ในกำไรขาดทุนจนกว่าจะมีรายการธนาคาร)"
+  },
+  "เดือนนี้ใช้ยอดจาก Bank & Reconcile แล้ว หากมีรายจ่ายเงินสดให้บันทึกในบัญชีเงินสดของ Bank & Reconcile และจัดหมวด เพื่อรวมในสรุปเดียวกัน": {
+    "en": "This month uses bank expenses. Record and categorize cash expenses in the cash account to include them in this summary.",
+    "th": "เดือนนี้ใช้ยอดธนาคารแล้ว หากมีรายจ่ายเงินสดให้บันทึกและจัดหมวดในบัญชีเงินสด เพื่อรวมในสรุปเดียวกัน"
+  },
+  "กรอกค่าใช้จ่ายได้เมื่อยังไม่มีข้อมูลธนาคาร เมื่อเริ่มลง Bank & Reconcile ระบบจะเปลี่ยนมาใช้ยอดธนาคารทั้งเดือน กรุณาลงให้ครบทุกบัญชีรวมถึงเงินสด": {
+    "en": "Manual costs are used when there are no bank transactions. Once bank data exists, bank costs are used for the entire month. Record every account, including cash.",
+    "th": "กรอกค่าใช้จ่ายได้เมื่อยังไม่มีข้อมูลธนาคาร เมื่อเริ่มลงบัญชี ระบบจะใช้ยอดธนาคารทั้งเดือน กรุณาลงให้ครบทุกบัญชีรวมถึงเงินสด"
+  },
+  "Daily P&L": {
+    "en": "Daily P&L",
+    "th": "กำไรขาดทุนรายวัน"
+  },
+  "ไม่พบข้อมูลปีงบในระบบ": {
+    "en": "Fiscal year data not found"
+  },
+  "ไม่สามารถคำนวณข้อมูลได้": {
+    "en": "Could not calculate data"
+  },
+  "กำไร/ขาดทุนรายวัน — Net Sales ดึงจาก POS, ต้นทุนกระจายจาก Cost Setup หาร {v0} วัน": {
+    "en": "Daily profit & loss — net sales from POS; monthly costs divided across {v0} days",
+    "th": "กำไรขาดทุนรายวัน — ยอดขายสุทธิดึงจากระบบขาย ต้นทุนกระจายจากสรุปต้นทุนหาร {v0} วัน"
+  },
+  "รายได้สุทธิ": {
+    "en": "Net revenue"
+  },
+  "{v0} บิล": {
+    "en": "{v0} bills"
+  },
+  "รวมต้นทุน": {
+    "en": "Total costs"
+  },
+  "COGS + Labor + Fixed": {
+    "en": "COGS + labor + fixed costs",
+    "th": "วัตถุดิบ + ค่าแรง + ค่าใช้จ่ายประจำ"
+  },
+  "กำไรสุทธิ": {
+    "en": "Net profit"
+  },
+  "วันที่ขาย": {
+    "en": "Trading dates"
+  },
+  "กำไร {v0} • ขาดทุน {v1} • ไม่ขาย {v2}": {
+    "en": "Profit {v0} • Loss {v1} • No sales {v2}"
+  },
+  "รายวัน —": {
+    "en": "Daily —"
+  },
+  "ต้นทุนต่อวัน: COGS": {
+    "en": "Daily costs: COGS",
+    "th": "ต้นทุนต่อวัน: วัตถุดิบ"
+  },
+  "• Labor": {
+    "en": "• Labor",
+    "th": "• ค่าแรง"
+  },
+  "• Fixed": {
+    "en": "• Fixed",
+    "th": "• ค่าใช้จ่ายประจำ"
+  },
+  "บิล": {
+    "en": "Bills"
+  },
+  "Gross": {
+    "en": "Gross",
+    "th": "ก่อนส่วนลด"
+  },
+  "ส่วนลด": {
+    "en": "Discount"
+  },
+  "Net": {
+    "en": "Net",
+    "th": "สุทธิ"
+  },
+  "VAT": {
+    "en": "VAT",
+    "th": "ภาษีมูลค่าเพิ่ม"
+  },
+  "COGS": {
+    "en": "COGS",
+    "th": "ต้นทุนวัตถุดิบ"
+  },
+  "Labor": {
+    "en": "Labor",
+    "th": "ค่าแรง"
+  },
+  "Fixed": {
+    "en": "Fixed",
+    "th": "ค่าใช้จ่ายประจำ"
+  },
+  "กำไร/ขาดทุน": {
+    "en": "Profit / loss"
+  },
+  "Margin %": {
+    "en": "Margin %",
+    "th": "อัตรากำไร %"
+  },
+  "ส": {
+    "en": "Sat"
+  },
+  "อา": {
+    "en": "Sun"
+  },
+  "บันทึกแล้ว ({v0} วัน)": {
+    "en": "Saved ({v0} days)"
+  },
+  "ยอดหลัก = ดึงจาก POS อัตโนมัติ · ยอดเข้าจริง = กรอกเอง · ต่าง = ยอดหลัก − เข้าจริง": {
+    "en": "Expected = automatically from POS · Received = entered manually · Difference = expected − received",
+    "th": "ยอดหลัก = ดึงจากยอดขายอัตโนมัติ · ยอดเข้าจริง = กรอกเอง · ต่าง = ยอดหลัก − เข้าจริง"
+  },
+  "บันทึกยอดเข้าจริง": {
+    "en": "Save actual receipts"
+  },
+  "ยอดหลัก (POS)": {
+    "en": "Expected (POS)",
+    "th": "ยอดหลัก (ระบบขาย)"
+  },
+  "ยอดเข้าจริง": {
+    "en": "Received"
+  },
+  "ต่าง": {
+    "en": "Difference"
+  },
+  "กรอกยอดที่เข้าจริง": {
+    "en": "Enter actual amount received"
+  },
+  "ไม่ดึงจาก POS (กรอกเข้าจริงอย่างเดียว)": {
+    "en": "No POS source (enter receipts only)",
+    "th": "ไม่ดึงจากยอดขาย (กรอกเข้าจริงอย่างเดียว)"
+  },
+  "ประเภทการชำระ": {
+    "en": "Payment type"
+  },
+  "โต๊ะ": {
+    "en": "Table"
+  },
+  "ผิดพลาด": {
+    "en": "Error"
+  },
+  "ตั้งค่ารายการกระทบยอด": {
+    "en": "Reconciliation rules"
+  },
+  "ลำดับ = ลำดับการตรวจ (บิลจะถูกจับเข้ารายการแรกที่ตรงกฎ) — เช่น Grab/Wokboy ต้องอยู่": {
+    "en": "Order determines matching priority. Bills use the first matching rule; for example, Grab / Wokboy must be"
+  },
+  "เหนือ": {
+    "en": "above"
+  },
+  "“โอนเข้าบัญชี” ไม่งั้นจะโดนนับรวมกัน": {
+    "en": "“Bank transfer” to avoid being counted together"
+  },
+  "{v0} มี: {v1}": {
+    "en": "{v0} contains: {v1}"
+  },
+  "กรอกเอง": {
+    "en": "Manual entry"
+  },
+  "แก้ไข": {
+    "en": "Edit"
+  },
+  "ชื่อรายการใหม่": {
+    "en": "New item name"
+  },
+  "เช่น Shopee Food": {
+    "en": "e.g. Shopee Food"
+  },
+  "ดึงจาก POS โดยดู": {
+    "en": "Match POS using",
+    "th": "ดึงจากยอดขายโดยดู"
+  },
+  "คำที่ต้องมี (คั่นด้วย ,)": {
+    "en": "Required terms (comma-separated)"
+  },
+  "เช่น shopee,shopeefood": {
+    "en": "e.g. shopee,shopeefood"
+  },
+  "เพิ่มรายการ": {
+    "en": "Add item"
+  },
+  "คำที่ต้องมี, คั่นด้วย ,": {
+    "en": "Required terms, comma-separated"
+  },
+  "ไม่พบรายการนี้": {
+    "en": "Item not found"
+  },
+  "ต้องระบุชื่อรายการ": {
+    "en": "Enter an item name"
+  },
+  "กระทบยอดรายวัน": {
+    "en": "Daily reconciliation"
+  },
+  "ยังไม่มีข้อมูลเดือน": {
+    "en": "No month data available"
+  },
+  "คำนวณไม่ได้": {
+    "en": "Could not calculate"
+  },
+  "{v0} — ยอดหลักดึงจาก POS · ยอดเข้าจริงกรอกเอง · ส่วนต่าง = ค่าธรรมเนียม/GP": {
+    "en": "{v0} — expected from POS · receipts entered manually · difference = fees / commission",
+    "th": "{v0} — ยอดหลักดึงจากระบบขาย · ยอดเข้าจริงกรอกเอง · ส่วนต่าง = ค่าธรรมเนียม"
+  },
+  "ภาพรวม": {
+    "en": "Overview"
+  },
+  "ตั้งค่ารายการ": {
+    "en": "Configure rules"
+  },
+  "มียอด POS": {
+    "en": "There are POS sales of",
+    "th": "มียอดขาย"
+  },
+  "ที่ไม่เข้ารายการไหนเลย — เพิ่ม/แก้กฎในแท็บ “ตั้งค่ารายการ” ให้ครอบคลุม": {
+    "en": "that match no rule. Add or edit rules in the configuration tab to cover them."
+  },
+  "ภาพรวม —": {
+    "en": "Overview —"
+  },
+  "กดชื่อรายการเพื่อไปกรอกยอดเข้าจริงรายวัน": {
+    "en": "Click an item name to enter daily receipts"
+  },
+  "เข้าจริง (กรอก)": {
+    "en": "Received (manual)"
+  },
+  "ค่าใช้จ่ายรายวัน (จากธนาคาร)": {
+    "en": "Daily expenses (from bank)"
+  },
+  "ยังไม่มีรายการเงินออกของเดือนนี้ — นำเข้า statement ในหน้า Bank ก่อน": {
+    "en": "No money-out transactions this month. Import a statement in the bank page first.",
+    "th": "ยังไม่มีรายการเงินออกเดือนนี้ — นำเข้ารายการเดินบัญชีในหน้าบัญชีก่อน"
+  },
+  "จ่ายออก": {
+    "en": "Paid out"
+  },
+  "แถบเมนูหลัก": {
+    "en": "Main sidebar"
+  },
+  "Monthly P&L": {
+    "en": "Monthly P&L",
+    "th": "กำไรขาดทุนรายเดือน"
+  },
+  "งบกำไรขาดทุน — Revenue, COGS, Labor, Fixed, Net Profit, KPI ratios": {
+    "en": "Income statement — revenue, COGS, labor, fixed costs, net profit and key ratios",
+    "th": "งบกำไรขาดทุน — รายได้ วัตถุดิบ ค่าแรง ค่าใช้จ่ายประจำ กำไรสุทธิ และอัตราส่วนสำคัญ"
+  },
+  "Food Cost %": {
+    "en": "Food cost %",
+    "th": "ต้นทุนวัตถุดิบ %"
+  },
+  "เป้า ≤ 32%": {
+    "en": "Target ≤ 32%"
+  },
+  "เป้า ≤ 30%": {
+    "en": "Target ≤ 30%"
+  },
+  "Prime % (Food+Labor)": {
+    "en": "Prime % (food + labor)",
+    "th": "ต้นทุนหลัก % (วัตถุดิบและค่าแรง)"
+  },
+  "เป้า ≤ 60%": {
+    "en": "Target ≤ 60%"
+  },
+  "เป้า ≤ 15%": {
+    "en": "Target ≤ 15%"
+  },
+  "Net Margin %": {
+    "en": "Net margin %",
+    "th": "อัตรากำไรสุทธิ %"
+  },
+  "เป้า ≥ 10%": {
+    "en": "Target ≥ 10%"
+  },
+  "รายได้ (Revenue)": {
+    "en": "Revenue",
+    "th": "รายได้"
+  },
+  "ยอดขายสุทธิ (Net Sales)": {
+    "en": "Net sales",
+    "th": "ยอดขายสุทธิ"
+  },
+  "ต้นทุนวัตถุดิบ (COGS)": {
+    "en": "Cost of goods sold",
+    "th": "ต้นทุนวัตถุดิบ"
+  },
+  "Food + Bev + Pack": {
+    "en": "Food + beverages + packaging",
+    "th": "อาหาร + เครื่องดื่ม + บรรจุภัณฑ์"
+  },
+  "ค่าแรงพนักงาน (Labor)": {
+    "en": "Labor costs",
+    "th": "ค่าแรงพนักงาน"
+  },
+  "กำไรขั้นต้น (Gross Profit) = Revenue − COGS − Labor": {
+    "en": "Gross profit = revenue − COGS − labor",
+    "th": "กำไรขั้นต้น = รายได้ − วัตถุดิบ − ค่าแรง"
+  },
+  "Operating Expenses": {
+    "en": "Operating expenses",
+    "th": "ค่าใช้จ่ายดำเนินงาน"
+  },
+  "Fixed Cost (เช่า/ไฟ/Sub/Platform/อื่นๆ)": {
+    "en": "Fixed costs (rent / utilities / subscriptions / platforms / other)",
+    "th": "ค่าใช้จ่ายประจำ (เช่า / สาธารณูปโภค / สมาชิก / แพลตฟอร์ม / อื่นๆ)"
+  },
+  "รวมรายจ่ายทั้งหมด": {
+    "en": "Total expenses"
+  },
+  "กำไรสุทธิ (Net Profit)": {
+    "en": "Net profit",
+    "th": "กำไรสุทธิ"
+  },
+  "Net Profit Margin %": {
+    "en": "Net profit margin %",
+    "th": "อัตรากำไรสุทธิ %"
+  },
+  "งบกำไรขาดทุนรายเดือน": {
+    "en": "Monthly income statement"
+  },
+  "เปรียบเทียบ 12 เดือน • รวมทั้งปี • % รายรับ": {
+    "en": "12-month comparison • annual total • % of revenue"
+  },
+  "รวมทั้งปี": {
+    "en": "Annual total"
+  },
+  "แหล่งต้นทุน": {
+    "en": "Cost source"
+  },
+  "Dashboard": {
+    "en": "Dashboard",
+    "th": "ภาพรวม"
+  },
+  "คุณยังไม่ได้รับสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้านเพื่อขอสิทธิ์": {
+    "en": "You do not have access to any business. Contact the owner for access."
+  },
+  "ยังไม่มีข้อมูลปีงบในระบบ": {
+    "en": "No fiscal year data available"
+  },
+  "ไม่สามารถคำนวณ P&L ได้": {
+    "en": "Could not calculate profit & loss",
+    "th": "ไม่สามารถคำนวณกำไรขาดทุนได้"
+  },
+  "{v0} — ปีงบ {v1}": {
+    "en": "{v0} — fiscal year {v1}"
+  },
+  "ภาพรวมทั้งปี": {
+    "en": "Annual overview"
+  },
+  "Year-to-Date": {
+    "en": "Year to date",
+    "th": "สะสมตั้งแต่ต้นปี"
+  },
+  "รายได้รวมทั้งปี": {
+    "en": "Annual revenue"
+  },
+  "YTD": {
+    "en": "YTD",
+    "th": "สะสมทั้งปี"
+  },
+  "รายจ่ายรวมทั้งปี": {
+    "en": "Annual expenses"
+  },
+  "กำไรสุทธิทั้งปี": {
+    "en": "Annual net profit"
+  },
+  "YTD • เป้า ≥ 10%": {
+    "en": "YTD • Target ≥ 10%",
+    "th": "สะสมทั้งปี • เป้า ≥ 10%"
+  },
+  "โครงสร้างต้นทุน YTD": {
+    "en": "Year-to-date cost structure",
+    "th": "โครงสร้างต้นทุนสะสมทั้งปี"
+  },
+  "เทียบกับเกณฑ์มาตรฐานร้านอาหาร": {
+    "en": "Compared with restaurant benchmarks"
+  },
+  "Food % (YTD)": {
+    "en": "Food % (YTD)",
+    "th": "วัตถุดิบ % (สะสมทั้งปี)"
+  },
+  "Labor % (YTD)": {
+    "en": "Labor % (YTD)",
+    "th": "ค่าแรง % (สะสมทั้งปี)"
+  },
+  "Fixed % (YTD)": {
+    "en": "Fixed % (YTD)",
+    "th": "ค่าใช้จ่ายประจำ % (สะสมทั้งปี)"
+  },
+  "Prime % (YTD)": {
+    "en": "Prime % (YTD)",
+    "th": "ต้นทุนหลัก % (สะสมทั้งปี)"
+  },
+  "เดือนปัจจุบัน": {
+    "en": "Current month"
+  },
+  "Month-To-Date": {
+    "en": "Month to date",
+    "th": "สะสมเดือนนี้"
+  },
+  "เดือนนี้": {
+    "en": "This month"
+  },
+  "ตามวันที่ปัจจุบัน": {
+    "en": "Based on today’s date"
+  },
+  "รายได้เดือนนี้": {
+    "en": "Monthly revenue"
+  },
+  "กำไรเดือนนี้": {
+    "en": "Monthly profit"
+  },
+  "Revenue − Cost": {
+    "en": "Revenue − cost",
+    "th": "รายได้ − ต้นทุน"
+  },
+  "Margin เดือนนี้": {
+    "en": "Monthly margin",
+    "th": "อัตรากำไร เดือนนี้"
+  },
+  "Real-time": {
+    "en": "Real time",
+    "th": "อัปเดตตามข้อมูลล่าสุด"
+  },
+  "% ต้นทุน-กำไร รายเดือน": {
+    "en": "Monthly cost and profit ratios"
+  },
+  "Data Quality": {
+    "en": "Data quality",
+    "th": "คุณภาพข้อมูล"
+  },
+  "สถานะการกรอกข้อมูล POS": {
+    "en": "POS data completeness",
+    "th": "ความครบของข้อมูลยอดขาย"
+  },
+  "สรุปรายเดือน": {
+    "en": "Monthly summary"
+  },
+  "P&L absolute amounts": {
+    "en": "Profit & loss amounts",
+    "th": "ตัวเลขกำไรขาดทุน"
+  },
+  "Revenue vs Profit รายเดือน": {
+    "en": "Monthly revenue vs profit",
+    "th": "รายได้เทียบกำไรรายเดือน"
+  },
+  "เกณฑ์": {
+    "en": "Benchmark"
+  },
+  "เดือน": {
+    "en": "Month"
+  },
+  "ดีมาก": {
+    "en": "Excellent"
+  },
+  "ดี": {
+    "en": "Good"
+  },
+  "พอใช้": {
+    "en": "Fair"
+  },
+  "ต้องปรับ": {
+    "en": "Needs improvement"
+  },
+  "Food 28/32/35% • Labor 25/30/35% • Prime 55/60/65% • Margin ≥15/10/5%": {
+    "en": "Food 28/32/35% • Labor 25/30/35% • Prime 55/60/65% • Margin ≥15/10/5%",
+    "th": "วัตถุดิบ 28/32/35% • ค่าแรง 25/30/35% • ต้นทุนหลัก 55/60/65% • อัตรากำไร ≥15/10/5%"
+  },
+  "วันมี POS": {
+    "en": "Days with POS",
+    "th": "วันที่มีข้อมูลขาย"
+  },
+  "ครบ (≥90%)": {
+    "en": "Complete (≥90%)"
+  },
+  "พอใช้ (≥50%)": {
+    "en": "Fair (≥50%)"
+  },
+  "น้อย": {
+    "en": "Low"
+  },
+  "ยังไม่กรอก": {
+    "en": "No data"
+  },
+  "วันขาย": {
+    "en": "Trading days"
+  },
+  "รายได้ {v0}": {
+    "en": "Revenue {v0}"
+  },
+  "รายจ่าย {v0}": {
+    "en": "Expenses {v0}"
+  },
+  "กำไร {v0}": {
+    "en": "Profit {v0}"
+  },
+  "ลบไม่สำเร็จ": {
+    "en": "Could not delete"
+  },
+  "ลบ batch นี้": {
+    "en": "Delete this batch",
+    "th": "ลบชุดนำเข้านี้"
+  },
+  "ยืนยันการลบ Import Batch": {
+    "en": "Confirm import batch deletion",
+    "th": "ยืนยันลบชุดนำเข้า"
+  },
+  "จะลบไฟล์": {
+    "en": "Delete file"
+  },
+  "ที่เกี่ยวข้องออกจากระบบ": {
+    "en": "and its related records from the system"
+  },
+  "⚠️ การลบนี้ไม่สามารถย้อนกลับได้ — Dashboard / Daily P&L / Bank reconciliation จะอัปเดตทันที": {
+    "en": "⚠️ This cannot be undone. The dashboard, daily profit & loss and bank reconciliation update immediately.",
+    "th": "⚠️ การลบนี้ย้อนกลับไม่ได้ — ภาพรวม กำไรขาดทุนรายวัน และกระทบยอดจะอัปเดตทันที"
+  },
+  "รหัสผ่านยืนยันการลบ": {
+    "en": "Deletion confirmation password"
+  },
+  "กำลังลบ…": {
+    "en": "Deleting…"
+  },
+  "ลบ Batch + บิล": {
+    "en": "Delete batch and bills",
+    "th": "ลบชุดนำเข้าและบิล"
+  },
+  "Upload Foodstory export": {
+    "en": "Upload Foodstory export",
+    "th": "อัปโหลดไฟล์ส่งออกจากระบบขาย"
+  },
+  "ไฟล์: รายงาน “สรุปยอดขายแยกตามบิล” (.xlsx) — ระบบ dedupe ตามเลขบิลอัตโนมัติ การอัปโหลดซ้ำจะแทนค่าเก่า": {
+    "en": "File: “Sales summary by bill” report (.xlsx). Bills are deduplicated by bill number; reuploads replace existing values.",
+    "th": "ไฟล์รายงาน “สรุปยอดขายแยกตามบิล” (.xlsx) — ระบบป้องกันบิลซ้ำตามเลขบิล การอัปโหลดซ้ำจะแทนค่าเดิม"
+  },
+  "เลือกไฟล์": {
+    "en": "Select file"
+  },
+  "กำลังนำเข้า…": {
+    "en": "Importing…"
+  },
+  "นำเข้า": {
+    "en": "Import"
+  },
+  "นำเข้าสำเร็จ": {
+    "en": "Import complete"
+  },
+  "เพิ่มใหม่": {
+    "en": "Added"
+  },
+  "อัปเดต": {
+    "en": "Updated"
+  },
+  "Error": {
+    "en": "Error",
+    "th": "ข้อผิดพลาด"
+  },
+  "นำเข้าไม่สำเร็จ": {
+    "en": "Import failed"
+  },
+  "แสดง error": {
+    "en": "Show errors",
+    "th": "แสดงข้อผิดพลาด"
+  },
+  "รายการแรก": {
+    "en": "first items"
+  },
+  "กรุณาเลือกไฟล์ก่อน": {
+    "en": "Select a file first"
+  },
+  "อ่านไฟล์ไม่สำเร็จ: {v0}": {
+    "en": "Could not read file: {v0}"
+  },
+  "ไม่พบข้อมูลในไฟล์": {
+    "en": "No data found in file"
+  },
+  "ต้อง login ก่อน": {
+    "en": "Sign in first",
+    "th": "ต้องเข้าสู่ระบบก่อน"
+  },
+  "ไม่มีสิทธิ์ลบ": {
+    "en": "You do not have permission to delete"
+  },
+  "รหัสผ่านไม่ถูกต้อง": {
+    "en": "Incorrect password"
+  },
+  "ไม่พบ batch นี้ในธุรกิจปัจจุบัน": {
+    "en": "Batch not found in the current business",
+    "th": "ไม่พบชุดนำเข้านี้ในธุรกิจปัจจุบัน"
+  },
+  "POS Sales": {
+    "en": "POS Sales",
+    "th": "ยอดขายหน้าร้าน"
+  },
+  "ข้อมูลบิลจาก Foodstory — Upload .xlsx แล้วระบบจะ parse + dedupe ตามเลขบิล": {
+    "en": "Foodstory bills — upload .xlsx to import and deduplicate by bill number",
+    "th": "ข้อมูลบิลจากระบบขาย — อัปโหลดไฟล์ตารางแล้วระบบจะอ่านและป้องกันรายการซ้ำตามเลขบิล"
+  },
+  "จำนวนบิล": {
+    "en": "Number of bills"
+  },
+  "+ {v0} ยกเลิก (refund / void)": {
+    "en": "+ {v0} cancelled (refund / void)",
+    "th": "+ {v0} ยกเลิก (คืนเงิน / ยกเลิกบิล)"
+  },
+  "ยอดขายสุทธิ": {
+    "en": "Net sales"
+  },
+  "ตรงกับ Foodstory dashboard": {
+    "en": "Matches the Foodstory dashboard",
+    "th": "ตรงกับหน้าสรุปของระบบขาย"
+  },
+  "ส่วนลดรวม": {
+    "en": "Total discounts"
+  },
+  "VAT รวม": {
+    "en": "Total VAT",
+    "th": "ภาษีมูลค่าเพิ่ม รวม"
+  },
+  "ประวัติการ import (5 ล่าสุด)": {
+    "en": "Import history (latest 5)",
+    "th": "ประวัตินำเข้า (5 ชุดล่าสุด)"
+  },
+  "โดย": {
+    "en": "By"
+  },
+  "บิลในเดือนนี้ (": {
+    "en": "Bills this month ("
+  },
+  "ทุกช่องทาง": {
+    "en": "All channels"
+  },
+  "วิธีจ่าย": {
+    "en": "Payment method"
+  },
+  "ทุกวิธีจ่าย": {
+    "en": "All payment methods"
+  },
+  "กรอง": {
+    "en": "Filter"
+  },
+  "Export ทุกบิลที่ตรงกับ filter เป็น .xlsx": {
+    "en": "Export all bills matching the filters to .xlsx",
+    "th": "ส่งออกทุกบิลที่ตรงกับตัวกรองเป็นไฟล์ตาราง"
+  },
+  "Export Excel": {
+    "en": "Export Excel",
+    "th": "ส่งออกไฟล์ตาราง"
+  },
+  "ยังไม่มีข้อมูลบิล — Upload Foodstory export เพื่อเริ่มต้น": {
+    "en": "No bills yet. Upload a Foodstory export to begin.",
+    "th": "ยังไม่มีบิล — อัปโหลดไฟล์จากระบบขายเพื่อเริ่มต้น"
+  },
+  "เลขบิล / ID": {
+    "en": "Bill number / ID",
+    "th": "เลขบิล / รหัส"
+  },
+  "POS ID": {
+    "en": "POS ID",
+    "th": "รหัสระบบขาย"
+  },
+  "INV. No": {
+    "en": "Invoice no.",
+    "th": "เลขที่ใบกำกับภาษี"
+  },
+  "ยอดก่อนลด": {
+    "en": "Amount before discounts"
+  },
+  "ส่วนลดสินค้า": {
+    "en": "Item discount"
+  },
+  "ส่วนลดบิล": {
+    "en": "Bill discount"
+  },
+  "ยอดรวม": {
+    "en": "Total amount"
+  },
+  "ค่าบริการ": {
+    "en": "Service charge"
+  },
+  "ภาษี": {
+    "en": "Tax"
+  },
+  "มูลค่า Voucher": {
+    "en": "Voucher value",
+    "th": "มูลค่าคูปอง"
+  },
+  "ส่วนลด Voucher": {
+    "en": "Voucher discount",
+    "th": "ส่วนลดคูปอง"
+  },
+  "ยอดปัดเศษ": {
+    "en": "Rounding"
+  },
+  "ค่าจัดส่ง": {
+    "en": "Delivery fee"
+  },
+  "รวมสุทธิ": {
+    "en": "Net total"
+  },
+  "ทิป": {
+    "en": "Tip"
+  },
+  "คืนเงิน": {
+    "en": "Refund"
+  },
+  "ประเภทการสั่ง": {
+    "en": "Order type"
+  },
+  "วิธีบันทึก": {
+    "en": "Entry method"
+  },
+  "จำนวนลูกค้า": {
+    "en": "Guest count"
+  },
+  "ชื่อลูกค้า": {
+    "en": "Customer name"
+  },
+  "หมายเหตุ": {
+    "en": "Note"
+  },
+  "LINE MAN วันที่": {
+    "en": "LINE MAN date",
+    "th": "ไลน์ MAN วันที่"
+  },
+  "LINE MAN ยอด": {
+    "en": "LINE MAN amount",
+    "th": "ไลน์ MAN ยอด"
+  },
+  "โปรโมชั่น": {
+    "en": "Promotion"
+  },
+  "โค้ด": {
+    "en": "Code"
+  },
+  "เปิดบิล": {
+    "en": "Opened"
+  },
+  "ปิดบิล": {
+    "en": "Closed"
+  },
+  "สาขา": {
+    "en": "Branch"
+  },
+  "‹ ก่อนหน้า": {
+    "en": "‹ Previous"
+  },
+  "ถัดไป ›": {
+    "en": "Next ›"
+  },
+  "ยังไม่ได้ตั้งค่า AUTH_GOOGLE_ID/SECRET": {
+    "en": "AUTH_GOOGLE_ID/SECRET is not configured"
+  },
+  "งบกำไรขาดทุน — Export": {
+    "en": "Income statement — export",
+    "th": "งบกำไรขาดทุน — ส่งออก"
+  },
+  "← กลับ": {
+    "en": "← Back"
+  },
+  "งบกำไรขาดทุน (Profit & Loss Statement)": {
+    "en": "Profit & Loss Statement",
+    "th": "งบกำไรขาดทุน"
+  },
+  "ออกเมื่อ": {
+    "en": "Issued on"
+  },
+  "ปิดงบแล้ว (FINALIZED)": {
+    "en": "Finalized",
+    "th": "ปิดงบแล้ว"
+  },
+  "ฉบับร่าง (DRAFT)": {
+    "en": "Draft",
+    "th": "ฉบับร่าง"
+  },
+  "ปิดงบโดย": {
+    "en": "Finalized by"
+  },
+  "เมื่อ": {
+    "en": "On"
+  },
+  "รายการปรับปรุง": {
+    "en": "Adjustments"
+  },
+  "ผลการตรวจสอบ": {
+    "en": "Validation results"
+  },
+  "หมายเหตุ:": {
+    "en": "Note:"
+  },
+  "ผู้จัดทำ (Accountant)": {
+    "en": "Prepared by (accountant)",
+    "th": "ผู้จัดทำ (ผู้ทำบัญชี)"
+  },
+  "ผู้อนุมัติ / เจ้าของร้าน (Owner)": {
+    "en": "Approved by (owner)",
+    "th": "ผู้อนุมัติ / เจ้าของร้าน"
+  },
+  "เอกสารนี้สร้างจากระบบบัญชี 61 Bistro —": {
+    "en": "Generated by the 61 Bistro accounting system —"
+  },
+  "พิมพ์ / บันทึกเป็น PDF": {
+    "en": "Print / save as PDF",
+    "th": "พิมพ์ / บันทึกเป็นไฟล์พีดีเอฟ"
+  },
+  "61 Bistro — ระบบบัญชี 2569": {
+    "en": "61 Bistro — Accounting 2026/27",
+    "th": "61 Bistro — ระบบบัญชี 2569"
+  },
+  "ระบบบัญชี + P&L ของร้าน 61 Bistro — Dashboard, Daily/Monthly P&L, Cost Setup, POS Sales, Bank Reconciliation": {
+    "en": "61 Bistro accounting and profit & loss — dashboard, daily and monthly reports, costs, POS sales and bank reconciliation",
+    "th": "ระบบบัญชีร้าน 61 Bistro — ภาพรวม กำไรขาดทุน สรุปต้นทุน ยอดขาย และกระทบยอด"
+  },
+  "บัญชี Google นี้ยังไม่ได้รับสิทธิ์เข้าระบบ — ติดต่อเจ้าของร้านเพื่อขอเพิ่มสิทธิ์": {
+    "en": "This Google account does not have access. Contact the owner.",
+    "th": "บัญชี กูเกิล นี้ยังไม่ได้รับสิทธิ์เข้าระบบ — ติดต่อเจ้าของร้านเพื่อขอเพิ่มสิทธิ์"
+  },
+  "เกิดข้อผิดพลาดระหว่างเชื่อมต่อ Google — ลองอีกครั้ง": {
+    "en": "Google connection error. Try again.",
+    "th": "เกิดข้อผิดพลาดระหว่างเชื่อมต่อ กูเกิล — ลองอีกครั้ง"
+  },
+  "ระบบ Google Login ยังไม่ได้ตั้งค่า — ติดต่อ admin": {
+    "en": "Google sign-in is not configured. Contact the administrator.",
+    "th": "ระบบเข้าสู่ระบบด้วยกูเกิลยังไม่ได้ตั้งค่า — ติดต่อผู้ดูแลระบบ"
+  },
+  "ระบบบัญชี 2569": {
+    "en": "Accounting 2026/27"
+  },
+  "เข้าสู่ระบบด้วย Google": {
+    "en": "Sign in with Google",
+    "th": "เข้าสู่ระบบด้วยกูเกิล"
+  },
+  "เกิดข้อผิดพลาด — ลองอีกครั้ง": {
+    "en": "An error occurred. Try again."
+  },
+  "สิทธิ์เข้าถึง": {
+    "en": "Access"
+  },
+  "เฉพาะ Gmail ที่อยู่ในรายชื่อที่ได้รับอนุญาตเท่านั้นที่เข้าระบบได้": {
+    "en": "Only approved Google accounts can access this system",
+    "th": "เฉพาะบัญชีกูเกิลที่ได้รับอนุญาตเท่านั้นที่เข้าระบบได้"
+  },
+  "ผู้ใช้ใหม่ติดต่อเจ้าของร้านเพื่อเพิ่มสิทธิ์": {
+    "en": "New users should contact the owner for access"
+  },
+  "ลบไฟล์แนบ": {
+    "en": "Remove attachment"
+  },
+  "แนบไฟล์": {
+    "en": "Attach file"
+  },
+  "แนบไฟล์ (เก็บเข้า Google Drive)": {
+    "en": "Attach file (stored in Google Drive)",
+    "th": "แนบไฟล์ (เก็บเข้ากูเกิลไดรฟ์)"
+  },
+  "เลือกธุรกิจ": {
+    "en": "Select business"
+  },
+  "แตะเพื่อสลับธุรกิจ": {
+    "en": "Tap to switch business"
+  },
+  "ต้นทุนจาก Cost Setup:": {
+    "en": "Cost source:",
+    "th": "ที่มาของต้นทุน:"
+  },
+  "ใช้รายจ่ายที่จัดหมวดใน Bank & Reconcile ไม่บวกยอดกรอกเดิมซ้ำ": {
+    "en": "Uses categorized bank expenses without adding previous manual amounts again",
+    "th": "ใช้รายจ่ายธนาคารที่จัดหมวดแล้ว ไม่บวกยอดกรอกเดิมซ้ำ"
+  },
+  "ใช้ยอดกรอกเองในเดือนที่ยังไม่มีรายการธนาคาร": {
+    "en": "Uses manual amounts in months with no bank transactions"
+  },
+  "ใช้รายจ่ายธนาคารในเดือนที่ลง Bank & Reconcile แล้ว และยอดกรอกเองในเดือนที่ยังไม่มีข้อมูลธนาคาร": {
+    "en": "Uses bank expenses where available and manual amounts for months with no bank data",
+    "th": "ใช้รายจ่ายธนาคารในเดือนที่ลงบัญชีแล้ว และยอดกรอกเองในเดือนที่ยังไม่มีข้อมูลธนาคาร"
+  },
+  "ดูที่มาค่าใช้จ่าย": {
+    "en": "View expense sources"
+  },
+  "บาทรอจัดหมวด / ตรวจสอบ ซึ่งยังไม่นับในต้นทุน กำไรที่แสดงจึงยังไม่ครบ": {
+    "en": "THB awaiting categorization / review is excluded from costs, so the profit shown is incomplete"
+  },
+  "เปิดเมนู": {
+    "en": "Open menu"
+  },
+  "ปิดเมนู": {
+    "en": "Close menu"
+  },
+  "กำลังพัฒนา": {
+    "en": "Coming soon"
+  },
+  "รายได้จากการขาย (POS)": {
+    "en": "Sales revenue (POS)",
+    "th": "รายได้จากการขาย"
+  },
+  "— ยังไม่มีข้อมูลยอดขาย —": {
+    "en": "— No sales data —"
+  },
+  "รวมรายได้จากการขาย": {
+    "en": "Total sales revenue"
+  },
+  "ปรับปรุงรายได้": {
+    "en": "Revenue adjustments"
+  },
+  "รวมรายได้": {
+    "en": "Total revenue"
+  },
+  "ค่าใช้จ่าย": {
+    "en": "Expenses"
+  },
+  "— ไม่มี —": {
+    "en": "— None —"
+  },
+  "รวมต้นทุนวัตถุดิบ": {
+    "en": "Total cost of goods sold"
+  },
+  "รวมค่าแรงพนักงาน": {
+    "en": "Total labor costs"
+  },
+  "รวมค่าใช้จ่ายประจำ": {
+    "en": "Total fixed costs"
+  },
+  "ปรับปรุงต้นทุน": {
+    "en": "Cost adjustments"
+  },
+  "รวมค่าใช้จ่าย": {
+    "en": "Total expenses"
+  },
+  "กำไร(ขาดทุน) สุทธิ": {
+    "en": "Net profit / loss"
+  },
+  "Net Margin": {
+    "en": "Net margin",
+    "th": "อัตรากำไรสุทธิ"
+  },
+  "ภาพรวมและรายงาน": {
+    "en": "Overview & reports"
+  },
+  "บันทึกและกระทบยอด": {
+    "en": "Transactions & reconciliation"
+  },
+  "จัดการระบบ": {
+    "en": "Administration"
+  },
+  "เมนูหลัก": {
+    "en": "Main navigation"
+  },
+  "เปลี่ยนเป็นโหมดสว่าง": {
+    "en": "Switch to light mode"
+  },
+  "เปลี่ยนเป็นโหมดมืด": {
+    "en": "Switch to dark mode"
+  },
+  "ธีมสว่าง": {
+    "en": "Light theme"
+  },
+  "ธีมมืด": {
+    "en": "Dark theme"
+  },
+  "ออกจากระบบ": {
+    "en": "Sign out"
+  },
+  "ไม่ระบุหมวด": {
+    "en": "Uncategorized"
+  },
+  "EDC + PromptPay + Card": {
+    "en": "EDC + PromptPay + card",
+    "th": "เครื่องรูดบัตร + พร้อมเพย์ + บัตร"
+  },
+  "เงินสดหน้าร้าน": {
+    "en": "Store cash"
+  },
+  "Grab Delivery": {
+    "en": "Grab Delivery"
+  },
+  "ตรง": {
+    "en": "Exact match"
+  },
+  "ใกล้เคียง": {
+    "en": "Close match"
+  },
+  "ค่าธรรมเนียม": {
+    "en": "Fees"
+  },
+  "ต่างมาก": {
+    "en": "Large difference"
+  },
+  "รอกรอก": {
+    "en": "Pending entry"
+  },
+  "ธนาคารกสิกรไทย": {
+    "en": "Kasikornbank"
+  },
+  "ไทยพาณิชย์": {
+    "en": "Siam Commercial Bank"
+  },
+  "เงินสด": {
+    "en": "Cash"
+  },
+  "💰 รายรับ - โอนรับ/ยอดขาย": {
+    "en": "💰 Income - Transfers / sales"
+  },
+  "💰 รายรับ - ฝากเงินสด": {
+    "en": "💰 Income - Cash deposits"
+  },
+  "💰 รายรับ - เพิ่มเงินบริหาร": {
+    "en": "💰 Income - Working capital added"
+  },
+  "💰 รายรับ - อื่นๆ": {
+    "en": "💰 Income - Other"
+  },
+  "🛵 รายรับ - Grab": {
+    "en": "🛵 Income - Grab"
+  },
+  "🟢 รายรับ - LINE MAN": {
+    "en": "🟢 Income - LINE MAN",
+    "th": "🟢 รายรับ - ไลน์ MAN"
+  },
+  "🥩 ต้นทุน - วัตถุดิบอาหาร": {
+    "en": "🥩 Cost - Food ingredients"
+  },
+  "🍹 ต้นทุน - วัตถุดิบเครื่องดื่ม": {
+    "en": "🍹 Cost - Beverage ingredients"
+  },
+  "📦 ต้นทุน - แพ็คเกจจิ้ง": {
+    "en": "📦 Cost - Packaging"
+  },
+  "🛒 ต้นทุน - ซื้อสินค้า/จัดซื้อ": {
+    "en": "🛒 Cost - Purchases"
+  },
+  "👥 เงินเดือนพนักงาน": {
+    "en": "👥 Employee salaries"
+  },
+  "👥 ค่าจ้าง/OT/พิเศษ": {
+    "en": "👥 Wages / overtime / extra",
+    "th": "👥 ค่าจ้าง/ล่วงเวลา/พิเศษ"
+  },
+  "💊 เบิกล่วงหน้าพนักงาน": {
+    "en": "💊 Employee advances"
+  },
+  "🏠 ค่าเช่า": {
+    "en": "🏠 Rent"
+  },
+  "⚡ ค่าสาธารณูปโภค (ไฟ/น้ำ)": {
+    "en": "⚡ Utilities (electricity / water)"
+  },
+  "🌐 ค่าอินเตอร์เน็ต/โทรศัพท์": {
+    "en": "🌐 Internet / telephone"
+  },
+  "📣 Marketing & โฆษณา": {
+    "en": "📣 Marketing & advertising",
+    "th": "📣 การตลาด & โฆษณา"
+  },
+  "🗂️ ค่าใช้จ่ายเบ็ดเตล็ด": {
+    "en": "🗂️ Miscellaneous expenses"
+  },
+  "👔 เบิกเงิน/โอนให้ผู้บริหาร": {
+    "en": "👔 Owner withdrawals / transfers"
+  },
+  "🔴 ชำระบัตรเครดิต": {
+    "en": "🔴 Credit card repayments"
+  },
+  "🔄 โอนระหว่างบัญชี": {
+    "en": "🔄 Transfers between accounts"
+  },
+  "💵 ถอนเงินสด (ATM)": {
+    "en": "💵 Cash withdrawals (ATM)"
+  },
+  "📅 ยกยอดเดือนก่อน": {
+    "en": "📅 Previous month carryover"
+  },
+  "ไม่มีสิทธิ์เข้าถึงธุรกิจใดๆ — ติดต่อเจ้าของร้าน": {
+    "en": "You do not have access to any business. Contact the owner."
+  },
+  "อื่นๆ / ไม่ระบุ": {
+    "en": "Other / unspecified"
+  },
+  "ปรับยอดรายได้ (กรอกเอง / Override)": {
+    "en": "Revenue adjustment (manual / override)",
+    "th": "ปรับยอดรายได้ (กรอกเอง)"
+  },
+  "ค่าแรง (Labor)": {
+    "en": "Labor costs",
+    "th": "ค่าแรง"
+  },
+  "ค่าใช้จ่ายประจำ (Fixed)": {
+    "en": "Fixed costs",
+    "th": "ค่าใช้จ่ายประจำ"
+  },
+  "ความครบของข้อมูล POS": {
+    "en": "POS data completeness",
+    "th": "ความครบของข้อมูลขาย"
+  },
+  "มียอดขาย {v0}/{v1} วัน": {
+    "en": "Sales recorded on {v0}/{v1} days"
+  },
+  "มีรายได้บันทึก": {
+    "en": "Revenue recorded"
+  },
+  "รายได้ {v0} บาท": {
+    "en": "Revenue {v0} THB"
+  },
+  "ยังไม่มีรายได้ (POS หรือ Override)": {
+    "en": "No revenue yet (POS or override)",
+    "th": "ยังไม่มีรายได้ (ยอดขายหรือยอดที่กรอกเอง)"
+  },
+  "มีต้นทุนวัตถุดิบ (COGS)": {
+    "en": "Cost of goods sold recorded",
+    "th": "มีต้นทุนวัตถุดิบ"
+  },
+  "มีข้อมูลแล้ว": {
+    "en": "Data available"
+  },
+  "ยังไม่มีต้นทุนใน Cost Setup / Statement": {
+    "en": "No costs in Cost Setup / statement yet",
+    "th": "ยังไม่มีต้นทุนในสรุปต้นทุนหรือรายการเดินบัญชี"
+  },
+  "มีค่าแรงพนักงาน (Labor)": {
+    "en": "Labor costs recorded",
+    "th": "มีค่าแรงพนักงาน"
+  },
+  "มีค่าใช้จ่ายดำเนินงาน (Fixed)": {
+    "en": "Operating expenses recorded",
+    "th": "มีค่าใช้จ่ายดำเนินงาน"
+  },
+  "จัดหมวดรายจ่าย Statement ครบ": {
+    "en": "Statement expenses fully categorized",
+    "th": "จัดหมวดรายจ่ายธนาคารครบ"
+  },
+  "มีเงินออก {v0} บาทรอตรวจสอบ ยังไม่รวมในต้นทุน": {
+    "en": "{v0} THB paid out awaiting review, excluded from costs"
+  },
+  "อัตรากำไรสมเหตุสมผล": {
+    "en": "Profit margin is reasonable"
+  },
+  "คำนวณไม่ได้ (ไม่มีรายได้)": {
+    "en": "Cannot calculate (no revenue)"
+  },
+  "กระทบยอด POS ↔ Bank": {
+    "en": "POS ↔ bank reconciliation",
+    "th": "กระทบยอดขายกับธนาคาร"
+  },
+  "ยังไม่ได้ลง/จับคู่ statement ธนาคาร": {
+    "en": "No bank statement entered / matched yet",
+    "th": "ยังไม่ได้ลงหรือจับคู่รายการเดินบัญชีธนาคาร"
+  },
+  "มีช่องทางที่ต่างมาก {v0} รายการ": {
+    "en": "{v0} channels have large differences"
+  },
+  "ยอดตรง/ใกล้เคียงทุกช่องทาง": {
+    "en": "All channels match or are close"
+  },
+  "ข้อมูลตรงกับตอนปิดงบ": {
+    "en": "Data matches the closing snapshot"
+  },
+  "ข้อมูลรายวันเปลี่ยนหลังปิดงบ — ควรกด Re-sync หรือตรวจสอบ": {
+    "en": "Daily data changed after closing. Refresh figures or review.",
+    "th": "ข้อมูลรายวันเปลี่ยนหลังปิดงบ — ควรอัปเดตตัวเลขหรือตรวจสอบ"
+  },
+  "ไม่พบหลักฐานในธุรกิจและเดือนนี้": {
+    "en": "Evidence not found in this business and month"
+  },
+  "ข้อมูลหลักฐานเปลี่ยนไปแล้ว": {
+    "en": "Evidence data has changed"
+  },
+  "หลักฐานนี้แนบกับข้อมูลประเภทอื่นอยู่แล้ว": {
+    "en": "This evidence is already attached to another record type"
+  },
+  "อ่านข้อความไม่สำเร็จ กรุณาตรวจรูปหรือกรอกข้อมูลเอง": {
+    "en": "Could not read text. Check the image or enter information manually."
+  },
+  "วันที่ในสลิปไม่อยู่ในเดือนที่เลือก กรุณาตรวจเดือนก่อนจัดหมวด": {
+    "en": "The slip date is outside the selected month. Check the month before categorizing."
+  },
+  "หมวดหรือรายการเปลี่ยนไปแล้ว": {
+    "en": "Category or transaction changed"
+  },
+  "จับคู่และจัดหมวดอัตโนมัติแล้ว": {
+    "en": "Matched and categorized automatically"
+  },
+  "คู่หลักฐานเปลี่ยนไประหว่างทำรายการ": {
+    "en": "The evidence match changed during processing"
+  },
+  "คู่เดิมถูกลบหรืออยู่นอกเดือนนี้": {
+    "en": "The previous match was deleted or is outside this month"
+  },
+  "พบหลายรายการที่ยอดและวันที่ตรงกัน ต้องตรวจเลือกคู่": {
+    "en": "Multiple transactions match the amount and date. Select a match manually."
+  },
+  "ยังไม่พบคู่ที่ยอดและวันที่ตรงกัน หรืออ่านข้อมูลไม่ครบ": {
+    "en": "No matching amount and date found, or information is incomplete"
+  },
+  "ข้อมูลเวลาหรือเลขอ้างอิงยังไม่พอสำหรับยืนยันอัตโนมัติ": {
+    "en": "Insufficient time or reference information for automatic confirmation"
+  },
+  "ยอดและวันตรง แต่ยังยืนยันผู้รับหรือบัญชีจาก Statement ไม่ได้": {
+    "en": "Amount and date match, but the recipient or account cannot be verified from the statement",
+    "th": "ยอดและวันตรง แต่ยังยืนยันผู้รับหรือบัญชีจากรายการเดินบัญชีไม่ได้"
+  },
+  "คู่ที่พบอยู่ในบัญชีอื่น ให้เลือกบัญชีที่ถูกต้องหรือตรวจทุกบัญชี": {
+    "en": "The match is in another account. Select that account or review all accounts."
+  },
+  "ทิศทางเงินเข้า / ออกไม่ชัดเจน": {
+    "en": "Money-in / money-out direction is unclear"
+  },
+  "รายการนี้เคยยืนยันหมวดจากหลักฐานแล้ว จึงคงข้อมูลเดิม": {
+    "en": "This transaction already has a category confirmed from evidence; existing data was preserved"
+  },
+  "ไม่พบ Remark ที่ชัดเจนสำหรับจัดหมวด": {
+    "en": "No clear remark for categorization",
+    "th": "ไม่พบหมายเหตุที่ชัดเจนสำหรับจัดหมวด"
+  },
+  "Remark อาจอยู่ได้หลายหมวด": {
+    "en": "The remark may refer to multiple categories",
+    "th": "หมายเหตุอาจอยู่ได้หลายหมวด"
+  },
+  "ยังไม่พบหมวดบัญชีที่ตรงกับ Remark": {
+    "en": "No accounting category matches the remark",
+    "th": "ยังไม่พบหมวดบัญชีที่ตรงกับหมายเหตุ"
+  },
+  "หมวดเดิมต่างจากหมวดที่แนะนำ จึงไม่ทับหมวดเฉพาะที่มีอยู่": {
+    "en": "The existing specific category differs from the suggestion and was preserved"
+  },
+  "Remark มีคำว่า “{v0}”": {
+    "en": "Remark contains “{v0}”",
+    "th": "หมายเหตุมีคำว่า “{v0}”"
+  },
+  "หลักฐาน #{v0} · Remark:": {
+    "en": "Evidence #{v0} · Remark:",
+    "th": "หลักฐาน #{v0} · หมายเหตุ:"
+  },
+  "มค": {
+    "en": "Jan"
+  },
+  "มกราคม": {
+    "en": "January"
+  },
+  "กพ": {
+    "en": "Feb"
+  },
+  "กุมภาพันธ์": {
+    "en": "February"
+  },
+  "มีค": {
+    "en": "Mar"
+  },
+  "มีนาคม": {
+    "en": "March"
+  },
+  "เมย": {
+    "en": "Apr"
+  },
+  "เมษายน": {
+    "en": "April"
+  },
+  "พค": {
+    "en": "May"
+  },
+  "พฤษภาคม": {
+    "en": "May"
+  },
+  "มิย": {
+    "en": "Jun"
+  },
+  "มิถุนายน": {
+    "en": "June"
+  },
+  "กค": {
+    "en": "Jul"
+  },
+  "กรกฎาคม": {
+    "en": "July"
+  },
+  "สค": {
+    "en": "Aug"
+  },
+  "สิงหาคม": {
+    "en": "August"
+  },
+  "กย": {
+    "en": "Sep"
+  },
+  "กันยายน": {
+    "en": "September"
+  },
+  "ตค": {
+    "en": "Oct"
+  },
+  "ตุลาคม": {
+    "en": "October"
+  },
+  "พย": {
+    "en": "Nov"
+  },
+  "พฤศจิกายน": {
+    "en": "November"
+  },
+  "ธค": {
+    "en": "Dec"
+  },
+  "ธันวาคม": {
+    "en": "December"
+  },
+  "ยอดเงินตรง": {
+    "en": "Amount matches"
+  },
+  "วันที่ตรง": {
+    "en": "Date matches"
+  },
+  "เวลาใกล้เคียงไม่เกิน 5 นาที": {
+    "en": "Time within 5 minutes"
+  },
+  "ไฟล์ว่าง": {
+    "en": "Empty file"
+  },
+  "ไฟล์ใหญ่เกิน 4 MB กรุณาลดขนาดแล้วเลือกใหม่": {
+    "en": "File exceeds 4 MB. Reduce its size and select again."
+  },
+  "อัปโหลดไม่สำเร็จ": {
+    "en": "Upload failed"
+  },
+  "การเชื่อมต่อขัดข้อง ตรวจรายการใน Drive ก่อนลองใหม่": {
+    "en": "Connection interrupted. Check Drive before retrying.",
+    "th": "การเชื่อมต่อขัดข้อง ตรวจรายการใน ไดรฟ์ ก่อนลองใหม่"
+  },
+  "เม.ย.": {
+    "en": "Apr"
+  },
+  "พ.ค.": {
+    "en": "May"
+  },
+  "มิ.ย.": {
+    "en": "Jun"
+  },
+  "ก.ค.": {
+    "en": "Jul"
+  },
+  "ส.ค.": {
+    "en": "Aug"
+  },
+  "ก.ย.": {
+    "en": "Sep"
+  },
+  "ต.ค.": {
+    "en": "Oct"
+  },
+  "พ.ย.": {
+    "en": "Nov"
+  },
+  "ธ.ค.": {
+    "en": "Dec"
+  },
+  "ม.ค.": {
+    "en": "Jan"
+  },
+  "ก.พ.": {
+    "en": "Feb"
+  },
+  "มี.ค.": {
+    "en": "Mar"
+  },
+  "OT รวม": {
+    "en": "Total overtime",
+    "th": "ค่าล่วงเวลารวม"
+  },
+  "โบนัส": {
+    "en": "Bonus"
+  },
+  "ค่าจ้างพิเศษ / Extra": {
+    "en": "Extra wages",
+    "th": "ค่าจ้างพิเศษ"
+  },
+  "Service Charge 3% (ส่วนแบ่งพนักงาน)": {
+    "en": "Service charge 3% (employee share)",
+    "th": "ค่าบริการ 3% (ส่วนแบ่งพนักงาน)"
+  },
+  "ต้นทุนวัตถุดิบอาหาร (Food Cost)": {
+    "en": "Food costs",
+    "th": "ต้นทุนวัตถุดิบอาหาร"
+  },
+  "ต้นทุนเครื่องดื่ม (Beverage)": {
+    "en": "Beverage costs",
+    "th": "ต้นทุนเครื่องดื่ม"
+  },
+  "บรรจุภัณฑ์ (Packaging)": {
+    "en": "Packaging",
+    "th": "บรรจุภัณฑ์"
+  },
+  "วันที่ชำระเงิน": {
+    "en": "Payment date"
+  },
+  "หมายเลขใบเสร็จ": {
+    "en": "Receipt number"
+  },
+  "ไม่พบ sheet ในไฟล์": {
+    "en": "No sheet found in file",
+    "th": "ไม่พบแผ่นงานในไฟล์"
+  },
+  "ไม่พบ header row — ต้องมีคอลัมน์ 'วันที่ชำระเงิน' และ 'หมายเลขใบเสร็จ'": {
+    "en": "Header row not found. The file must contain the original payment date and receipt number columns.",
+    "th": "ไม่พบแถวหัวตาราง — ต้องมีคอลัมน์ 'วันที่ชำระเงิน' และ 'หมายเลขใบเสร็จ'"
+  },
+  "เวลาที่ชำระเงิน": {
+    "en": "Payment time"
+  },
+  "แถวที่ {v0}: รูปแบบวันที่ไม่ถูกต้อง ({v1})": {
+    "en": "Row {v0}: invalid date ({v1})"
+  },
+  "แถวที่ {v0}: เลขบิลซ้ำในไฟล์เดียวกัน ({v1})": {
+    "en": "Row {v0}: duplicate bill number in this file ({v1})"
+  },
+  "ข้อมูล": {
+    "en": "Data"
+  },
+  "ยังไม่มีข้อมูลปีงบ": {
+    "en": "No fiscal year data available"
+  },
+  "ต้นทุนวัตถุดิบ": {
+    "en": "Cost of goods sold"
+  },
+  "ค่าแรง": {
+    "en": "Labor"
+  },
+  "ค่าใช้จ่ายประจำ": {
+    "en": "Fixed costs"
+  },
+  "ต้นทุนรวม": {
+    "en": "Total cost"
+  },
+  "%กำไร": {
+    "en": "Profit %"
+  },
+  "P&L รายเดือน": {
+    "en": "Monthly profit & loss",
+    "th": "กำไรขาดทุนรายเดือน"
+  },
+  "งบกำไรขาดทุน — {v0}": {
+    "en": "Income statement — {v0}"
+  },
+  "ต้นทุนรายเดือน": {
+    "en": "Monthly costs"
+  },
+  "อาหาร": {
+    "en": "Food"
+  },
+  "เครื่องดื่ม": {
+    "en": "Beverages"
+  },
+  "บรรจุภัณฑ์": {
+    "en": "Packaging"
+  },
+  "เงินเดือน": {
+    "en": "Salary"
+  },
+  "OT/พิเศษ": {
+    "en": "Overtime / extras",
+    "th": "ล่วงเวลา / พิเศษ"
+  },
+  "ธุรกรรมธนาคาร": {
+    "en": "Bank transactions"
+  },
+  "POS รายวัน": {
+    "en": "Daily POS",
+    "th": "ยอดขายรายวัน"
+  },
+  "ยอดสุทธิ (Net)": {
+    "en": "Net amount",
+    "th": "ยอดสุทธิ"
+  },
+  "ยอดเก็บจริง (Grand)": {
+    "en": "Amount collected (grand total)",
+    "th": "ยอดเก็บจริง"
+  },
+  "ไม่พบธุรกิจ": {
+    "en": "Business not found"
+  },
+  "ยังไม่ได้เชื่อม Google Drive — กดปุ่ม “เชื่อม Google” ก่อน": {
+    "en": "Google Drive is not connected. Click “Connect Google” first.",
+    "th": "ยังไม่ได้เชื่อม กูเกิลไดรฟ์ — กดปุ่ม “เชื่อม กูเกิล” ก่อน"
+  },
+  "{v0} (ระบบบัญชี)": {
+    "en": "{v0} (accounting)"
+  },
+  "หลักฐานการโอน": {
+    "en": "Transfer evidence",
+    "th": "หลักฐานการโอน"
+  },
+  "อ่านอัตโนมัติรองรับ JPG, PNG และ PDF เป็นหลัก กรุณากรอกยอดและวันที่เองสำหรับไฟล์นี้": {
+    "en": "Automatic reading primarily supports JPG, PNG and PDF. Enter the amount and date manually for this file.",
+    "th": "อ่านอัตโนมัติรองรับ JPG, PNG และ พีดีเอฟ เป็นหลัก กรุณากรอกยอดและวันที่เองสำหรับไฟล์นี้"
+  },
+  "ไฟล์ใหญ่เกินขนาดอ่านอัตโนมัติ กรุณากรอกยอดและวันที่เอง": {
+    "en": "File exceeds the automatic reading limit. Enter the amount and date manually."
+  },
+  "สร้างเอกสารอ่านข้อความไม่สำเร็จ": {
+    "en": "Could not create the text-reading document"
+  },
+  "โหลดตัวอ่าน PDF ไม่ได้: {v0}": {
+    "en": "Could not load PDF reader: {v0}",
+    "th": "โหลดตัวอ่าน พีดีเอฟ ไม่ได้: {v0}"
+  },
+  "รหัสผ่านไม่ถูกต้อง — statement ใช้วันเกิด 8 หลัก (ddmmyyyy)": {
+    "en": "Incorrect password. Statements use an 8-digit birth date (ddmmyyyy).",
+    "th": "รหัสผ่านไม่ถูกต้อง — รายการเดินบัญชีใช้วันเกิด 8 หลัก (วันเดือนปีค.ศ.)"
+  },
+  "ไฟล์ PDF มีรหัสผ่าน กรุณาใส่รหัส": {
+    "en": "This PDF is password-protected. Enter the password.",
+    "th": "ไฟล์ พีดีเอฟ มีรหัสผ่าน กรุณาใส่รหัส"
+  },
+  "อ่าน PDF ไม่ได้: {v0}": {
+    "en": "Could not read PDF: {v0}",
+    "th": "อ่าน พีดีเอฟ ไม่ได้: {v0}"
+  },
+  "ถอน/ฝาก": {
+    "en": "Debit / credit"
+  },
+  "ยอดคงเหลือ": {
+    "en": "Balance"
+  },
+  "ส่งรูป “สลิปโอนเงิน” หรือ “บิลซื้อ” เข้ามาได้เลย ระบบจะเก็บเข้า Google Drive ให้อัตโนมัติ ✅": {
+    "en": "Send transfer slips or purchase invoices here. They will be saved to Google Drive automatically. ✅",
+    "th": "ส่งรูป “สลิปโอนเงิน” หรือ “บิลซื้อ” เข้ามาได้เลย ระบบจะเก็บเข้า กูเกิลไดรฟ์ ให้อัตโนมัติ ✅"
+  },
+  "ส่งผ่าน LINE": {
+    "en": "Sent via LINE",
+    "th": "ส่งผ่าน ไลน์"
+  },
+  "✅ บันทึกหลักฐานเข้าระบบ + Google Drive แล้ว": {
+    "en": "✅ Evidence saved to the system and Google Drive",
+    "th": "✅ บันทึกหลักฐานเข้าระบบ + กูเกิลไดรฟ์ แล้ว"
+  },
+  "⚠️ บันทึกไม่สำเร็จ — ตรวจสอบว่าเชื่อม Google Drive + สร้างโครงสร้างแล้ว": {
+    "en": "⚠️ Could not save. Check that Google Drive is connected and folders are created.",
+    "th": "⚠️ บันทึกไม่สำเร็จ — ตรวจสอบว่าเชื่อม กูเกิลไดรฟ์ + สร้างโครงสร้างแล้ว"
+  },
+  "จ": {
+    "en": "Mon"
+  },
+  "อ": {
+    "en": "Tue"
+  },
+  "พ": {
+    "en": "Wed"
+  },
+  "พฤ": {
+    "en": "Thu"
+  },
+  "ศ": {
+    "en": "Fri"
+  },
+  "รวมทั้งปี {v0}": {
+    "en": "Annual total {v0}"
+  },
+  "EDC (บัตร)": {
+    "en": "EDC (card)",
+    "th": "เครื่องรูดบัตร"
+  },
+  "โอนเข้าบัญชี": {
+    "en": "Bank transfer"
+  },
+  "วัตถุดิบอาหาร / จัดซื้อ": {
+    "en": "Food ingredients / purchases"
+  },
+  "ค่าจ้าง / OT / พิเศษ": {
+    "en": "Wages / overtime / extras",
+    "th": "ค่าจ้าง / ล่วงเวลา / พิเศษ"
+  },
+  "ค่าใช้จ่ายดำเนินงานอื่น": {
+    "en": "Other operating expenses"
+  }
+}

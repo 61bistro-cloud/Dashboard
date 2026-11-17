@@ -1,5 +1,7 @@
 "use client";
 
+import { useUi } from "@/lib/i18n/use-ui";
+
 import { useState, useTransition } from "react";
 import { Check } from "lucide-react";
 import { setOpeningBalance } from "../actions";
@@ -13,6 +15,7 @@ export function OpeningBalanceForm({
   accountId: number;
   initial: number;
 }) {
+  const { ui } = useUi();
   const [pending, start] = useTransition();
   const [val, setVal] = useState(String(initial || ""));
   const [saved, setSaved] = useState(false);
@@ -34,7 +37,7 @@ export function OpeningBalanceForm({
       }}
       className="flex items-center gap-2 text-xs"
     >
-      <label className="text-muted">ยอดยกมา:</label>
+      <label className="text-muted">{ui("ยอดยกมา:")}</label>
       <input
         type="text"
         inputMode="decimal"

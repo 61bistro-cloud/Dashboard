@@ -1,3 +1,4 @@
+import { getUi } from "@/lib/i18n/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -6,6 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { BusinessManager } from "./_components/business-manager";
 
 export default async function BusinessesAdminPage() {
+  const { ui } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
   if (session.user.role !== "OWNER") redirect("/");
@@ -39,8 +41,11 @@ export default async function BusinessesAdminPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1100px] mx-auto space-y-6">
       <PageHeader
         icon={Building2}
-        title="จัดการธุรกิจ"
-        description={`ทั้งหมด ${rows.length} ธุรกิจ — แต่ละธุรกิจแยกข้อมูลกันโดยสมบูรณ์`}
+        title={ui("จัดการธุรกิจ")}
+        description={ui(
+          "ทั้งหมด {v0} ธุรกิจ — แต่ละธุรกิจแยกข้อมูลกันโดยสมบูรณ์",
+          { v0: rows.length }
+        )}
       />
       <BusinessManager businesses={rows} />
     </div>
