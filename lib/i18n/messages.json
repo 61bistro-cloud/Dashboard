@@ -835,7 +835,7 @@
     "en": "Category not found in the current business"
   },
   "ไม่พบรายการนี้ในธุรกิจปัจจุบัน": {
-    "en": "Transaction not found in the current business"
+    "en": "Item not found in the current business"
   },
   "กรุณาเลือกไฟล์ PDF ก่อน": {
     "en": "Select a PDF file first",
@@ -3303,5 +3303,59 @@
   },
   "ค่าใช้จ่ายดำเนินงานอื่น": {
     "en": "Other operating expenses"
+  },
+  "ชื่อรายการ {v0}": {
+    "en": "Item name {v0}"
+  },
+  "ชื่อรายการ": {
+    "en": "Item name"
+  },
+  "จำนวนเงิน {v0}": {
+    "en": "Amount {v0}"
+  },
+  "ลบรายการ {v0}": {
+    "en": "Remove item {v0}"
+  },
+  "ลบรายการนี้? การเปลี่ยนแปลงจะมีผลเมื่อกดบันทึก": {
+    "en": "Remove this item? Changes take effect when you save."
+  },
+  "ยังไม่มีรายการ เพิ่มรายการด้านล่างได้เลย": {
+    "en": "No items yet. Add one below."
+  },
+  "เพิ่มค่าจ้างพิเศษ": {
+    "en": "Add extra pay item"
+  },
+  "เพิ่มต้นทุนอื่นๆ": {
+    "en": "Add other cost"
+  },
+  "แก้ชื่อ จำนวนเงิน เพิ่มหรือลบรายการ แล้วกดบันทึก • ยอดเงินใช้เฉพาะเดือนที่เลือก ชื่อรายการใช้ร่วมกันทุกเดือน": {
+    "en": "Edit names and amounts, add or remove items, then save. Amounts apply to the selected month; item names are shared across months."
+  },
+  "ต้นทุนอื่นๆ / ซื้อของเข้าร้าน": {
+    "en": "Other costs / shop purchases"
+  },
+  "เช่น ของใช้ อุปกรณ์ หรือวัสดุสิ้นเปลืองในร้าน • รวมเป็นค่าใช้จ่ายดำเนินงานในรายงาน ไม่ใช่ต้นทุนวัตถุดิบอาหาร": {
+    "en": "For supplies, equipment or consumables used in the shop. Included in operating expenses, separately from food ingredients."
+  },
+  "มีรายการซ้ำ กรุณาตรวจชื่อและรายการ": {
+    "en": "Duplicate items. Check the names and entries."
+  },
+  "มีหมวดชื่อนี้อยู่แล้ว กรุณาใช้ชื่ออื่น": {
+    "en": "This category name already exists. Use another name."
+  },
+  "เพิ่มหรือแก้รายการด้านล่างได้เพื่อเก็บเทียบ แต่รายงานยังใช้ยอด Statement เท่านั้น หากต้องการเพิ่มค่าใช้จ่ายจริง ให้บันทึกใน Bank & Reconcile": {
+    "en": "You can edit the items below for comparison. Reports still use statement expenses only. Record actual additional expenses in Bank & Reconcile.",
+    "th": "เพิ่มหรือแก้รายการด้านล่างได้เพื่อเก็บเทียบ แต่รายงานยังใช้ยอดธนาคารเท่านั้น หากต้องการเพิ่มค่าใช้จ่ายจริง ให้บันทึกในหน้าบัญชีและกระทบยอด"
+  },
+  "unauthorized": {
+    "en": "Sign in first",
+    "th": "กรุณาเข้าสู่ระบบก่อน"
+  },
+  "forbidden": {
+    "en": "Access denied",
+    "th": "ไม่มีสิทธิ์"
+  },
+  "จำนวนเงินไม่ถูกต้อง": {
+    "en": "Invalid amount"
   }
 }

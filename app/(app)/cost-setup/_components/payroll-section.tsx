@@ -13,7 +13,11 @@ import {
 import { MoneyInput } from "./money-input";
 import { SectionCard } from "./section-card";
 import { SortableList, SortableRow } from "./sortable";
-import { PAYROLL_EXTRA_LABELS } from "@/lib/fiscal";
+import {
+  validateFlexibleCostRows,
+  type FlexibleCostRow,
+} from "@/lib/flexible-costs";
+import { EditableCostRows } from "./editable-cost-rows";
 
 type EmpRow = {
   id: number;
@@ -23,7 +27,7 @@ type EmpRow = {
   /** Per-month name override (null = use global name) */
   nameOverride: string | null;
 };
-type ExtraRow = { type: keyof typeof PAYROLL_EXTRA_LABELS; amount: number };
+type ExtraRow = FlexibleCostRow;
 
 export function PayrollSection({
   fiscalMonthId,
@@ -96,17 +100,18 @@ export function PayrollSection({
       icon={Users}
       title={ui("ค่าแรงพนักงาน (Payroll)")}
       total={total}
-      onSave={() =>
-        savePayroll({
+      onSave={() => {
+        validateFlexibleCostRows(exts);
+        return savePayroll({
           fiscalMonthId,
           payroll: emps.map((e) => ({
             employeeId: e.id,
             amount: e.amount,
             nameOverride: e.nameOverride,
           })),
-          extras: exts.map((e) => ({ type: e.type, amount: e.amount })),
-        })
-      }
+          extras: exts,
+        });
+      }}
     >
       <div className="space-y-1">
         <div className="grid grid-cols-[auto_1fr_160px_auto] gap-3 px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted">
@@ -254,26 +259,7 @@ export function PayrollSection({
         <div className="mt-4 mb-2 px-2 text-xs font-medium uppercase tracking-wide text-muted">
           {ui("OT / โบนัส / ค่าจ้างพิเศษ")}
         </div>
-        {exts.map((x) => (
-          <div
-            key={x.type}
-            className="grid grid-cols-[1fr_180px_28px] gap-3 items-center px-2 py-1 rounded hover:bg-surface"
-          >
-            <div className="text-sm text-ink/90">
-              {ui(PAYROLL_EXTRA_LABELS[x.type])}
-            </div>
-            <MoneyInput
-              ariaLabel={ui(PAYROLL_EXTRA_LABELS[x.type])}
-              value={x.amount}
-              onChange={(n) =>
-                setExts((prev) =>
-                  prev.map((p) => (p.type === x.type ? { ...p, amount: n } : p))
-                )
-              }
-            />
-            <div></div>
-          </div>
-        ))}
+        <EditableCostRows rows={exts} onChange={setExts} kind="extra" />
       </div>
     </SectionCard>
   );

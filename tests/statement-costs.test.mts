@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
+import { isPayrollExtraCategory } from "../lib/flexible-costs.ts";
 import {
   classifyExpense,
   emptyCosts,
@@ -173,13 +174,21 @@ async function pipeline(snapshot: any = null) {
         { fiscalMonthId: 1, _sum: { amount: 1000 } },
         { fiscalMonthId: 2, _sum: { amount: 10 } },
       ],
-      findMany: async () => [
-        {
-          amount: 1000,
-          nameOverride: null,
-          employee: { name: "Manual salary" },
-        },
-      ],
+      findMany: async ({ where }: any) =>
+        [
+          {
+            fiscalMonthId: 1,
+            amount: 1000,
+            nameOverride: null,
+            employee: { name: "Manual salary" },
+          },
+          {
+            fiscalMonthId: 2,
+            amount: 10,
+            nameOverride: null,
+            employee: { name: "Manual salary" },
+          },
+        ].filter((row) => row.fiscalMonthId === where.fiscalMonthId),
     },
     payrollExtra: { groupBy: async () => [], findMany: async () => [] },
     fixedCost: {
@@ -187,9 +196,36 @@ async function pipeline(snapshot: any = null) {
         { fiscalMonthId: 1, _sum: { amount: 1000 } },
         { fiscalMonthId: 2, _sum: { amount: 5 } },
       ],
-      findMany: async () => [
-        { amount: 1000, category: { name: "Manual rent" } },
-      ],
+      findMany: async ({ where }: any) =>
+        [
+          {
+            fiscalMonthId: 1,
+            amount: 1000,
+            category: { name: "Manual rent", icon: null },
+          },
+          {
+            fiscalMonthId: 2,
+            amount: 5,
+            category: { name: "Manual rent", icon: null },
+          },
+          {
+            fiscalMonthId: 2,
+            amount: 7,
+            category: {
+              name: "Custom overtime",
+              icon: "cost-setup:payroll-extra",
+            },
+          },
+          {
+            fiscalMonthId: 2,
+            amount: 3,
+            category: { name: "Shop supplies", icon: "cost-setup:other" },
+          },
+        ].filter(
+          (row) =>
+            typeof where.fiscalMonthId !== "number" ||
+            row.fiscalMonthId === where.fiscalMonthId
+        ),
     },
     monthlyRevenueOverride: {
       findMany: async () => [],
@@ -212,6 +248,7 @@ async function pipeline(snapshot: any = null) {
     if (modules.has(name)) return modules.get(name)!;
     const mock: Record<string, any> = {
       "@/lib/prisma": { prisma },
+      "@/lib/flexible-costs": { isPayrollExtraCategory },
       "@/lib/fiscal": { PAYROLL_EXTRA_LABELS: {} },
       "@/lib/bank-calc": { getReconciliation: async () => [] },
     };
@@ -269,9 +306,11 @@ test("Cost Setup expense buckets feed monthly, yearly, Daily P&L and closing lin
   assert.equal(april.cogs, 130);
   assert.equal(april.labor, 55);
   assert.equal(april.fixed, 30);
-  assert.equal(yearly.months[1].totalCost, 35);
+  assert.equal(yearly.months[1].totalCost, 45);
+  assert.equal(yearly.months[1].laborExtra, 7);
+  assert.equal(yearly.months[1].fixed, 8);
   assert.equal(yearly.months[1].costSource, "manual");
-  assert.equal(yearly.total.totalCost, 250);
+  assert.equal(yearly.total.totalCost, 260);
   assert.equal(yearly.total.costSource, "mixed");
   const daily = await h.pl.getDailyPL(1, 1);
   assert.equal(daily.totals.totalCost, 215);
@@ -288,6 +327,28 @@ test("Cost Setup expense buckets feed monthly, yearly, Daily P&L and closing lin
       .flatMap(([, value]) => value as any[])
       .reduce((sum, row) => sum + row.amount, 0),
     215
+  );
+  const mayDaily = await h.pl.getDailyPL(2, 1);
+  assert.equal(mayDaily.totals.totalCost, 45);
+  assert.ok(
+    Math.abs(
+      mayDaily.days.reduce((sum: number, row: any) => sum + row.totalCost, 0) -
+        45
+    ) < 0.00001
+  );
+  const mayBreakdown = await h.closing.computeBreakdown(1, 2);
+  assert.equal(mayBreakdown.laborExtra[0].label, "Custom overtime");
+  assert.equal(mayBreakdown.laborExtra[0].amount, 7);
+  assert.equal(
+    mayBreakdown.fixed.reduce((sum: number, row: any) => sum + row.amount, 0),
+    8
+  );
+  assert.equal(
+    Object.entries(mayBreakdown)
+      .filter(([key]) => key !== "revenue")
+      .flatMap(([, value]) => value as any[])
+      .reduce((sum, row) => sum + row.amount, 0),
+    45
   );
   for (const query of h.scopes) {
     assert.equal(query.where.businessId, 1);

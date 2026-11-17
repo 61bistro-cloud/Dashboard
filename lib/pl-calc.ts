@@ -1,3 +1,4 @@
+import { isPayrollExtraCategory } from "@/lib/flexible-costs";
 import { prisma } from "@/lib/prisma";
 import { getStatementCostSummaries } from "@/lib/statement-cost-data";
 import { resolveCostAmounts } from "@/lib/statement-costs";
@@ -151,10 +152,13 @@ export async function getYearlyPL(
       where: { businessId, fiscalMonthId: { in: monthIds } },
       _sum: { amount: true },
     }),
-    prisma.fixedCost.groupBy({
-      by: ["fiscalMonthId"],
+    prisma.fixedCost.findMany({
       where: { businessId, fiscalMonthId: { in: monthIds } },
-      _sum: { amount: true },
+      select: {
+        fiscalMonthId: true,
+        amount: true,
+        category: { select: { icon: true } },
+      },
     }),
     prisma.monthlyRevenueOverride.findMany({
       where: { businessId, fiscalMonthId: { in: monthIds } },
@@ -185,9 +189,16 @@ export async function getYearlyPL(
   const laborExtraByMonth = new Map<number, number>(
     extras.map((e) => [e.fiscalMonthId, e._sum.amount ?? 0])
   );
-  const fixedByMonth = new Map<number, number>(
-    fixedCosts.map((f) => [f.fiscalMonthId, f._sum.amount ?? 0])
-  );
+  const fixedByMonth = new Map<number, number>();
+  for (const cost of fixedCosts) {
+    const target = isPayrollExtraCategory(cost.category.icon)
+      ? laborExtraByMonth
+      : fixedByMonth;
+    target.set(
+      cost.fiscalMonthId,
+      (target.get(cost.fiscalMonthId) ?? 0) + cost.amount
+    );
+  }
   const overrideByMonth = new Map<number, number>(
     overrides.map((o) => [o.fiscalMonthId, o.amount])
   );

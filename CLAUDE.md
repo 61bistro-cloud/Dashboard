@@ -76,3 +76,10 @@ Deploy บน Vercel, ฐานข้อมูล Neon Postgres. UI ภาษา
 - คงหมวดเฉพาะเดิมที่ต่างจากคำแนะนำ และรายการที่ผู้ใช้เคยยืนยัน Remark. คู่กำกวม/ข้อมูลไม่ครบ/หมวดไม่ชัด/คนละบัญชีที่เลือกให้รอตรวจ.
 - `lib/evidence-auto-service.ts` บันทึกลิงก์+categoryId+note+ผลตรวจใน Prisma transaction พร้อม compare-and-set; ไม่สร้าง BankTransaction และไม่เปลี่ยนยอด/date. เก็บ audit `EVIDENCE_AUTO_V1` ใน DriveFile.note โดยรักษา OCR/WEB_UPLOAD marker.
 - ไม่มีการเปลี่ยน schema หรือ migrations. การประมวลผลข้อมูลจริงเริ่มเมื่อผู้ใช้กดปุ่ม; ทดสอบด้วยข้อมูลจำลอง.
+
+## Editable additional costs (schema-compatible)
+
+- `lib/flexible-costs.ts` identifies custom extra-pay and shop-cost categories using reserved `FixedCostCategory.icon` markers `cost-setup:payroll-extra[:TYPE]` / `cost-setup:other`. Amounts use `FixedCost` by business/category/month; no schema migration or automatic conversion is required.
+- On explicit payroll save only, replace that month’s legacy `PayrollExtra` rows with editable categories/amounts in one transaction. Untouched historical legacy amounts remain readable. Removed built-in items retain inactive markers so they do not reappear on reload. Removing a category clears the selected month only and preserves historical amounts.
+- `pl-calc.ts` and closing breakdown classify marked extra-pay amounts as Labor Extra and shop costs as Fixed/Operating. Statement-first cost resolution remains unchanged; manual forms are editable comparison data in statement months and never get added a second time.
+- Item names are shared across months; monthly amounts are separate. New UI labels must have Thai/English translations. Tests use mock data only (`npm run test:costs`).

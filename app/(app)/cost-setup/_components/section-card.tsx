@@ -23,6 +23,7 @@ export function SectionCard({
   const { ui } = useUi();
   const [pending, start] = useTransition();
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <section className="rounded-card border border-hairline bg-canvas">
@@ -46,9 +47,22 @@ export function SectionCard({
             onClick={() =>
               start(async () => {
                 setSaved(false);
-                await onSave();
-                setSaved(true);
-                setTimeout(() => setSaved(false), 2500);
+                setError(null);
+                try {
+                  await onSave();
+                  setSaved(true);
+                  setTimeout(() => setSaved(false), 2500);
+                } catch (error) {
+                  const validation = error as {
+                    issues?: Array<{ message: string }>;
+                  };
+                  setError(
+                    validation.issues?.[0]?.message ??
+                      (error instanceof Error
+                        ? error.message
+                        : "บันทึกไม่สำเร็จ")
+                  );
+                }
               })
             }
             className="inline-flex items-center gap-1.5 rounded-pill bg-ink px-5 py-2.5 text-[14px] font-medium text-canvas hover:bg-ink-2 disabled:opacity-50 transition-colors"
@@ -62,7 +76,14 @@ export function SectionCard({
           </button>
         </div>
       </header>
-      <div className="p-6">{children}</div>
+      <fieldset disabled={pending} className="min-w-0 p-4 sm:p-6">
+        {children}
+      </fieldset>
+      {error && (
+        <p role="alert" className="px-6 pb-4 text-sm text-red-600">
+          {ui(error)}
+        </p>
+      )}
     </section>
   );
 }

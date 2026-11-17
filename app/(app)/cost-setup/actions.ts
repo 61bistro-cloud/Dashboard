@@ -3,6 +3,16 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
+import {
+  EXTRA_MARKER,
+  OTHER_MARKER,
+  extraMarker,
+  isPayrollExtraCategory,
+  legacyExtraType,
+  type FlexibleCostRow,
+} from "@/lib/flexible-costs";
+import { PAYROLL_EXTRA_LABELS } from "@/lib/payroll-labels";
 import { revalidatePath } from "next/cache";
 import { requireBusiness } from "@/lib/business";
 
@@ -40,6 +50,186 @@ const fiscalMonthId = z.coerce.number().int().positive();
 
 // ───── PAYROLL ─────
 
+const flexibleRowSchema = z.object({
+  id: z.number().int().positive().optional(),
+  legacyType: z.enum(["OT", "BONUS", "EXTRA", "SERVICE_CHARGE"]).optional(),
+  name: z.string().trim().min(1, "ต้องระบุชื่อรายการ").max(120),
+  amount: z.number().finite().min(0).max(99_999_999),
+});
+const flexibleRowsSchema = z
+  .array(flexibleRowSchema)
+  .max(200)
+  .superRefine((rows, ctx) => {
+    const names = new Set<string>(),
+      ids = new Set<number>(),
+      types = new Set<string>();
+    for (const row of rows) {
+      const name = row.name.toLocaleLowerCase();
+      if (
+        names.has(name) ||
+        (row.id && ids.has(row.id)) ||
+        (row.legacyType && types.has(row.legacyType))
+      )
+        ctx.addIssue({
+          code: "custom",
+          message: "มีรายการซ้ำ กรุณาตรวจชื่อและรายการ",
+        });
+      names.add(name);
+      if (row.id) ids.add(row.id);
+      if (row.legacyType) types.add(row.legacyType);
+    }
+  });
+
+async function saveFlexibleRows(
+  tx: Prisma.TransactionClient,
+  businessId: number,
+  monthId: number,
+  kind: "extra" | "other",
+  rows: FlexibleCostRow[]
+) {
+  if (
+    !(await tx.fiscalMonth.findUnique({
+      where: { id: monthId },
+      select: { id: true },
+    }))
+  )
+    throw new Error("ไม่พบเดือนนี้");
+  const marker = kind === "extra" ? EXTRA_MARKER : OTHER_MARKER;
+  const categories = await tx.fixedCostCategory.findMany({
+    where: { businessId },
+  });
+  const belongs = (icon: string | null) =>
+    kind === "extra" ? isPayrollExtraCategory(icon) : icon === OTHER_MARKER;
+  for (const row of rows) {
+    const existing = row.id
+      ? categories.find((c) => c.id === row.id)
+      : undefined;
+    if (
+      row.id &&
+      (!existing ||
+        !belongs(existing.icon) ||
+        legacyExtraType(existing.icon) !== row.legacyType)
+    )
+      throw new Error("ไม่พบรายการนี้ในธุรกิจปัจจุบัน");
+    if (kind === "other" && row.legacyType) throw new Error("ข้อมูลไม่ถูกต้อง");
+    if (
+      !row.id &&
+      row.legacyType &&
+      categories.some((c) => legacyExtraType(c.icon) === row.legacyType)
+    )
+      throw new Error("รายการเปลี่ยนไปแล้ว กรุณารีเฟรชหน้าและเลือกใหม่");
+  }
+  for (const row of rows) {
+    const collision = categories.find(
+      (c) => c.name === row.name && c.id !== row.id
+    );
+    if (
+      collision &&
+      (row.id ||
+        !belongs(collision.icon) ||
+        legacyExtraType(collision.icon) !== row.legacyType)
+    )
+      throw new Error("มีหมวดชื่อนี้อยู่แล้ว กรุณาใช้ชื่ออื่น");
+  }
+  const keep = new Set<number>();
+  let order = Math.max(0, ...categories.map((c) => c.sortOrder));
+  for (const row of rows) {
+    const icon = kind === "extra" ? extraMarker(row.legacyType) : marker;
+    const existingId =
+      row.id ??
+      categories.find(
+        (c) =>
+          c.name === row.name &&
+          belongs(c.icon) &&
+          legacyExtraType(c.icon) === row.legacyType
+      )?.id;
+    const category = existingId
+      ? await tx.fixedCostCategory.update({
+          where: { id: existingId },
+          data: { name: row.name, active: true },
+        })
+      : await tx.fixedCostCategory.create({
+          data: {
+            businessId,
+            name: row.name,
+            icon,
+            active: true,
+            sortOrder: ++order,
+          },
+        });
+    keep.add(category.id);
+    // Keep an explicit zero so a deleted/zero legacy amount cannot reappear.
+    await tx.fixedCost.upsert({
+      where: {
+        categoryId_fiscalMonthId: {
+          categoryId: category.id,
+          fiscalMonthId: monthId,
+        },
+      },
+      update: { amount: row.amount },
+      create: {
+        businessId,
+        categoryId: category.id,
+        fiscalMonthId: monthId,
+        amount: row.amount,
+      },
+    });
+  }
+  for (const category of categories.filter(
+    (c) => belongs(c.icon) && !keep.has(c.id)
+  )) {
+    await tx.fixedCostCategory.update({
+      where: { id: category.id },
+      data: { active: false },
+    });
+    await tx.fixedCost.deleteMany({
+      where: { businessId, categoryId: category.id, fiscalMonthId: monthId },
+    });
+  }
+  if (kind === "extra") {
+    // Missing built-in rows get a hidden marker, so removal survives reload.
+    for (const type of Object.keys(PAYROLL_EXTRA_LABELS) as Array<
+      keyof typeof PAYROLL_EXTRA_LABELS
+    >) {
+      if (
+        rows.some((r) => r.legacyType === type) ||
+        categories.some((c) => legacyExtraType(c.icon) === type)
+      )
+        continue;
+      await tx.fixedCostCategory.create({
+        data: {
+          businessId,
+          name: PAYROLL_EXTRA_LABELS[type],
+          icon: extraMarker(type),
+          active: false,
+          sortOrder: ++order,
+        },
+      });
+    }
+    // Move only this month's explicitly saved extras; historical months stay intact.
+    await tx.payrollExtra.deleteMany({
+      where: { businessId, fiscalMonthId: monthId },
+    });
+  }
+}
+
+export async function saveOtherCosts(input: {
+  fiscalMonthId: number;
+  rows: FlexibleCostRow[];
+}) {
+  await requireAccess();
+  const biz = await requireBusiness();
+  const data = z
+    .object({ fiscalMonthId, rows: flexibleRowsSchema })
+    .parse(input);
+  await prisma.$transaction(
+    (tx) =>
+      saveFlexibleRows(tx, biz.id, data.fiscalMonthId, "other", data.rows),
+    { timeout: 30_000 }
+  );
+  revalidateCostViews();
+}
+
 const savePayrollSchema = z.object({
   fiscalMonthId,
   payroll: z.array(
@@ -50,12 +240,7 @@ const savePayrollSchema = z.object({
       nameOverride: z.string().trim().max(200).optional().nullable(),
     })
   ),
-  extras: z.array(
-    z.object({
-      type: z.enum(["OT", "BONUS", "EXTRA", "SERVICE_CHARGE"]),
-      amount: moneyField,
-    })
-  ),
+  extras: flexibleRowsSchema,
 });
 
 export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
@@ -63,68 +248,59 @@ export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
   const biz = await requireBusiness();
   const data = savePayrollSchema.parse(input);
 
-  await prisma.$transaction(async (tx) => {
-    for (const p of data.payroll) {
-      const override =
-        p.nameOverride && p.nameOverride.length > 0 ? p.nameOverride : null;
-      // Delete the row only when there's NOTHING worth saving — amount is 0
-      // AND there's no per-month name override the user wants to keep.
-      if (p.amount === 0 && override == null) {
-        await tx.employeePayroll.deleteMany({
-          where: {
-            businessId: biz.id,
-            employeeId: p.employeeId,
-            fiscalMonthId: data.fiscalMonthId,
-          },
-        });
-      } else {
-        await tx.employeePayroll.upsert({
-          where: {
-            employeeId_fiscalMonthId: {
+  await prisma.$transaction(
+    async (tx) => {
+      const owned = await tx.employee.findMany({
+        where: {
+          businessId: biz.id,
+          id: { in: data.payroll.map((p) => p.employeeId) },
+        },
+        select: { id: true },
+      });
+      if (data.payroll.some((p) => !owned.some((e) => e.id === p.employeeId)))
+        throw new Error("ไม่พบพนักงานในธุรกิจปัจจุบัน");
+      for (const p of data.payroll) {
+        const override =
+          p.nameOverride && p.nameOverride.length > 0 ? p.nameOverride : null;
+        // Delete the row only when there's NOTHING worth saving — amount is 0
+        // AND there's no per-month name override the user wants to keep.
+        if (p.amount === 0 && override == null) {
+          await tx.employeePayroll.deleteMany({
+            where: {
+              businessId: biz.id,
               employeeId: p.employeeId,
               fiscalMonthId: data.fiscalMonthId,
             },
-          },
-          update: { amount: p.amount, nameOverride: override },
-          create: {
-            businessId: biz.id,
-            employeeId: p.employeeId,
-            fiscalMonthId: data.fiscalMonthId,
-            amount: p.amount,
-            nameOverride: override,
-          },
-        });
-      }
-    }
-    for (const e of data.extras) {
-      if (e.amount === 0) {
-        await tx.payrollExtra.deleteMany({
-          where: {
-            businessId: biz.id,
-            fiscalMonthId: data.fiscalMonthId,
-            type: e.type,
-          },
-        });
-      } else {
-        await tx.payrollExtra.upsert({
-          where: {
-            businessId_fiscalMonthId_type: {
-              businessId: biz.id,
-              fiscalMonthId: data.fiscalMonthId,
-              type: e.type,
+          });
+        } else {
+          await tx.employeePayroll.upsert({
+            where: {
+              employeeId_fiscalMonthId: {
+                employeeId: p.employeeId,
+                fiscalMonthId: data.fiscalMonthId,
+              },
             },
-          },
-          update: { amount: e.amount },
-          create: {
-            businessId: biz.id,
-            fiscalMonthId: data.fiscalMonthId,
-            type: e.type,
-            amount: e.amount,
-          },
-        });
+            update: { amount: p.amount, nameOverride: override },
+            create: {
+              businessId: biz.id,
+              employeeId: p.employeeId,
+              fiscalMonthId: data.fiscalMonthId,
+              amount: p.amount,
+              nameOverride: override,
+            },
+          });
+        }
       }
-    }
-  });
+      await saveFlexibleRows(
+        tx,
+        biz.id,
+        data.fiscalMonthId,
+        "extra",
+        data.extras
+      );
+    },
+    { timeout: 30_000 }
+  );
 
   revalidateCostViews();
 }

@@ -1,3 +1,9 @@
+import {
+  payrollExtraRows,
+  isPayrollExtraCategory,
+  isOtherCostCategory,
+} from "@/lib/flexible-costs";
+import { OtherCostsSection } from "./_components/other-costs-section";
 import { displayMonth } from "@/lib/i18n/core";
 
 import { getUi } from "@/lib/i18n/server";
@@ -103,7 +109,7 @@ export default async function CostSetupPage({
       include: { supplier: { select: { category: true } } },
     }),
     prisma.fixedCostCategory.findMany({
-      where: { active: true, businessId: business.id },
+      where: { businessId: business.id },
       orderBy: { sortOrder: "asc" },
     }),
     prisma.fixedCost.findMany({
@@ -130,7 +136,10 @@ export default async function CostSetupPage({
       { amount: p.amount, nameOverride: p.nameOverride },
     ])
   );
-  const extraByType = new Map(extras.map((e) => [e.type, e.amount]));
+  const flexibleExtras = payrollExtraRows(fixedCats, fixedCosts, extras);
+  const extraCategoryIds = new Set(
+    fixedCats.filter((c) => isPayrollExtraCategory(c.icon)).map((c) => c.id)
+  );
   const purchaseBySupplier = new Map(
     purchases.map((p) => [
       p.supplierId,
@@ -150,8 +159,10 @@ export default async function CostSetupPage({
       .filter((p) => p.supplier.category === "PACKAGING")
       .reduce((s, p) => s + p.amount, 0),
     laborBase: payrollRows.reduce((s, p) => s + p.amount, 0),
-    laborExtra: extras.reduce((s, p) => s + p.amount, 0),
-    fixed: fixedCosts.reduce((s, p) => s + p.amount, 0),
+    laborExtra: flexibleExtras.reduce((s, p) => s + p.amount, 0),
+    fixed: fixedCosts
+      .filter((p) => !extraCategoryIds.has(p.categoryId))
+      .reduce((s, p) => s + p.amount, 0),
   };
   const effectiveCosts = resolveCostAmounts(manualAmounts, statementExpenses);
   const manualTotal = Object.values(manualAmounts).reduce((s, v) => s + v, 0);
@@ -250,10 +261,14 @@ export default async function CostSetupPage({
                 "กรอกค่าใช้จ่ายได้เมื่อยังไม่มีข้อมูลธนาคาร เมื่อเริ่มลง Bank & Reconcile ระบบจะเปลี่ยนมาใช้ยอดธนาคารทั้งเดือน กรุณาลงให้ครบทุกบัญชีรวมถึงเงินสด"
               )}
         </p>
-        <fieldset
-          disabled={statementExpenses.hasTransactions}
-          className="space-y-6 disabled:opacity-60"
-        >
+        {statementExpenses.hasTransactions && (
+          <p className="mb-4 text-xs text-amber-700">
+            {ui(
+              "เพิ่มหรือแก้รายการด้านล่างได้เพื่อเก็บเทียบ แต่รายงานยังใช้ยอด Statement เท่านั้น หากต้องการเพิ่มค่าใช้จ่ายจริง ให้บันทึกใน Bank & Reconcile"
+            )}
+          </p>
+        )}
+        <fieldset className="space-y-6">
           <PayrollSection
             fiscalMonthId={currentMonth.id}
             employees={employees.map((e) => {
@@ -266,9 +281,7 @@ export default async function CostSetupPage({
                 nameOverride: row?.nameOverride ?? null,
               };
             })}
-            extras={(["OT", "BONUS", "EXTRA", "SERVICE_CHARGE"] as const).map(
-              (t) => ({ type: t, amount: extraByType.get(t) ?? 0 })
-            )}
+            extras={flexibleExtras}
           />
 
           <SupplierSection
@@ -285,13 +298,35 @@ export default async function CostSetupPage({
             })}
           />
 
+          <OtherCostsSection
+            fiscalMonthId={currentMonth.id}
+            items={fixedCats
+              .filter(
+                (c) =>
+                  isOtherCostCategory(c.icon) &&
+                  (c.active || (fixedByCat.get(c.id) ?? 0) !== 0)
+              )
+              .map((c) => ({
+                id: c.id,
+                name: c.name,
+                amount: fixedByCat.get(c.id) ?? 0,
+              }))}
+          />
+
           <FixedCostSection
             fiscalMonthId={currentMonth.id}
-            categories={fixedCats.map((c) => ({
-              id: c.id,
-              name: c.name,
-              amount: fixedByCat.get(c.id) ?? 0,
-            }))}
+            categories={fixedCats
+              .filter(
+                (c) =>
+                  c.active &&
+                  !isPayrollExtraCategory(c.icon) &&
+                  !isOtherCostCategory(c.icon)
+              )
+              .map((c) => ({
+                id: c.id,
+                name: c.name,
+                amount: fixedByCat.get(c.id) ?? 0,
+              }))}
           />
         </fieldset>
       </details>

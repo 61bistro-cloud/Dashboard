@@ -1,3 +1,4 @@
+import { isPayrollExtraCategory } from "@/lib/flexible-costs";
 import { getStatementCostSummaries } from "@/lib/statement-cost-data";
 import { prisma } from "@/lib/prisma";
 import { getYearlyPL, getDataQuality, type MonthlyTotals } from "@/lib/pl-calc";
@@ -76,7 +77,7 @@ export async function computeBreakdown(
     }),
     prisma.fixedCost.findMany({
       where: { businessId, fiscalMonthId, amount: { gt: 0 } },
-      include: { category: { select: { name: true } } },
+      include: { category: { select: { name: true, icon: true } } },
     }),
     getStatementCostSummaries([fiscalMonthId], businessId),
   ]);
@@ -128,14 +129,21 @@ export async function computeBreakdown(
     label: p.nameOverride ?? p.employee.name,
     amount: p.amount,
   }));
-  const laborExtra: BreakdownLine[] = extras.map((e) => ({
-    label: PAYROLL_EXTRA_LABELS[e.type] ?? e.type,
-    amount: e.amount,
-  }));
-  const fixed: BreakdownLine[] = fixedCosts.map((f) => ({
-    label: f.category.name,
-    amount: f.amount,
-  }));
+  const laborExtra: BreakdownLine[] = [
+    ...extras.map((e) => ({
+      label: PAYROLL_EXTRA_LABELS[e.type] ?? e.type,
+      amount: e.amount,
+    })),
+    ...fixedCosts
+      .filter((f) => isPayrollExtraCategory(f.category.icon))
+      .map((f) => ({ label: f.category.name, amount: f.amount })),
+  ];
+  const fixed: BreakdownLine[] = fixedCosts
+    .filter((f) => !isPayrollExtraCategory(f.category.icon))
+    .map((f) => ({
+      label: f.category.name,
+      amount: f.amount,
+    }));
 
   return {
     revenue,

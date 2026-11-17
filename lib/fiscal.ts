@@ -15,12 +15,7 @@ export const THAI_MONTH_LABELS = [
   "มี.ค.",
 ];
 
-export const PAYROLL_EXTRA_LABELS = {
-  OT: "OT รวม",
-  BONUS: "โบนัส",
-  EXTRA: "ค่าจ้างพิเศษ / Extra",
-  SERVICE_CHARGE: "Service Charge 3% (ส่วนแบ่งพนักงาน)",
-} as const;
+export { PAYROLL_EXTRA_LABELS } from "./payroll-labels";
 
 export const SUPPLIER_CATEGORY_LABELS = {
   FOOD: { label: "ต้นทุนวัตถุดิบอาหาร (Food Cost)" },
