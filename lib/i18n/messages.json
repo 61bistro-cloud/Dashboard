@@ -3970,5 +3970,8 @@
   },
   "ระบุยอดเฉลี่ยต่อบิลเพื่อแปลงเป้าเป็นจำนวนบิล": {
     "en": "Enter an average bill to convert the sales target into bills."
+  },
+  "เปิดในแท็บใหม่": {
+    "en": "Open in a new tab"
   }
 }

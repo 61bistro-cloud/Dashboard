@@ -15,5 +15,5 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run test:advice && npm run test:safety && npm run test:pos && npm run test:costs && npm run test:accounts && npm run test:bank && npm run test:bank-delete && npm run test:matching && npm run test:evidence && npm run test:line && npm run test:i18n
+      - run: npm run test:client && npm run test:advice && npm run test:safety && npm run test:pos && npm run test:costs && npm run test:accounts && npm run test:bank && npm run test:bank-delete && npm run test:matching && npm run test:evidence && npm run test:line && npm run test:i18n
       - run: npm run typecheck

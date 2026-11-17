@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getCurrentFiscalMonth } from "@/lib/fiscal";
+import { getCurrentFiscalMonth } from "@/lib/fiscal-server";
 import { getCurrentBusiness } from "@/lib/business";
 import { getClosingView, type CheckStatus } from "@/lib/closing";
 import { MonthPicker } from "../cost-setup/_components/month-picker";

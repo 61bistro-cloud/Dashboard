@@ -3,7 +3,7 @@ import { Settings } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentBusiness } from "@/lib/business";
-import { getCurrentFiscalMonth } from "@/lib/fiscal";
+import { getCurrentFiscalMonth } from "@/lib/fiscal-server";
 import { getUi } from "@/lib/i18n/server";
 import { displayMonth } from "@/lib/i18n/core";
 import { getManualCostData } from "@/lib/manual-cost-data";

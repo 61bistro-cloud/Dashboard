@@ -8,7 +8,7 @@ import { Paperclip } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentBusiness } from "@/lib/business";
-import { getCurrentFiscalMonth } from "@/lib/fiscal";
+import { getCurrentFiscalMonth } from "@/lib/fiscal-server";
 import { readEvidenceOcr } from "@/lib/evidence-match";
 import { PageHeader } from "@/components/page-header";
 import { MonthPicker } from "../../cost-setup/_components/month-picker";

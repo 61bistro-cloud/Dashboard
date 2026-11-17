@@ -154,6 +154,10 @@ export function AdvicePlanner(p: Props) {
           <Link
             className="inline-flex items-center gap-1 text-accent underline underline-offset-4"
             href={`/cost-setup?month=${p.monthId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            prefetch={false}
+            title={ui("เปิดในแท็บใหม่")}
           >
             {ui("ตรวจต้นทุนต้นทาง")}
             <ArrowUpRight className="h-3 w-3" />
@@ -161,6 +165,10 @@ export function AdvicePlanner(p: Props) {
           <Link
             className="inline-flex items-center gap-1 text-accent underline underline-offset-4"
             href={`/pos-sales?month=${p.monthId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            prefetch={false}
+            title={ui("เปิดในแท็บใหม่")}
           >
             {ui("ตรวจยอดขายต้นทาง")}
             <ArrowUpRight className="h-3 w-3" />

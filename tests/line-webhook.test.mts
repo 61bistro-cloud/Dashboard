@@ -174,7 +174,7 @@ async function worker(duplicate = false) {
         },
       },
     },
-    "@/lib/fiscal": {
+    "@/lib/fiscal-server": {
       getCurrentFiscalMonth: async () => ({
         id: 8,
         calendarYear: 2026,
