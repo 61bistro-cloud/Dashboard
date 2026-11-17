@@ -147,6 +147,7 @@ export function StatementUpload({
             className="flex flex-wrap items-end gap-3 rounded-card bg-surface p-3"
           >
             <input type="hidden" name="accountId" value={accountId} />
+            <input type="hidden" name="fiscalMonthId" value={fiscalMonthId} />
             <div className="flex-1 min-w-[240px]">
               <label className="block text-xs text-muted mb-1">
                 {ui("ไฟล์ Statement (PDF)")}

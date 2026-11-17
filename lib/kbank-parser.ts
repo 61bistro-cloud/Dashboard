@@ -38,6 +38,7 @@ export type ParsedTx = {
 
 export type ParseResult = {
   ok: boolean;
+  bank?: "KBANK" | "SCB" | "BAY";
   password?: "missing" | "wrong";
   message?: string;
   rows: ParsedTx[];
@@ -191,11 +192,12 @@ async function extractRows(
 }
 
 /** Detect which bank issued the statement from its text. */
-function detectBank(rawText: string[]): "SCB" | "KBANK" | "BAY" {
+function detectBank(rawText: string[]): "SCB" | "KBANK" | "BAY" | null {
   const all = rawText.join(" ");
   if (/ธนาคารกรุงศรีอยุธยา|KRUNGSRI|BANK OF AYUDHYA/i.test(all)) return "BAY";
   if (/ไทยพาณิชย์|SIAM COMMERCIAL/i.test(all)) return "SCB";
-  return "KBANK"; // default
+  if (/กสิกรไทย|KASIKORN|K-BANK|\bKBANK\b/i.test(all)) return "KBANK";
+  return null;
 }
 
 /**
@@ -235,6 +237,13 @@ export async function parseKbankPdf(
   }
 
   const bank = detectBank(ex.rawText);
+  if (!bank)
+    return {
+      ok: false,
+      message: "รองรับเฉพาะ Statement กสิกรไทย ไทยพาณิชย์ และกรุงศรี",
+      rows: [],
+      rawText: ex.rawText,
+    };
   const rows =
     bank === "BAY"
       ? parseKrungsriRows(ex.rows)
@@ -253,7 +262,7 @@ export async function parseKbankPdf(
       ? round2(first.balance - first.deposit + first.withdraw)
       : null);
 
-  return { ok: true, rows, openingBalance, rawText: ex.rawText };
+  return { ok: true, bank, rows, openingBalance, rawText: ex.rawText };
 }
 
 /** Alias with a clearer name for new call sites. */

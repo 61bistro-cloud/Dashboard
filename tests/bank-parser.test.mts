@@ -60,6 +60,7 @@ test("KBANK keeps dates, times, debit/credit, balance and channel", async () => 
     undefined
   );
   assert.equal(result.ok, true);
+  assert.equal(result.bank, "KBANK");
   assert.deepEqual(
     result.rows.map((r) => [
       r.date,
@@ -195,3 +196,23 @@ test(
     }
   }
 );
+
+test("unknown issuing banks are rejected instead of falling back to KBANK", async () => {
+  const result = await parseBankStatement(
+    pdf([
+      [[20, "UNSUPPORTED BANK STATEMENT"]],
+      [
+        [20, "01/08/69"],
+        [95, "10:00"],
+        [140, "purchase"],
+        [260, "100.00"],
+        [350, "900.00"],
+        [450, "MOBILE"],
+      ],
+    ]),
+    undefined
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.rows.length, 0);
+  assert.ok(result.message);
+});

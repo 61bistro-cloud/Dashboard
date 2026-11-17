@@ -1,183 +1,308 @@
 "use client";
-
-import { useUi } from "@/lib/i18n/use-ui";
-
-import { useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import {
-  Plus,
-  Trash2,
-  Loader2,
-  Settings2,
   AlertCircle,
-  CreditCard,
   Landmark,
+  Loader2,
+  Plus,
+  Settings2,
+  Trash2,
 } from "lucide-react";
-import { addBankAccount, deleteBankAccount } from "../actions";
+import { useUi } from "@/lib/i18n/use-ui";
+import {
+  ACCOUNT_OPTIONS,
+  supportsStatement,
+  type AccountKind,
+} from "@/lib/bank-account-options";
+import {
+  addBankAccount,
+  deleteBankAccount,
+  previewAccountDeletion,
+} from "../account-actions";
 
 type AccountRow = {
   id: number;
   code: string;
   name: string;
   accountType: string;
+  active: boolean;
 };
+type Preview = Extract<
+  Awaited<ReturnType<typeof previewAccountDeletion>>,
+  { ok: true }
+>;
 
-export function AccountManager({ accounts }: { accounts: AccountRow[] }) {
+export function AccountManager({
+  accounts,
+  businessId,
+}: {
+  accounts: AccountRow[];
+  businessId: number;
+}) {
   const { ui } = useUi();
-  const [pending, startTransition] = useTransition();
+  const [pending, start] = useTransition();
+  const [kind, setKind] = useState<AccountKind | "">("");
   const [error, setError] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [type, setType] = useState<"BANK" | "CREDIT_CARD">("BANK");
-
-  function onAdd(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = name.trim();
-    if (!trimmed) return;
+  const [success, setSuccess] = useState<string | null>(null);
+  const [deletion, setDeletion] = useState<{
+    account: AccountRow;
+    preview: Preview;
+  } | null>(null);
+  const [password, setPassword] = useState("");
+  const dialog = useRef<HTMLDialogElement>(null);
+  const headingId = useId();
+  useEffect(() => {
+    if (deletion) dialog.current?.showModal();
+    else dialog.current?.close();
+  }, [deletion]);
+  const cancel = () => {
+    if (pending) return;
+    setDeletion(null);
+    setPassword("");
     setError(null);
-    startTransition(async () => {
-      try {
-        await addBankAccount({ name: trimmed, accountType: type });
-        setName("");
-        setType("BANK");
-      } catch (err) {
-        setError((err as Error).message);
-      }
-    });
-  }
-
-  function onDelete(a: AccountRow) {
-    if (
-      !confirm(
-        ui(
-          'ลบ "{v0}" ?\nถ้ามีรายการ/ยอดยกมาบันทึกไว้ ระบบจะซ่อนแทนการลบ (เก็บประวัติไว้)',
-          { v0: a.name }
-        )
-      )
-    )
-      return;
-    setError(null);
-    startTransition(async () => {
-      try {
-        await deleteBankAccount(a.id);
-      } catch (err) {
-        setError((err as Error).message);
-        alert(ui((err as Error).message));
-      }
-    });
-  }
-
+  };
   return (
     <section className="rounded-card border border-hairline bg-canvas overflow-hidden">
       <details className="group">
-        <summary className="cursor-pointer px-5 py-3 flex items-center justify-between hover:bg-surface">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <Settings2 className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
+        <summary className="flex cursor-pointer items-center justify-between px-5 py-3 hover:bg-surface">
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <Settings2 className="h-4 w-4" />
             {ui("จัดการบัญชี & ช่องทาง (")}
             {accounts.length})
-          </div>
+          </span>
           <span className="text-xs text-muted group-open:hidden">
             {ui("เปิด ▾")}
           </span>
-          <span className="text-xs text-muted hidden group-open:inline">
+          <span className="hidden text-xs text-muted group-open:inline">
             {ui("ปิด ▴")}
           </span>
         </summary>
-
-        <div className="px-5 pb-5 pt-1 space-y-4">
-          {/* Add form */}
+        <div className="space-y-4 px-5 pb-5 pt-1">
           <form
-            onSubmit={onAdd}
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!kind || pending) return;
+              setError(null);
+              setSuccess(null);
+              start(async () => {
+                try {
+                  const result = await addBankAccount({ businessId, kind });
+                  if (!result.ok) setError(result.message);
+                  else setKind("");
+                } catch {
+                  setError("ดำเนินการไม่สำเร็จ กรุณารีเฟรชหน้าแล้วลองใหม่");
+                }
+              });
+            }}
             className="flex flex-wrap items-end gap-3 rounded-card bg-surface p-3"
           >
-            <div className="flex-1 min-w-[200px]">
-              <label className="block text-xs text-muted mb-1">
-                {ui("ชื่อบัญชี / ช่องทาง")}
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={ui("เช่น ธนาคารกรุงเทพ, Grab, Lineman, Shopee")}
-                maxLength={60}
-                className="w-full rounded-input border border-hairline bg-canvas px-3 py-2 text-sm focus:border-ink focus:outline-none"
-              />
-            </div>
-            <div className="w-40">
-              <label className="block text-xs text-muted mb-1">
-                {ui("ประเภท")}
-              </label>
+            <label className="min-w-0 flex-1 text-xs text-muted">
+              {ui("บัญชี / ช่องทางที่รองรับ")}
               <select
-                value={type}
-                onChange={(e) =>
-                  setType(e.target.value as "BANK" | "CREDIT_CARD")
+                required
+                disabled={pending}
+                value={kind}
+                onChange={(event) =>
+                  setKind(event.target.value as AccountKind | "")
                 }
-                className="w-full rounded-input border border-hairline bg-canvas px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-input border border-hairline bg-canvas px-3 py-2 text-sm text-ink"
               >
-                <option value="BANK">{ui("บัญชี / ช่องทางเงิน")}</option>
-                <option value="CREDIT_CARD">{ui("บัตรเครดิต")}</option>
+                <option value="">{ui("— เลือกบัญชีหรือช่องทาง —")}</option>
+                <optgroup label={ui("ธนาคารที่รองรับ Statement")}>
+                  {ACCOUNT_OPTIONS.filter((o) => o.statement).map((o) => (
+                    <option key={o.kind} value={o.kind}>
+                      {ui(o.name)}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label={ui("เงินสด / แอปเดลิเวอรี (บันทึกเอง)")}>
+                  {ACCOUNT_OPTIONS.filter((o) => !o.statement).map((o) => (
+                    <option key={o.kind} value={o.kind}>
+                      {ui(o.name)}
+                    </option>
+                  ))}
+                </optgroup>
               </select>
-            </div>
+            </label>
             <button
               type="submit"
-              disabled={pending || !name.trim()}
-              className="inline-flex items-center gap-1.5 rounded-pill bg-ink px-4 py-2 text-sm font-medium text-canvas disabled:opacity-50"
+              disabled={pending || !kind}
+              className="inline-flex items-center gap-1.5 rounded-pill bg-ink px-4 py-2 text-sm text-canvas disabled:opacity-50"
             >
               {pending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Plus className="h-3.5 w-3.5" />
-              )}{" "}
+                <Plus className="h-4 w-4" />
+              )}
               {ui("เพิ่ม")}
             </button>
           </form>
-
-          {error && (
-            <div className="flex items-center gap-1.5 rounded-input bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-800">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          <p className="text-xs text-muted">
+            {ui(
+              "นำเข้า PDF ได้เฉพาะกสิกรไทย ไทยพาณิชย์ และกรุงศรี • เงินสดและแอปเดลิเวอรีใช้บันทึกรายการเอง"
+            )}
+          </p>
+          {error && !deletion && (
+            <p
+              role="alert"
+              className="flex items-start gap-2 text-xs text-red-600"
+            >
+              <AlertCircle className="h-4 w-4 shrink-0" />
               {ui(error)}
-            </div>
+            </p>
           )}
-
-          {/* Existing accounts */}
+          {success && (
+            <p role="status" className="text-xs text-emerald-600">
+              {ui(success)}
+            </p>
+          )}
           <ul className="divide-y divide-hairline-soft rounded-card border border-hairline">
-            {accounts.map((a) => (
+            {accounts.map((account) => (
               <li
-                key={a.id}
-                className="flex items-center gap-3 px-3 py-2.5 hover:bg-surface"
+                key={account.id}
+                className="flex items-center gap-3 px-3 py-3 hover:bg-surface"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-input border border-hairline bg-surface text-muted-soft shrink-0">
-                  {a.accountType === "CREDIT_CARD" ? (
-                    <CreditCard className="h-4 w-4" strokeWidth={1.75} />
-                  ) : (
-                    <Landmark className="h-4 w-4" strokeWidth={1.75} />
-                  )}
-                </span>
-                <span className="flex-1 text-sm">{a.name}</span>
-                {a.accountType === "CREDIT_CARD" && (
-                  <span className="rounded-pill bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-900">
-                    {ui("บัตรเครดิต")}
-                  </span>
-                )}
+                <Landmark className="h-4 w-4 shrink-0 text-muted" />
+                <div className="min-w-0 flex-1">
+                  <p className="break-words text-sm">{account.name}</p>
+                  <p className="mt-1 text-[10px] text-muted">
+                    {!account.active
+                      ? ui("บัญชีที่ซ่อน — ยังมีประวัติเดิม")
+                      : supportsStatement(account)
+                        ? ui("รองรับนำเข้า Statement")
+                        : ui("บันทึกรายการเอง")}
+                  </p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => onDelete(a)}
                   disabled={pending}
-                  className="text-muted-soft hover:text-red-600 disabled:opacity-30 p-1"
-                  title={ui("ลบ {v0}", { v0: a.name })}
-                  aria-label={ui("ลบ {v0}", { v0: a.name })}
+                  aria-label={ui("ลบ {v0}", { v0: account.name })}
+                  onClick={() => {
+                    setError(null);
+                    setSuccess(null);
+                    start(async () => {
+                      try {
+                        const result = await previewAccountDeletion({
+                          businessId,
+                          id: account.id,
+                        });
+                        if (!result.ok) setError(result.message);
+                        else {
+                          setPassword("");
+                          setDeletion({ account, preview: result });
+                        }
+                      } catch {
+                        setError(
+                          "ดำเนินการไม่สำเร็จ กรุณารีเฟรชหน้าแล้วลองใหม่"
+                        );
+                      }
+                    });
+                  }}
+                  className="rounded p-2 text-muted hover:text-red-600 disabled:opacity-40"
                 >
-                  <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </li>
             ))}
           </ul>
-
-          <p className="text-xs text-muted">
-            {ui(
-              "💡 เพิ่มได้ทั้งธนาคาร (กรุงเทพ/กรุงศรี/กรุงไทย ฯลฯ) และช่องทางเงิน (Grab/Lineman/Shopee) — แต่ละธุรกิจมีบัญชีของตัวเองแยกกัน"
-            )}
-          </p>
         </div>
       </details>
+      <dialog
+        ref={dialog}
+        aria-labelledby={headingId}
+        onCancel={(event) => {
+          event.preventDefault();
+          cancel();
+        }}
+        className="m-auto w-[calc(100%_-_2rem)] max-w-lg rounded-card border border-hairline bg-canvas p-5 text-ink backdrop:bg-black/50"
+      >
+        {deletion && (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!password || pending || deletion.preview.closed) return;
+              setError(null);
+              start(async () => {
+                try {
+                  const result = await deleteBankAccount({
+                    businessId,
+                    id: deletion.account.id,
+                    password,
+                    token: deletion.preview.token,
+                  });
+                  setPassword("");
+                  if (!result.ok) setError(result.message);
+                  else {
+                    setSuccess("ลบบัญชีและข้อมูลที่ผูกไว้แล้ว");
+                    setDeletion(null);
+                  }
+                } catch {
+                  setPassword("");
+                  setError("ดำเนินการไม่สำเร็จ กรุณารีเฟรชหน้าแล้วลองใหม่");
+                }
+              });
+            }}
+            className="space-y-4"
+          >
+            <h2 id={headingId} className="text-base font-semibold">
+              {ui("ยืนยันลบบัญชีและข้อมูลทุกเดือน")}
+            </h2>
+            <p className="break-words text-sm">{deletion.preview.name}</p>
+            <p className="rounded-input border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+              {ui("ลบ {v0} รายการ และยอดยกมา {v1} รายการ จาก {v2} เดือน", {
+                v0: deletion.preview.transactions,
+                v1: deletion.preview.openings,
+                v2: deletion.preview.months,
+              })}
+            </p>
+            <p className="text-xs text-muted">
+              {ui(
+                "ลบบัญชี ธุรกรรม และยอดยกมาทุกเดือนอย่างถาวร ยอดในรายงานจะคำนวณใหม่ • ยกเลิกการจับคู่หลักฐาน แต่เก็บไฟล์ต้นฉบับใน Drive ไว้"
+              )}
+            </p>
+            {deletion.preview.closed > 0 && (
+              <p role="alert" className="text-sm text-red-600">
+                {ui("บัญชีนี้มีรายการในเดือนที่ปิดงบ กรุณาเปิดงบก่อนลบบัญชี")}
+              </p>
+            )}
+            <label className="block text-sm">
+              {ui("รหัสลบของเจ้าของร้าน")}
+              <input
+                autoFocus
+                required
+                type="password"
+                value={password}
+                autoComplete="off"
+                disabled={pending || deletion.preview.closed > 0}
+                onChange={(event) => setPassword(event.target.value)}
+                className="mt-1 block w-full rounded-input border border-hairline bg-canvas px-3 py-2"
+              />
+            </label>
+            {error && (
+              <p role="alert" className="text-sm text-red-600">
+                {ui(error)}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancel}
+                disabled={pending}
+                className="rounded-pill border border-hairline px-4 py-2 text-sm disabled:opacity-50"
+              >
+                {ui("ยกเลิก")}
+              </button>
+              <button
+                type="submit"
+                disabled={pending || !password || deletion.preview.closed > 0}
+                className="rounded-pill bg-red-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+              >
+                {pending ? ui("กำลังลบ…") : ui("ยืนยันลบ")}
+              </button>
+            </div>
+          </form>
+        )}
+      </dialog>
     </section>
   );
 }

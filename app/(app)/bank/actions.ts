@@ -6,6 +6,11 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { parseKbankPdf, suggestCategoryName } from "@/lib/kbank-parser";
 import { requireBusiness } from "@/lib/business";
+import {
+  supportsStatement,
+  accountKind,
+  rowsMatchMonth,
+} from "@/lib/bank-account-options";
 
 function revalidateBankCosts() {
   for (const path of [
@@ -64,6 +69,21 @@ export async function addTransaction(input: z.input<typeof addTxSchema>) {
   const session = await requireAccess();
   const biz = await requireBusiness();
   const data = addTxSchema.parse(input);
+  const context = await ledgerContext(
+    biz.id,
+    data.accountId,
+    data.fiscalMonthId
+  );
+  if (!rowsMatchMonth([data], context.month))
+    throw Error("วันที่รายการไม่ตรงกับเดือนที่เลือก");
+  if (
+    data.categoryId != null &&
+    !(await prisma.transactionCategory.findFirst({
+      where: { id: data.categoryId, businessId: biz.id },
+      select: { id: true },
+    }))
+  )
+    throw Error("ไม่พบหมวดนี้ในธุรกิจปัจจุบัน");
 
   if (data.deposit === 0 && data.withdraw === 0) {
     throw new Error("ต้องระบุยอดฝากหรือถอนอย่างน้อย 1 ฝั่ง");
@@ -176,6 +196,7 @@ export async function setOpeningBalance(input: z.input<typeof openingSchema>) {
   await requireAccess();
   const biz = await requireBusiness();
   const data = openingSchema.parse(input);
+  await ledgerContext(biz.id, data.accountId, data.fiscalMonthId);
   if (data.amount === 0) {
     await prisma.accountOpening.deleteMany({
       where: {
@@ -199,80 +220,31 @@ export async function setOpeningBalance(input: z.input<typeof openingSchema>) {
   revalidateBankCosts();
 }
 
-// ───── BANK ACCOUNT / CHANNEL CRUD ─────
-
-const addAccountSchema = z.object({
-  name: z.string().trim().min(1, "ต้องระบุชื่อบัญชี/ช่องทาง").max(60),
-  accountType: z.enum(["BANK", "CREDIT_CARD"]).default("BANK"),
-});
-
-export async function addBankAccount(input: z.input<typeof addAccountSchema>) {
-  await requireAccess();
-  const biz = await requireBusiness();
-  const data = addAccountSchema.parse(input);
-
-  // Generate a URL-safe code, unique within this business.
-  const base =
-    data.name
-      .normalize("NFKD")
-      .replace(/[^a-zA-Z0-9]/g, "")
-      .toUpperCase()
-      .slice(0, 12) || "ACCT";
-  let code = base;
-  let n = 1;
-  while (
-    await prisma.bankAccount.findUnique({
-      where: { businessId_code: { businessId: biz.id, code } },
-    })
-  ) {
-    n += 1;
-    code = `${base}${n}`;
-  }
-
-  const last = await prisma.bankAccount.findFirst({
-    where: { businessId: biz.id },
-    orderBy: { sortOrder: "desc" },
-    select: { sortOrder: true },
+async function ledgerContext(
+  businessId: number,
+  accountId: number,
+  monthId: number
+) {
+  const account = await prisma.bankAccount.findFirst({
+    where: { id: accountId, businessId, active: true },
   });
-
-  await prisma.bankAccount.create({
-    data: {
-      businessId: biz.id,
-      code,
-      name: data.name,
-      accountType: data.accountType,
-      sortOrder: (last?.sortOrder ?? 0) + 1,
-      active: true,
-    },
-  });
-
-  revalidateBankCosts();
+  if (!account) throw Error("ไม่พบบัญชีนี้ในธุรกิจปัจจุบัน");
+  const month = await prisma.fiscalMonth.findUnique({ where: { id: monthId } });
+  if (!month) throw Error("ไม่พบเดือนนี้");
+  return { account, month };
 }
-
-export async function deleteBankAccount(id: number) {
-  await requireAccess();
-  const biz = await requireBusiness();
-
-  const acc = await prisma.bankAccount.findFirst({
-    where: { id, businessId: biz.id },
-    select: { id: true },
-  });
-  if (!acc) throw new Error("ไม่พบบัญชีนี้ในธุรกิจปัจจุบัน");
-
-  // Hard-delete only if never used; otherwise soft-hide to preserve history.
-  const [txCount, openCount] = await Promise.all([
-    prisma.bankTransaction.count({ where: { accountId: id } }),
-    prisma.accountOpening.count({ where: { accountId: id } }),
-  ]);
-
-  if (txCount === 0 && openCount === 0) {
-    await prisma.bankAccount.delete({ where: { id } });
-  } else {
-    await prisma.bankAccount.update({ where: { id }, data: { active: false } });
-  }
-
-  revalidateBankCosts();
+async function importContext(
+  businessId: number,
+  accountId: number,
+  monthId: number
+) {
+  const context = await ledgerContext(businessId, accountId, monthId);
+  if (!supportsStatement(context.account))
+    throw Error("บัญชีนี้ไม่รองรับนำเข้า Statement กรุณาเลือกธนาคารที่รองรับ");
+  return context;
 }
+const WRONG_MONTH =
+  "รายการในไฟล์ไม่ตรงกับเดือนที่เลือก กรุณาเลือกเดือนให้ตรงก่อนนำเข้า";
 
 // ───── TRANSACTION CATEGORY CRUD + REORDER ─────
 
@@ -476,7 +448,14 @@ export async function parseStatementPdf(
 
     const file = formData.get("file");
     const password = String(formData.get("password") ?? "");
-    const accountId = Number(formData.get("accountId")) || null;
+    const accountId = Number(formData.get("accountId")) || 0;
+    const monthId = Number(formData.get("fiscalMonthId")) || 0;
+    let context;
+    try {
+      context = await importContext(biz.id, accountId, monthId);
+    } catch (error) {
+      return { ok: false, message: (error as Error).message, preview: [] };
+    }
 
     if (!(file instanceof File) || file.size === 0) {
       return { ok: false, message: "กรุณาเลือกไฟล์ PDF ก่อน", preview: [] };
@@ -508,6 +487,19 @@ export async function parseStatementPdf(
         rawText: parsed.rawText.join("\n\n"),
       };
     }
+
+    const expectedBank =
+      accountKind(context.account) === "KRUNGSRI"
+        ? "BAY"
+        : accountKind(context.account);
+    if (parsed.bank !== expectedBank)
+      return {
+        ok: false,
+        message: "ธนาคารในไฟล์ไม่ตรงกับบัญชีที่เลือก",
+        preview: [],
+      };
+    if (!rowsMatchMonth(parsed.rows, context.month))
+      return { ok: false, message: WRONG_MONTH, preview: [] };
 
     // Resolve suggested category name → id (within the current business)
     const categories = await prisma.transactionCategory.findMany({
@@ -717,6 +709,33 @@ export async function importStatementRows(
     if (data.rows.length === 0) {
       return { ok: false, inserted: 0, message: "ไม่มีรายการให้บันทึก" };
     }
+
+    let context;
+    try {
+      context = await importContext(biz.id, data.accountId, data.fiscalMonthId);
+    } catch (error) {
+      return { ok: false, inserted: 0, message: (error as Error).message };
+    }
+    if (!rowsMatchMonth(data.rows, context.month))
+      return { ok: false, inserted: 0, message: WRONG_MONTH };
+    const categoryIds = [
+      ...new Set(
+        data.rows
+          .map((r) => r.categoryId)
+          .filter((id): id is number => id != null)
+      ),
+    ];
+    if (
+      categoryIds.length &&
+      (await prisma.transactionCategory.count({
+        where: { businessId: biz.id, id: { in: categoryIds } },
+      })) !== categoryIds.length
+    )
+      return {
+        ok: false,
+        inserted: 0,
+        message: "ไม่พบหมวดนี้ในธุรกิจปัจจุบัน",
+      };
 
     // ── Dedup against what's already in this account ──
     const existing = await prisma.bankTransaction.findMany({

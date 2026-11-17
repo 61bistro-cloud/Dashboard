@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
 import { z } from "zod";
+import * as accountOptions from "../lib/bank-account-options.ts";
 
 // Execute the actual server action with in-memory dependencies. No database or
 // production credentials are used; failed transactions restore the mock state.
@@ -74,6 +75,7 @@ async function harness({ role = "OWNER", loggedIn = true } = {}) {
       auth: async () => (loggedIn ? { user: { role, id: 1 } } : null),
     },
     "@/lib/prisma": { prisma },
+    "@/lib/bank-account-options": accountOptions,
     "next/cache": { revalidatePath: (path: string) => invalidated.push(path) },
     "@/lib/kbank-parser": { parseKbankPdf() {}, suggestCategoryName() {} },
     "@/lib/business": { requireBusiness: async () => ({ id: 1 }) },

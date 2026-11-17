@@ -3390,5 +3390,105 @@
   },
   "ดูรายการต้นทาง": {
     "en": "View source transaction"
+  },
+  "ธนาคารไทยพาณิชย์": {
+    "en": "Siam Commercial Bank"
+  },
+  "ธนาคารกรุงศรีอยุธยา": {
+    "en": "Krungsri (Bank of Ayudhya)"
+  },
+  "แอปเดลิเวอรีอื่นๆ": {
+    "en": "Other delivery apps"
+  },
+  "กรุงศรี": {
+    "en": "Krungsri"
+  },
+  "กสิกรไทย": {
+    "en": "Kasikornbank"
+  },
+  "ข้อมูลบัญชีไม่สอดคล้องกัน กรุณาติดต่อผู้ดูแลก่อนลบ": {
+    "en": "Account data is inconsistent. Contact the administrator before deleting."
+  },
+  "ดำเนินการไม่สำเร็จ กรุณารีเฟรชหน้าแล้วลองใหม่": {
+    "en": "Could not complete the action. Refresh and try again."
+  },
+  "กรุณาเลือกบัญชีหรือช่องทางที่ระบบรองรับ": {
+    "en": "Select an account or channel supported by the system."
+  },
+  "กรุณากรอกรหัสลบและตรวจสอบรายการก่อนยืนยัน": {
+    "en": "Enter the deletion password and review the account before confirming."
+  },
+  "รหัสลบไม่ถูกต้อง": {
+    "en": "Incorrect deletion password"
+  },
+  "รายการเปลี่ยนไปแล้ว กรุณารีเฟรชหน้าและตรวจสอบใหม่": {
+    "en": "The records have changed. Refresh and review again."
+  },
+  "บัญชีนี้มีรายการในเดือนที่ปิดงบ กรุณาเปิดงบก่อนลบบัญชี": {
+    "en": "This account has records in a finalized month. Reopen the month before deleting the account."
+  },
+  "บัญชี / ช่องทางที่รองรับ": {
+    "en": "Supported account / channel"
+  },
+  "— เลือกบัญชีหรือช่องทาง —": {
+    "en": "— Select account or channel —"
+  },
+  "ธนาคารที่รองรับ Statement": {
+    "en": "Banks with supported statements",
+    "th": "ธนาคารที่รองรับ รายการเดินบัญชี"
+  },
+  "เงินสด / แอปเดลิเวอรี (บันทึกเอง)": {
+    "en": "Cash / delivery apps (manual entry)"
+  },
+  "นำเข้า PDF ได้เฉพาะกสิกรไทย ไทยพาณิชย์ และกรุงศรี • เงินสดและแอปเดลิเวอรีใช้บันทึกรายการเอง": {
+    "en": "PDF import supports Kasikornbank, SCB and Krungsri only. Cash and delivery apps use manual entries.",
+    "th": "นำเข้า พีดีเอฟ ได้เฉพาะกสิกรไทย ไทยพาณิชย์ และกรุงศรี • เงินสดและแอปเดลิเวอรีใช้บันทึกรายการเอง"
+  },
+  "บัญชีที่ซ่อน — ยังมีประวัติเดิม": {
+    "en": "Hidden account — historical data retained"
+  },
+  "รองรับนำเข้า Statement": {
+    "en": "Statement import supported",
+    "th": "รองรับนำเข้า รายการเดินบัญชี"
+  },
+  "บันทึกรายการเอง": {
+    "en": "Manual entry"
+  },
+  "ลบบัญชีและข้อมูลที่ผูกไว้แล้ว": {
+    "en": "Account and linked financial records deleted"
+  },
+  "ยืนยันลบบัญชีและข้อมูลทุกเดือน": {
+    "en": "Confirm account deletion for all months"
+  },
+  "ลบ {v0} รายการ และยอดยกมา {v1} รายการ จาก {v2} เดือน": {
+    "en": "Delete {v0} transactions and {v1} opening balances across {v2} months"
+  },
+  "ลบบัญชี ธุรกรรม และยอดยกมาทุกเดือนอย่างถาวร ยอดในรายงานจะคำนวณใหม่ • ยกเลิกการจับคู่หลักฐาน แต่เก็บไฟล์ต้นฉบับใน Drive ไว้": {
+    "en": "Permanently delete the account, transactions and opening balances for all months. Reports will recalculate. Evidence will be unmatched; original Drive files will be retained.",
+    "th": "ลบบัญชี ธุรกรรม และยอดยกมาทุกเดือนอย่างถาวร ยอดในรายงานจะคำนวณใหม่ • ยกเลิกการจับคู่หลักฐาน แต่เก็บไฟล์ต้นฉบับใน ไดรฟ์ ไว้"
+  },
+  "รหัสลบของเจ้าของร้าน": {
+    "en": "Owner deletion password"
+  },
+  "บัญชีนี้ไม่รองรับนำเข้า Statement กรุณาเลือกธนาคารที่รองรับ": {
+    "en": "Statement import is unavailable for this account. Select a supported bank.",
+    "th": "บัญชีนี้ไม่รองรับนำเข้า รายการเดินบัญชี กรุณาเลือกธนาคารที่รองรับ"
+  },
+  "รายการในไฟล์ไม่ตรงกับเดือนที่เลือก กรุณาเลือกเดือนให้ตรงก่อนนำเข้า": {
+    "en": "The file contains transactions outside the selected month. Select the correct month before importing."
+  },
+  "ธนาคารในไฟล์ไม่ตรงกับบัญชีที่เลือก": {
+    "en": "The statement bank does not match the selected account."
+  },
+  "บัญชีนี้ใช้บันทึกรายการเอง ไม่รองรับนำเข้าไฟล์ Statement": {
+    "en": "This account uses manual entries. Statement file import is unavailable.",
+    "th": "บัญชีนี้ใช้บันทึกรายการเอง ไม่รองรับนำเข้าไฟล์ รายการเดินบัญชี"
+  },
+  "รองรับเฉพาะ Statement กสิกรไทย ไทยพาณิชย์ และกรุงศรี": {
+    "en": "Only Kasikornbank, SCB and Krungsri statements are supported.",
+    "th": "รองรับเฉพาะ รายการเดินบัญชี กสิกรไทย ไทยพาณิชย์ และกรุงศรี"
+  },
+  "วันที่รายการไม่ตรงกับเดือนที่เลือก": {
+    "en": "The transaction date does not match the selected month."
   }
 }

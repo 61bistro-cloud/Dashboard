@@ -1,3 +1,4 @@
+import { supportsStatement } from "@/lib/bank-account-options";
 import { displayMonth } from "@/lib/i18n/core";
 
 import { useUi } from "@/lib/i18n/use-ui";
@@ -104,13 +105,13 @@ export default async function BankPage({
 
   const sp = await searchParams;
 
-  const [allMonths, accounts, categories] = await Promise.all([
+  const [allMonths, allAccounts, categories] = await Promise.all([
     prisma.fiscalMonth.findMany({
       orderBy: [{ year: { yearBE: "desc" } }, { monthIndex: "asc" }],
       include: { year: true },
     }),
     prisma.bankAccount.findMany({
-      where: { active: true, businessId: business.id },
+      where: { businessId: business.id },
       orderBy: { sortOrder: "asc" },
     }),
     prisma.transactionCategory.findMany({
@@ -118,6 +119,8 @@ export default async function BankPage({
       orderBy: [{ kind: "asc" }, { sortOrder: "asc" }],
     }),
   ]);
+
+  const accounts = allAccounts.filter((account) => account.active);
 
   if (allMonths.length === 0) {
     return (
@@ -142,7 +145,7 @@ export default async function BankPage({
             { v0: business.name }
           )}
         />
-        <AccountManager accounts={[]} />
+        <AccountManager businessId={business.id} accounts={allAccounts} />
       </div>
     );
   }
@@ -393,11 +396,13 @@ export default async function BankPage({
       {/* Add / manage accounts & channels + categories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <AccountManager
-          accounts={accounts.map((a) => ({
+          businessId={business.id}
+          accounts={allAccounts.map((a) => ({
             id: a.id,
             code: a.code,
             name: a.name,
             accountType: a.accountType,
+            active: a.active,
           }))}
         />
         <CategoryManager
@@ -483,16 +488,22 @@ export default async function BankPage({
           </p>
         </div>
 
-        <StatementUpload
-          fiscalMonthId={currentMonth.id}
-          accountId={currentAccount.id}
-          accountName={currentAccount.name}
-          categories={categories.map((c) => ({
-            id: c.id,
-            name: c.name,
-            kind: c.kind,
-          }))}
-        />
+        {supportsStatement(currentAccount) ? (
+          <StatementUpload
+            fiscalMonthId={currentMonth.id}
+            accountId={currentAccount.id}
+            accountName={currentAccount.name}
+            categories={categories.map((c) => ({
+              id: c.id,
+              name: c.name,
+              kind: c.kind,
+            }))}
+          />
+        ) : (
+          <p className="px-5 py-3 text-xs text-muted">
+            {ui("บัญชีนี้ใช้บันทึกรายการเอง ไม่รองรับนำเข้าไฟล์ Statement")}
+          </p>
+        )}
 
         <AddTransactionForm
           fiscalMonthId={currentMonth.id}
