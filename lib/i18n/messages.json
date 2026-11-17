@@ -3973,5 +3973,179 @@
   },
   "เปิดในแท็บใหม่": {
     "en": "Open in a new tab"
+  },
+  "AI ตอบไม่ตรงรูปแบบ ใช้ผล OCR และรอตรวจ": {
+    "en": "AI returned an invalid result. OCR is retained for review."
+  },
+  "AI ยังไม่เปิด ระบบยังเก็บเอกสารและใช้ OCR ได้": {
+    "en": "AI is not enabled. Document storage and OCR remain available."
+  },
+  "AI เสนอข้อมูลแล้ว รอยืนยัน": {
+    "en": "AI suggestions are ready for human review."
+  },
+  "AI และ OCR อ่านยอดเงินต่างกัน": {
+    "en": "AI and OCR amounts differ."
+  },
+  "AI และ OCR อ่านวันที่ต่างกัน": {
+    "en": "AI and OCR dates differ."
+  },
+  "AI ไม่พร้อมหรือโควตาหมด ใช้ผล OCR และรอตรวจ": {
+    "en": "AI is unavailable or rate limited. OCR is retained for review."
+  },
+  "API key ของคุณ": {
+    "en": "Your API key"
+  },
+  "กำลังคัดกรอง...": {
+    "en": "Screening..."
+  },
+  "กำลังทดสอบ...": {
+    "en": "Testing..."
+  },
+  "ข้อความต้นทางที่ใช้เสนอ": {
+    "en": "Source text supporting the suggestions"
+  },
+  "คัดกรอง / ลองใหม่": {
+    "en": "Screen / retry"
+  },
+  "คัดกรอง OCR + AI ทั้งเดือน": {
+    "en": "Screen this month with OCR + AI"
+  },
+  "คัดกรองเอกสาร OCR + AI": {
+    "en": "Document screening: OCR + AI"
+  },
+  "คัดกรองเอกสารก่อนยืนยันบัญชี": {
+    "en": "Review documents before confirming accounts"
+  },
+  "คัดกรองเอกสารด้วย OCR + OpenRouter": {
+    "en": "Document screening with OCR + OpenRouter"
+  },
+  "คัดกรองแล้ว {v0}/{v1} ไฟล์ • ลองใหม่ {v2}": {
+    "en": "Screened {v0}/{v1} files • Retry {v2}"
+  },
+  "คัดกรองไม่สำเร็จ กรุณาลองใหม่ เอกสารต้นฉบับยังอยู่": {
+    "en": "Screening failed. Please retry. The original document is retained."
+  },
+  "ตรวจด้วยกฎแล้ว": {
+    "en": "Screened using rules"
+  },
+  "ตรวจว่ารายการเกี่ยวกับธุรกิจนี้จริง การส่งเข้า LINE ไม่ใช่การยืนยันบัญชีร้าน": {
+    "en": "Check that this belongs to the business. Being sent to LINE does not confirm a store account."
+  },
+  "ตั้งใน Vercel Environment Variables ฝั่ง Production เท่านั้น ห้ามใช้ NEXT_PUBLIC_ และไม่ต้องส่ง key ในแชต": {
+    "en": "Set Production environment variables in Vercel. Do not use NEXT_PUBLIC_ or send the key in chat."
+  },
+  "ทดสอบ AI ด้วยข้อความตัวอย่าง": {
+    "en": "Test AI with sample text"
+  },
+  "บันทึกแล้ว deploy ใหม่เพื่อเริ่มใช้ หากโควตาหมดหรือไม่มีโมเดลฟรีที่ผ่านเงื่อนไขความเป็นส่วนตัว ระบบจะรอตรวจ ไม่สลับไปรุ่นเสียเงิน": {
+    "en": "Save and redeploy to activate. If the quota is exhausted or no free model meets the privacy restrictions, documents wait for review. No paid fallback is used."
+  },
+  "ประเภทเอกสาร": {
+    "en": "Document type"
+  },
+  "ปุ่มทดสอบส่งเฉพาะข้อความสมมติ ไม่มีรูปหรือข้อมูลบัญชีจริง": {
+    "en": "The test sends synthetic text only, without real images or account data."
+  },
+  "ผลเสนอแนะเท่านั้น ไม่ลงหมวดธนาคาร ไม่เพิ่มต้นทุน และไม่ยืนยันว่าสลิปแท้": {
+    "en": "Suggestions only. No bank categories or costs are changed, and slip authenticity is not verified."
+  },
+  "ผู้ขาย / เลขอ้างอิง": {
+    "en": "Merchant / reference"
+  },
+  "มี QR เดียวกับหลักฐานอื่น อาจเป็น QR ร้านค้าเดิม ไม่ใช่ข้อสรุปว่าเอกสารซ้ำ": {
+    "en": "This QR also appears on another file. It may be a shared merchant QR, not a duplicate document."
+  },
+  "มีข้อมูลที่ AI อ้างอิงไม่ครบ กรุณาตรวจต้นฉบับ": {
+    "en": "Some AI fields lack source support. Check the original document."
+  },
+  "มีหลักฐานเลขอ้างอิงเดียวกัน อาจเป็นการจ่ายครั้งเดียว": {
+    "en": "Other evidence shares this reference and may belong to the same payment."
+  },
+  "ยอดเงิน / วันที่ที่เสนอ": {
+    "en": "Suggested amount / date"
+  },
+  "ยังอ่านยอดเงินไม่ครบ": {
+    "en": "The OCR amount is incomplete."
+  },
+  "ยังอ่านวันที่ไม่ครบ": {
+    "en": "The OCR date is incomplete."
+  },
+  "ยังแยกหมวดไม่ชัด": {
+    "en": "The category is unclear."
+  },
+  "ยังไม่ทราบประเภท": {
+    "en": "Unknown type"
+  },
+  "ยังไม่เปิด AI ให้ธุรกิจนี้": {
+    "en": "AI is not enabled for this business."
+  },
+  "ยังไม่ได้ตั้งค่า OpenRouter API key": {
+    "en": "OpenRouter API key is not configured."
+  },
+  "รอคัดกรอง": {
+    "en": "Queued for screening"
+  },
+  "รอตรวจด้วยตนเอง": {
+    "en": "Awaiting manual review"
+  },
+  "วันที่เอกสารไม่ตรงเดือนที่เก็บ กรุณาตรวจเดือน": {
+    "en": "The document date differs from its stored month. Review the month."
+  },
+  "สลิปกับใบเสร็จอาจเป็นหลักฐานของค่าใช้จ่ายเดียวกัน อย่าบวกต้นทุนซ้ำ": {
+    "en": "A slip and a receipt may support the same expense. Do not count the cost twice."
+  },
+  "สลิปโอนเงิน": {
+    "en": "Transfer slip"
+  },
+  "ส่งเฉพาะข้อความ OCR ที่ปิดบังข้อมูลบัญชีและข้อมูลส่วนตัวบางส่วนไปยัง OpenRouter และผู้ให้บริการโมเดล ไม่ส่งรูปต้นฉบับ ผลต้องตรวจยืนยันก่อนลงบัญชี": {
+    "en": "Only OCR text with some personal and account details redacted is sent to OpenRouter and its model provider. Original images are not sent. Review suggestions before recording them."
+  },
+  "หมวดที่เสนอ": {
+    "en": "Suggested category"
+  },
+  "หลักฐานที่ควรตรวจร่วมกัน": {
+    "en": "Evidence to review together"
+  },
+  "อ่านเอกสารไม่สำเร็จ ลองใหม่หรือกรอกเอง": {
+    "en": "Document reading failed. Retry or enter the details manually."
+  },
+  "เชื่อมต่อโมเดลฟรีและตรวจรูปแบบผลลัพธ์ได้แล้ว": {
+    "en": "The free model connection and output format passed the test."
+  },
+  "เปิด AI สำหรับธุรกิจนี้แล้ว": {
+    "en": "AI is configured for this business."
+  },
+  "เปิดคิวตรวจเอกสาร": {
+    "en": "Open the document review queue"
+  },
+  "เริ่มคัดกรองไม่สำเร็จ กรุณาตรวจสิทธิ์และลองใหม่": {
+    "en": "Could not start screening. Check access and retry."
+  },
+  "เอกสารจาก LINE จะเข้าคิว OCR และเสนอข้อมูล หากยังรอหรืออ่านไม่สำเร็จ ให้ลองคัดกรองซ้ำ ไม่มีการเพิ่มรายจ่ายอัตโนมัติ": {
+    "en": "LINE documents are queued for OCR and suggestions. Retry queued or failed files here. Expenses are never created automatically."
+  },
+  "เอกสารอื่น": {
+    "en": "Other document"
+  },
+  "โมเดลฟรีที่เลือก": {
+    "en": "Selected free model"
+  },
+  "ใช้ข้อมูลเสนอเพื่อค้นหาคู่ ยังไม่บันทึกบัญชี": {
+    "en": "Use suggestions to search; do not save accounts yet"
+  },
+  "ใช้ข้อมูลเสนอในช่องค้นหาแล้ว ยังไม่ได้บันทึกคู่หรือหมวด": {
+    "en": "Suggestions filled the search fields. No match or category has been saved."
+  },
+  "ใบเสร็จ / ใบกำกับภาษี": {
+    "en": "Receipt / tax invoice"
+  },
+  "ไม่มีสิทธิ์ทดสอบ AI": {
+    "en": "You do not have permission to test AI."
+  },
+  "เงินทุนจากเจ้าของ": {
+    "en": "Owner capital"
+  },
+  "ยังระบุหมวดไม่ได้": {
+    "en": "Category unknown"
   }
 }

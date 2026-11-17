@@ -1,4 +1,6 @@
 "use client";
+import { DocumentReviewPanel } from "./document-review-panel";
+import type { DocumentReview } from "@/lib/document-review";
 
 import { useUi } from "@/lib/i18n/use-ui";
 
@@ -18,6 +20,7 @@ import {
   saveEvidenceCategory,
   runEvidenceAutomatically,
   listAutomaticEvidence,
+  reviewEvidenceDocument,
 } from "../actions";
 import {
   suggestEvidenceMatches,
@@ -35,6 +38,7 @@ export type EvidenceRow = {
   refType: string | null;
   refId: string | null;
   automatic?: AutoEvidenceStatus | null;
+  review?: DocumentReview | null;
   ocr: (EvidenceFields & { remark?: string | null }) | null;
 };
 export function EvidenceMatcher({
@@ -56,7 +60,9 @@ export function EvidenceMatcher({
 }) {
   const { ui } = useUi();
   const router = useRouter();
-  const [reading, setReading] = useState<number | "all" | "auto" | null>(null);
+  const [reading, setReading] = useState<
+    number | "all" | "auto" | "documents" | null
+  >(null);
   const [autoResults, setAutoResults] = useState<
     Array<{ id: number; name: string; status: string; message: string }>
   >([]);
@@ -95,6 +101,47 @@ export function EvidenceMatcher({
       setAutoError(ui("เริ่มตรวจทั้งเดือนไม่สำเร็จ โปรดตรวจธุรกิจและสิทธิ์"));
     } finally {
       automaticRunning.current = false;
+      setReading(null);
+    }
+  }
+  const [documentProgress, setDocumentProgress] = useState("");
+  async function reviewMonth() {
+    if (reading !== null) return;
+    setReading("documents");
+    setDocumentProgress("");
+    try {
+      const queue = await listAutomaticEvidence({ businessId, monthId });
+      let failed = 0;
+      for (let i = 0; i < queue.length; i++) {
+        try {
+          const r = await reviewEvidenceDocument({
+            businessId,
+            monthId,
+            fileId: queue[i].id,
+          });
+          if (
+            !r.ok ||
+            r.review.state === "failed" ||
+            ["unavailable", "invalid"].includes(r.review.ai)
+          )
+            failed++;
+        } catch {
+          failed++;
+        }
+        setDocumentProgress(
+          ui("คัดกรองแล้ว {v0}/{v1} ไฟล์ • ลองใหม่ {v2}", {
+            v0: i + 1,
+            v1: queue.length,
+            v2: failed,
+          })
+        );
+      }
+      router.refresh();
+    } catch {
+      setDocumentProgress(
+        ui("เริ่มคัดกรองไม่สำเร็จ กรุณาตรวจสิทธิ์และลองใหม่")
+      );
+    } finally {
       setReading(null);
     }
   }
@@ -244,6 +291,27 @@ export function EvidenceMatcher({
           )}
         </span>
       </div>
+      <div className="space-y-2 rounded-card border border-hairline bg-canvas p-4 text-xs">
+        <strong>{ui("คัดกรองเอกสารก่อนยืนยันบัญชี")}</strong>
+        <p className="text-muted">
+          {ui(
+            "เอกสารจาก LINE จะเข้าคิว OCR และเสนอข้อมูล หากยังรอหรืออ่านไม่สำเร็จ ให้ลองคัดกรองซ้ำ ไม่มีการเพิ่มรายจ่ายอัตโนมัติ"
+          )}
+        </p>
+        <button
+          type="button"
+          disabled={reading !== null}
+          className="rounded-pill border border-hairline px-3 py-2 disabled:opacity-50"
+          onClick={() => void reviewMonth()}
+        >
+          {ui(
+            reading === "documents"
+              ? "กำลังคัดกรอง..."
+              : "คัดกรอง OCR + AI ทั้งเดือน"
+          )}
+        </button>
+        {documentProgress && <p role="status">{documentProgress}</p>}
+      </div>
       {visible.length === 0 && (
         <p className="rounded-card border border-hairline p-8 text-center text-sm text-muted">
           {ui(
@@ -315,6 +383,7 @@ function EvidenceCard({
   const [time, setTime] = useState(file.ocr?.time ?? "");
   const [selected, setSelected] = useState("");
   const [query, setQuery] = useState("");
+  const [suggestionsUsed, setSuggestionsUsed] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const savedTransaction =
@@ -386,7 +455,7 @@ function EvidenceCard({
           rel="noreferrer"
           className="underline font-medium break-all"
         >
-          {file.name} {ui("↗ ดูรูปหลักฐาน")}
+          #{file.id} · {file.name} {ui("↗ ดูรูปหลักฐาน")}
         </a>
         <span className={linkedId ? "text-emerald-700" : "text-amber-700"}>
           {linkedId ? ui("ยืนยันคู่แล้ว") : ui("รอตรวจ / ยังไม่จับคู่")} •{" "}
@@ -402,6 +471,25 @@ function EvidenceCard({
           }
         >
           {ui("ผลตรวจอัตโนมัติล่าสุด:")} {ui(file.automatic.message)}
+        </p>
+      )}
+      <DocumentReviewPanel
+        businessId={businessId}
+        monthId={monthId}
+        fileId={file.id}
+        review={file.review}
+        disabled={locked}
+        onUse={(r) => {
+          if (r.amount !== null) setAmount(String(r.amount));
+          if (r.date) setDate(r.date);
+          if (r.remark) setRemark(r.remark);
+          setSuggestionsUsed(true);
+          setMessage(null);
+        }}
+      />
+      {suggestionsUsed && (
+        <p role="status" className="text-emerald-700">
+          {ui("ใช้ข้อมูลเสนอในช่องค้นหาแล้ว ยังไม่ได้บันทึกคู่หรือหมวด")}
         </p>
       )}
       <div className="flex flex-wrap gap-3 items-end rounded-input bg-surface p-3">

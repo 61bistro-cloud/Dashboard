@@ -96,6 +96,8 @@ for (const path of [
   "app/(app)/closing/_components/adjustments.tsx",
   "app/(app)/cost-setup/_components/supplier-section.tsx",
   "app/(app)/business-advice/_components/advice-planner.tsx",
+  "app/(app)/bank/evidence/_components/document-review-panel.tsx",
+  "app/(app)/admin/google/_components/document-ai-test.tsx",
 ])
   test(`real client import graph stays browser-safe: ${path}`, async () => {
     const result = await bundle(

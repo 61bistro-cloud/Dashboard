@@ -1,3 +1,5 @@
+import { DocumentAiTest } from "./_components/document-ai-test";
+import { documentAiConfig } from "@/lib/openrouter-documents";
 import { displayMonth, dateLocale } from "@/lib/i18n/core";
 
 import { getUi } from "@/lib/i18n/server";
@@ -59,6 +61,7 @@ export default async function GoogleAdminPage() {
     }),
   ]);
 
+  const ai = documentAiConfig(biz.id);
   const connected = !!b?.googleRefreshToken;
   const structureReady = !!b?.masterSheetId;
   const lineConfigured = !!b?.lineChannelSecret;
@@ -89,6 +92,51 @@ export default async function GoogleAdminPage() {
           <code>AUTH_GOOGLE_SECRET</code> {ui("— ใส่ใน Vercel ก่อน")}
         </div>
       )}
+
+      <section className="space-y-3 rounded-card border border-hairline bg-canvas p-5 text-sm">
+        <h2 className="font-semibold">
+          {ui("คัดกรองเอกสารด้วย OCR + OpenRouter")}
+        </h2>
+        <p>
+          {ui(
+            ai.enabled
+              ? "เปิด AI สำหรับธุรกิจนี้แล้ว"
+              : "AI ยังไม่เปิด ระบบยังเก็บเอกสารและใช้ OCR ได้"
+          )}
+        </p>
+        <p className="text-xs text-muted">
+          {ui(
+            "ส่งเฉพาะข้อความ OCR ที่ปิดบังข้อมูลบัญชีและข้อมูลส่วนตัวบางส่วนไปยัง OpenRouter และผู้ให้บริการโมเดล ไม่ส่งรูปต้นฉบับ ผลต้องตรวจยืนยันก่อนลงบัญชี"
+          )}
+        </p>
+        <p className="text-xs">
+          {ui("โมเดลฟรีที่เลือก")}: <code>{ai.model}</code>
+        </p>
+        {!ai.enabled && (
+          <div className="space-y-2 rounded-input bg-surface p-3 text-xs">
+            <p>
+              {ui(
+                "ตั้งใน Vercel Environment Variables ฝั่ง Production เท่านั้น ห้ามใช้ NEXT_PUBLIC_ และไม่ต้องส่ง key ในแชต"
+              )}
+            </p>
+            <p>
+              <code>OPENROUTER_API_KEY</code> = {ui("API key ของคุณ")}
+            </p>
+            <p>
+              <code>OPENROUTER_BUSINESS_IDS</code> = <code>{biz.id}</code>
+            </p>
+            <p>
+              {ui(
+                "บันทึกแล้ว deploy ใหม่เพื่อเริ่มใช้ หากโควตาหมดหรือไม่มีโมเดลฟรีที่ผ่านเงื่อนไขความเป็นส่วนตัว ระบบจะรอตรวจ ไม่สลับไปรุ่นเสียเงิน"
+              )}
+            </p>
+          </div>
+        )}
+        <DocumentAiTest businessId={biz.id} enabled={ai.enabled} />
+        <Link href="/bank/evidence" className="inline-block text-xs underline">
+          {ui("เปิดคิวตรวจเอกสาร")}
+        </Link>
+      </section>
 
       {/* Status */}
       <section className="rounded-card border border-hairline bg-canvas p-5 space-y-3">

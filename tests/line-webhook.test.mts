@@ -161,45 +161,73 @@ test("join/leave and unsupported message types require no Drive work", async () 
   assert.equal(h.jobs.length, 0);
 });
 
-async function worker(duplicate = false) {
+async function worker(duplicate = false, contentDuplicate = false) {
+  let lookups = 0;
   const writes: any[] = [],
     replies: any[] = [],
     downloads: any[] = [];
-  const module = await load("../lib/line-webhook.ts", {
-    "@/lib/prisma": {
-      prisma: {
-        driveFile: {
-          findFirst: async () => (duplicate ? { id: 1 } : null),
-          create: async (data: any) => writes.push(data),
+  const processed: any[] = [];
+  const module = await load(
+    "../lib/line-webhook.ts",
+    {
+      "@/lib/document-fingerprint": {
+        contentFingerprint: () => "hash-test",
+        qrFingerprint: async () => null,
+      },
+      "@/lib/document-review": {
+        queuedReview: () => ({ state: "queued" }),
+        writeDocumentReview: (note: string, r: any) =>
+          note + "\nDOCUMENT_REVIEW_V1:" + JSON.stringify(r),
+      },
+      "@/lib/prisma": {
+        prisma: {
+          driveFile: {
+            findFirst: async () => {
+              lookups++;
+              return duplicate || (contentDuplicate && lookups > 1)
+                ? { id: 1 }
+                : null;
+            },
+            create: async (data: any) => {
+              writes.push(data);
+              return { id: 9 };
+            },
+          },
         },
       },
-    },
-    "@/lib/fiscal-server": {
-      getCurrentFiscalMonth: async () => ({
-        id: 8,
-        calendarYear: 2026,
-        calendarMonth: 11,
-      }),
-    },
-    "@/lib/google": {
-      uploadEvidence: async (...args: any[]) => {
-        writes.push(args);
-        return {
-          driveFileId: "drive-test",
-          webViewLink: "https://example.test/file",
-        };
+      "@/lib/fiscal-server": {
+        getCurrentFiscalMonth: async () => ({
+          id: 8,
+          calendarYear: 2026,
+          calendarMonth: 11,
+        }),
+      },
+      "@/lib/google": {
+        uploadEvidence: async (...args: any[]) => {
+          writes.push(args);
+          return {
+            driveFileId: "drive-test",
+            webViewLink: "https://example.test/file",
+          };
+        },
+      },
+      "@/lib/line": {
+        getLineContent: async (...args: any[]) => {
+          downloads.push(args);
+          return { buffer: new Uint8Array([1]), mimeType: "image/jpeg" };
+        },
+        replyLine: async (...args: any[]) => replies.push(args),
+        extFromMime: () => "jpg",
       },
     },
-    "@/lib/line": {
-      getLineContent: async (...args: any[]) => {
-        downloads.push(args);
-        return { buffer: new Uint8Array([1]), mimeType: "image/jpeg" };
-      },
-      replyLine: async (...args: any[]) => replies.push(args),
-      extFromMime: () => "jpg",
-    },
-  });
-  return { module, writes, replies, downloads };
+    async (name) => {
+      assert.equal(name, "@/lib/document-processing");
+      return {
+        processEvidenceDocument: async (...args: any[]) => processed.push(args),
+      };
+    }
+  );
+  return { module, writes, replies, downloads, processed };
 }
 test("background worker keeps evidence storage and replies scoped to the verified business", async () => {
   const h = await worker();
@@ -218,6 +246,11 @@ test("background worker keeps evidence storage and replies scoped to the verifie
   assert.equal(h.replies.length, 1);
   assert.ok(h.replies[0][1].includes("บันทึกหลักฐาน"));
   assert.equal(h.downloads.length, 1);
+  assert.equal(h.processed.length, 1);
+  assert.deepEqual(JSON.parse(JSON.stringify(h.processed[0])), [7, 9]);
+  assert.ok(
+    h.writes[1].data.note.includes("DOCUMENT_CONTENT_SHA256:hash-test")
+  );
 });
 test("LINE redelivery with an existing message record does not upload or reply twice", async () => {
   const h = await worker(true);
@@ -231,4 +264,19 @@ test("LINE redelivery with an existing message record does not upload or reply t
   assert.equal(h.writes.length, 0);
   assert.equal(h.replies.length, 0);
   assert.equal(h.downloads.length, 0);
+});
+
+test("an exact repeated file with a new LINE message does not create a second Drive upload", async () => {
+  const h = await worker(false, true);
+  await h.module.processLineEvents({ id: 7 }, token, [
+    {
+      type: "message",
+      replyToken: "reply",
+      message: { type: "image", id: "another-message" },
+    },
+  ]);
+  assert.equal(h.downloads.length, 1);
+  assert.equal(h.writes.length, 0);
+  assert.equal(h.processed.length, 0);
+  assert.equal(h.replies.length, 1);
 });

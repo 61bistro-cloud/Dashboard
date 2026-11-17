@@ -1,3 +1,4 @@
+import { readDocumentReview } from "@/lib/document-review";
 import { displayMonth } from "@/lib/i18n/core";
 
 import { getUi } from "@/lib/i18n/server";
@@ -14,7 +15,7 @@ import { PageHeader } from "@/components/page-header";
 import { MonthPicker } from "../../cost-setup/_components/month-picker";
 import { EvidenceMatcher } from "./_components/evidence-matcher";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 export default async function EvidencePage({
   searchParams,
 }: {
@@ -166,6 +167,7 @@ export default async function EvidencePage({
             refType: file.refType,
             refId: file.refId,
             automatic: readAutoEvidenceStatus(file.note),
+            review: readDocumentReview(file.note),
             ocr: ocr
               ? {
                   amount: ocr.amount,

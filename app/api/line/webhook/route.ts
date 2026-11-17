@@ -4,7 +4,7 @@ import { verifyLineSignature } from "@/lib/line";
 import type { LineEvent } from "@/lib/line-webhook";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
   const signature = req.headers.get("x-line-signature");
@@ -24,6 +24,7 @@ export async function POST(req: Request) {
   // the saved secret works, not just that this URL is reachable.
   const businesses = await prisma.business.findMany({
     where: {
+      active: true,
       lineChannelSecret: { not: null },
       lineChannelToken: { not: null },
     },

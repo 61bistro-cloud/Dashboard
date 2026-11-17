@@ -285,3 +285,28 @@ export async function listAutomaticEvidence(input: {
     orderBy: { id: "asc" },
   });
 }
+
+/** Explicit screening only: never invokes the bank/category automation action. */
+export async function reviewEvidenceDocument(
+  input: z.infer<typeof scopeSchema>
+) {
+  try {
+    const { data, business } = await scope(input);
+    const { processEvidenceDocument } =
+      await import("@/lib/document-processing");
+    const result = await processEvidenceDocument(
+      business.id,
+      data.fileId,
+      data.monthId,
+      true
+    );
+    revalidatePath("/bank/evidence");
+    revalidatePath("/admin/google");
+    return { ok: true as const, ...result };
+  } catch {
+    return {
+      ok: false as const,
+      message: "คัดกรองไม่สำเร็จ กรุณาลองใหม่ เอกสารต้นฉบับยังอยู่",
+    };
+  }
+}
