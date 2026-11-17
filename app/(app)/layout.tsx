@@ -28,7 +28,7 @@ export default async function AppLayout({
           currentId={current?.id ?? 0}
         />
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         <SidebarNav role={session.user.role} />
       </div>
       <UserMenu
@@ -42,7 +42,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen md:flex bg-canvas">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-hairline bg-canvas h-screen sticky top-0">
+      <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-hairline bg-canvas h-dvh sticky top-0">
         {navBody}
       </aside>
 

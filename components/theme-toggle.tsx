@@ -31,7 +31,7 @@ export function ThemeToggle() {
       <button
         type="button"
         aria-hidden
-        className="h-7 w-7 rounded-pill"
+        className="h-11 w-full rounded-lg border border-hairline bg-canvas"
         tabIndex={-1}
       />
     );
@@ -47,9 +47,12 @@ export function ThemeToggle() {
       onClick={toggle}
       aria-label={label}
       title={label}
-      className="inline-flex h-7 w-7 items-center justify-center rounded-pill text-muted hover:bg-surface hover:text-ink transition-colors"
+      className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-hairline bg-canvas px-2 text-xs font-medium text-muted transition-colors hover:bg-surface hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
     >
-      <Icon className="h-4 w-4" strokeWidth={1.75} />
+      <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+      <span className="whitespace-nowrap">
+        {theme === "dark" ? "ธีมสว่าง" : "ธีมมืด"}
+      </span>
     </button>
   );
 }
