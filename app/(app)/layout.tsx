@@ -22,7 +22,7 @@ export default async function AppLayout({
   // Shared between the desktop sidebar and the mobile drawer
   const navBody = (
     <>
-      <div className="px-4 py-4 md:py-5">
+      <div className="shrink-0 border-b border-hairline px-4 py-4 md:py-5">
         <BusinessSwitcher
           businesses={businesses}
           currentId={current?.id ?? 0}
@@ -40,14 +40,17 @@ export default async function AppLayout({
   );
 
   return (
-    <div className="min-h-screen md:flex bg-canvas">
+    <div className="min-h-dvh bg-canvas md:pl-64 print:pl-0">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-hairline bg-canvas h-dvh sticky top-0">
+      <aside
+        aria-label="แถบเมนูหลัก"
+        className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-hairline bg-canvas md:flex print:hidden"
+      >
         {navBody}
       </aside>
 
       {/* Mobile content column */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="min-h-dvh min-w-0 flex flex-col">
         <MobileNav title={current?.name ?? "61 Bistro"}>{navBody}</MobileNav>
         <main className="flex-1 min-w-0">{children}</main>
       </div>
