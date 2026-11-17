@@ -8,7 +8,13 @@ import { usePathname } from "next/navigation";
 import type { Role } from "@prisma/client";
 import { NAV_ITEMS } from "@/lib/rbac";
 
-const REPORT_PATHS = new Set(["/", "/daily-pl", "/monthly-pl", "/closing"]);
+const REPORT_PATHS = new Set([
+  "/",
+  "/business-advice",
+  "/daily-pl",
+  "/monthly-pl",
+  "/closing",
+]);
 
 export function SidebarNav({ role }: { role: Role }) {
   const { ui } = useUi();

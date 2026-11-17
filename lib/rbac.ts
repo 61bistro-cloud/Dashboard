@@ -22,6 +22,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["OWNER", "ACCOUNTANT", "STAFF"],
   },
   {
+    href: "/business-advice",
+    label: "แนะนำธุรกิจ",
+    icon: NAV_ICONS["/business-advice"],
+    roles: ["OWNER", "ACCOUNTANT"],
+  },
+  {
     href: "/daily-pl",
     label: "Daily P&L",
     icon: NAV_ICONS["/daily-pl"],

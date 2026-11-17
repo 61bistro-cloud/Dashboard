@@ -1,4 +1,5 @@
 import {
+  Lightbulb,
   LayoutDashboard,
   Calendar,
   TrendingUp,
@@ -58,6 +59,7 @@ import {
 
 /** Single navigation icon table — keyed by route href */
 export const NAV_ICONS: Record<string, LucideIcon> = {
+  "/business-advice": Lightbulb,
   "/": LayoutDashboard,
   "/daily-pl": Calendar,
   "/monthly-pl": TrendingUp,

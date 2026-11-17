@@ -1,0 +1,13 @@
+# Business advice
+
+`/business-advice` is an OWNER/ACCOUNTANT report, listed immediately below Dashboard. It reads the selected business's POS net sales and owner-entered monthly costs using the existing manual cost/P&L helpers. It does not write records, change report formulas, use statement withdrawals as accounting costs, or call an external AI service.
+
+The page provides monthly break-even sales, sales for a chosen profit goal, average targets per opening day, remaining-day targets after recorded sales, rounded-up bill targets, a target comparison chart, three transparent observations and fiscal-year recorded totals. It intentionally does not extrapolate incomplete data into a year-end forecast.
+
+Defaults classify COGS and selling costs as variable, other operating costs as fixed. These are provisional: each group supports fixed, variable or a mixed percentage. The variable rate defaults to recorded variable costs / recorded POS revenue and can be overridden independently. Full-month fixed costs must be entered in Cost Setup; historical cost rates may be inappropriate when POS sales cover only part of a month. Marketing and platform fees can differ; owners must review the split.
+
+Targets are hidden until the owner confirms the assumptions and costs for this scenario. Confirmation is local, resets on page reopen and does not certify data completeness or close accounts. Assumptions are not persisted. Days remaining default to Bangkok calendar days including today; owners must adjust to real opening days. Past months have no remaining-day target. Future months are planning scenarios. Current-month POS totals stop at today's Bangkok business-date string; yearly rows show the existing report's recorded monthly totals.
+
+Math: contribution = 1 − variable rate; BEP = fixed / contribution; profit target = (fixed + target profit) / contribution. Remaining targets = max(0, target − recorded sales) / remaining opening days. Net sales already include bill discounts, so discounts must not be deducted again. Unknown average bill means unknown bill targets. Missing costs, invalid opening days, rates >=100%, numeric overflow and invalid fields withhold targets rather than returning zero/infinity as an estimate.
+
+Validation: `npm run test:advice`, `npm run test:costs`, `npm run test:safety`, `npm run test:i18n` and production build. Browser fixtures cover Thai/English, light/dark, desktop/mobile, mixed costs, rate validation, missing data and ended months without using production writes. For release comparisons use the read-only integrity procedure in `docs/data-safety.md`.

@@ -3748,5 +3748,227 @@
   },
   "นำเข้าไม่สำเร็จ ไม่มีการบันทึกข้อมูลบางส่วน กรุณาลองใหม่": {
     "en": "Import failed. No partial changes were saved. Please try again."
+  },
+  "แนะนำธุรกิจ": {
+    "en": "Business advice"
+  },
+  "จากตัวเลขของร้าน สู่เป้าหมายที่ลงมือทำได้": {
+    "en": "Turn your store figures into actionable targets"
+  },
+  "ยืนยันต้นทุนและตรวจสมมติฐานเพื่อคำนวณ": {
+    "en": "Confirm costs and review assumptions to calculate"
+  },
+  "วางแผนจากข้อมูลร้าน": {
+    "en": "Plan with your store data"
+  },
+  "ประมาณการ": {
+    "en": "Estimate"
+  },
+  "รู้เป้าขาย ก่อนวางแผนเดือนถัดไป": {
+    "en": "Know your sales target before planning ahead"
+  },
+  "ทดลองเป้ากำไรและจุดคุ้มทุนจากยอดขายสุทธิ ไม่แก้ข้อมูลบัญชี และไม่ถือเป็นยอดกำไรที่ปิดงบแล้ว": {
+    "en": "Explore profit targets and break-even sales using net sales. This does not change your accounts or represent finalized profit."
+  },
+  "ตรวจต้นทุนต้นทาง": {
+    "en": "Review source costs"
+  },
+  "ตรวจยอดขายต้นทาง": {
+    "en": "Review source sales"
+  },
+  "ยอดขายสุทธิที่บันทึก": {
+    "en": "Recorded net sales"
+  },
+  "{v0} บิล · มีข้อมูลยอดขาย {v1} วัน": {
+    "en": "{v0} bills · Sales recorded on {v1} days"
+  },
+  "ต้นทุนที่กรอกไว้": {
+    "en": "Entered costs"
+  },
+  "ต้นทุนทั้งเดือนจากสรุปต้นทุน รวมเงินเดือน": {
+    "en": "Full-month entered costs, including payroll"
+  },
+  "กำไรตามข้อมูลที่บันทึก": {
+    "en": "Profit from recorded data"
+  },
+  "ยังไม่ยืนยันความครบถ้วนของต้นทุน ไม่ใช่กำไรคาดการณ์": {
+    "en": "Cost completeness is unconfirmed. This is not a profit forecast."
+  },
+  "ตั้งสมมติฐานของร้าน": {
+    "en": "Set your planning assumptions"
+  },
+  "สมมติฐานใช้เฉพาะหน้านี้ และเริ่มใหม่เมื่อเปิดหน้าอีกครั้ง ไม่บันทึกทับต้นทุนหรือยอดขาย": {
+    "en": "Assumptions apply only to this page and reset when reopened. They do not overwrite costs or sales."
+  },
+  "เป้ากำไรต่อเดือน (บาท)": {
+    "en": "Monthly profit goal (THB)"
+  },
+  "วันเปิดร้านทั้งหมดในเดือน": {
+    "en": "Total opening days this month"
+  },
+  "วันเปิดร้านที่เหลือ (รวมวันนี้)": {
+    "en": "Opening days remaining (including today)"
+  },
+  "ยอดเฉลี่ยต่อบิลสมมติ (บาท)": {
+    "en": "Assumed average bill (THB)"
+  },
+  "ระบุเพื่อคำนวณจำนวนบิล": {
+    "en": "Enter to calculate bill targets"
+  },
+  "แยกต้นทุนคงที่และผันแปร": {
+    "en": "Classify fixed and variable costs"
+  },
+  "คงที่: จ่ายแม้ขายไม่ได้ เช่น ค่าเช่า • ผันแปร: เพิ่มตามยอดขาย เช่น วัตถุดิบหรือค่า GP • หากหมวดมีทั้งสองแบบ ให้เลือกผสมและระบุสัดส่วน": {
+    "en": "Fixed costs remain without sales, such as rent. Variable costs rise with sales, such as ingredients or platform fees. Choose mixed and set the variable share when a group includes both."
+  },
+  "ประเภทต้นทุน {v0}": {
+    "en": "Cost behavior: {v0}"
+  },
+  "คงที่": {
+    "en": "Fixed"
+  },
+  "ผันแปร": {
+    "en": "Variable"
+  },
+  "ผสม": {
+    "en": "Mixed"
+  },
+  "ผันแปร (%)": {
+    "en": "Variable (%)"
+  },
+  "สัดส่วนผันแปร {v0}": {
+    "en": "Variable share: {v0}"
+  },
+  "ต้นทุนคงที่สมมติ": {
+    "en": "Assumed fixed costs"
+  },
+  "ต้นทุนผันแปรที่บันทึก": {
+    "en": "Recorded variable costs"
+  },
+  "อัตราต้นทุนผันแปรสมมติ (%)": {
+    "en": "Assumed variable cost rate (%)"
+  },
+  "ใช้สัดส่วนจากข้อมูลที่บันทึก": {
+    "en": "Use recorded cost ratio"
+  },
+  "ค่าเริ่มต้น = ต้นทุนผันแปรที่บันทึก ÷ ยอดขายสุทธิ ควรปรับเป็นอัตราที่คาดว่าจะเกิดจริง โดยเฉพาะเดือนที่ยอดขายยังไม่ครบ แต่กรอกต้นทุนไว้ทั้งเดือนแล้ว ค่า GP และค่าโฆษณาอาจมีพฤติกรรมต่างกัน": {
+    "en": "The default is recorded variable costs divided by net sales. Adjust it to a realistic expected rate, especially when sales cover only part of the month but costs cover the full month. Platform fees and advertising may behave differently."
+  },
+  "ฉันตรวจต้นทุนทั้งเดือนและสมมติฐานแล้ว พร้อมใช้คำนวณประมาณการ": {
+    "en": "I have reviewed full-month costs and assumptions for this estimate"
+  },
+  "การยืนยันนี้ใช้เฉพาะการทดลอง ไม่ใช่การปิดบัญชีหรือรับรองความครบถ้วนในระบบ": {
+    "en": "This confirmation is for this scenario only. It does not close the month or certify system data completeness."
+  },
+  "ข้อมูลยังน้อย: ตรวจยอดขายและต้นทุนก่อนใช้คำแนะนำ หากยังไม่มียอดขาย ให้ระบุอัตราผันแปรและยอดเฉลี่ยต่อบิลเอง": {
+    "en": "Limited data: review sales and costs before using the advice. Without sales, enter an assumed variable rate and average bill."
+  },
+  "ยังคำนวณไม่ได้: ต้องมีต้นทุน วันเปิดร้านถูกต้อง และอัตราผันแปรตั้งแต่ 0 แต่น้อยกว่า 100% หากอัตราถึง 100% การเพิ่มยอดขายเพียงอย่างเดียวยังไม่ครอบคลุมต้นทุนคงที่": {
+    "en": "Cannot calculate yet: enter costs, valid opening days, and a variable rate from 0% to below 100%. At 100% or more, additional sales alone cannot cover fixed costs."
+  },
+  "เป้าหมายที่ร้านนำไปใช้ได้": {
+    "en": "Targets you can act on"
+  },
+  "ประมาณการจากสมมติฐาน ไม่ใช่การรับประกันผล": {
+    "en": "Scenario estimates, not guaranteed results"
+  },
+  "ยอดขายคุ้มทุนต่อเดือน": {
+    "en": "Monthly break-even sales"
+  },
+  "เฉลี่ยวันละ {v0} บาท": {
+    "en": "Average THB {v0} per opening day"
+  },
+  "ยอดขายเพื่อถึงเป้ากำไร": {
+    "en": "Sales needed for your profit goal"
+  },
+  "ต้องขายต่อวันในวันที่เหลือ": {
+    "en": "Daily sales needed in remaining days"
+  },
+  "ประมาณ {v0} บิลต่อวัน": {
+    "en": "Approximately {v0} bills per day"
+  },
+  "เดือนสิ้นสุดแล้ว ดูเป้ารายวันเฉลี่ยเพื่อวางแผน": {
+    "en": "This month has ended. Use average daily targets for planning."
+  },
+  "ขายคุ้มทุนต่อวันในวันที่เหลือ": {
+    "en": "Daily break-even sales in remaining days"
+  },
+  "หักยอดขายที่บันทึกแล้ว และหารวันเปิดร้านที่เหลือ": {
+    "en": "After subtracting recorded sales, divided by remaining opening days"
+  },
+  "ยอดขายที่ทำแล้ว เทียบกับเป้าหมาย": {
+    "en": "Recorded sales versus your targets"
+  },
+  "ยอดขายที่บันทึก": {
+    "en": "Recorded sales"
+  },
+  "จุดคุ้มทุน": {
+    "en": "Break-even"
+  },
+  "เป้ายอดขาย": {
+    "en": "Sales target"
+  },
+  "สูตร: ยอดขายคุ้มทุน = ต้นทุนคงที่ ÷ (1 − อัตราต้นทุนผันแปร) • เป้ายอดขาย = (ต้นทุนคงที่ + เป้ากำไร) ÷ (1 − อัตราต้นทุนผันแปร)": {
+    "en": "Formula: break-even sales = fixed costs / (1 − variable cost rate). Target sales = (fixed costs + profit goal) / (1 − variable cost rate)."
+  },
+  "เป้าเฉลี่ยทั้งเดือนประมาณ {v0} บิลต่อวัน จำนวนบิลปัดขึ้น": {
+    "en": "Full-month target: approximately {v0} bills per opening day, rounded up"
+  },
+  "จุดที่ควรพิจารณา": {
+    "en": "Areas to consider"
+  },
+  "เริ่มจากต้นทุนก้อนใหญ่": {
+    "en": "Start with the largest cost group"
+  },
+  "{v0} สูงสุดที่ {v1} บาท ลองตรวจรายละเอียดก่อนลดค่าใช้จ่ายที่กระทบคุณภาพหรือบริการ": {
+    "en": "{v0} is the largest group at THB {v1}. Review its details before cuts that could affect quality or service."
+  },
+  "กรอกต้นทุนก่อน เพื่อระบุหมวดที่ควรตรวจเป็นอันดับแรก": {
+    "en": "Enter costs to identify the first group to review."
+  },
+  "กำไรส่วนเกินต่อยอดขาย": {
+    "en": "Contribution from sales"
+  },
+  "ขายทุก 100 บาท เหลือ {v0} บาทหลังต้นทุนผันแปร เพื่อนำไปจ่ายต้นทุนคงที่และสร้างกำไร": {
+    "en": "Every THB 100 of sales leaves THB {v0} after variable costs to cover fixed costs and profit."
+  },
+  "ทดลองลดต้นทุนคงที่": {
+    "en": "Explore a fixed-cost reduction"
+  },
+  "หากลดต้นทุนคงที่ได้ 10% จุดคุ้มทุนจะลดลง {v0} บาทต่อเดือน ภายใต้อัตราผันแปรเดิม": {
+    "en": "Reducing fixed costs by 10% would lower break-even sales by THB {v0} per month, assuming the same variable rate."
+  },
+  "ภาพรวมปีงบประมาณ": {
+    "en": "Fiscal year overview"
+  },
+  "ยอดสะสมเฉพาะเดือนที่ถึงแล้ว รวมเดือนปัจจุบันที่อาจยังไม่ครบ • ใช้ต้นทุนที่บันทึก ไม่ใช่ประมาณการสิ้นปี": {
+    "en": "Totals include elapsed months and the current, potentially incomplete month. They use recorded costs and are not a year-end forecast."
+  },
+  "ยอดขายสะสม": {
+    "en": "Cumulative sales"
+  },
+  "ต้นทุนสะสม": {
+    "en": "Cumulative costs"
+  },
+  "กำไรตามข้อมูลสะสม": {
+    "en": "Profit from cumulative records"
+  },
+  "ล่วงหน้า": {
+    "en": "Future"
+  },
+  "ยอดขายใช้ยอดสุทธิหลังส่วนลด ไม่หักส่วนลดซ้ำ ต้นทุนเงินสดหรือเงินโอนในสเตทเมนท์ไม่ใช่ต้นทุนบัญชีทั้งหมด หน้านี้ไม่เปลี่ยนสูตรหรือยอดในรายงานเดิม": {
+    "en": "Sales are net of discounts; discounts are not deducted twice. Statement cash movements do not represent all accounting costs. This page does not change existing report formulas or figures."
+  },
+  "วันที่ตรวจข้อมูล: {v0} (เวลาประเทศไทย)": {
+    "en": "Data checked: {v0} (Bangkok time)"
+  },
+  "เดือนล่วงหน้า: ใช้ข้อมูลที่บันทึกสำหรับทดลองวางแผน": {
+    "en": "Future month: recorded data is used for planning scenarios."
+  },
+  "ไม่มีวันเปิดร้านเหลือ จึงไม่คำนวณเป้ารายวันที่เหลือ": {
+    "en": "No opening days remain, so remaining-day targets are unavailable."
+  },
+  "ระบุยอดเฉลี่ยต่อบิลเพื่อแปลงเป้าเป็นจำนวนบิล": {
+    "en": "Enter an average bill to convert the sales target into bills."
   }
 }
