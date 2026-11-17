@@ -3357,5 +3357,38 @@
   },
   "จำนวนเงินไม่ถูกต้อง": {
     "en": "Invalid amount"
+  },
+  "หมวดต้นทุน": {
+    "en": "Cost category"
+  },
+  "ดู {v0} รายการใน {v1}": {
+    "en": "View {v0} transactions in {v1}"
+  },
+  "รายละเอียดหมวด {v0}": {
+    "en": "Category details: {v0}"
+  },
+  "รายละเอียด {v0} รายการ • รวม {v1} บาท": {
+    "en": "{v0} transactions • Total {v1} THB"
+  },
+  "เปิดบัญชีและกระทบยอด": {
+    "en": "Open Bank & Reconcile"
+  },
+  "วันที่ / เวลา": {
+    "en": "Date / time"
+  },
+  "รายละเอียด / หมายเหตุ": {
+    "en": "Description / note"
+  },
+  "บัญชีที่จ่าย": {
+    "en": "Paid from"
+  },
+  "จำนวนเงิน": {
+    "en": "Amount"
+  },
+  "ยังไม่แนบหลักฐาน": {
+    "en": "No evidence attached"
+  },
+  "ดูรายการต้นทาง": {
+    "en": "View source transaction"
   }
 }

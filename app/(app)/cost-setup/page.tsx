@@ -13,7 +13,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentFiscalMonth } from "@/lib/fiscal";
 import { getCurrentBusiness } from "@/lib/business";
-import { getStatementExpenses } from "@/lib/bank-calc";
+import { getDetailedStatementExpenses } from "@/lib/statement-cost-details";
 import { MonthPicker } from "./_components/month-picker";
 import { PayrollSection } from "./_components/payroll-section";
 import { SupplierSection } from "./_components/supplier-section";
@@ -125,10 +125,8 @@ export default async function CostSetupPage({
     }),
   ]);
 
-  const statementExpenses = await getStatementExpenses(
-    currentMonth.id,
-    business.id
-  );
+  const { summary: statementExpenses, details: statementDetails } =
+    await getDetailedStatementExpenses(currentMonth.id, business.id);
 
   const payrollByEmp = new Map(
     payrollRows.map((p) => [
@@ -239,6 +237,7 @@ export default async function CostSetupPage({
       </section>
       <StatementExpensesPanel
         summary={statementExpenses}
+        details={statementDetails}
         manualTotal={manualTotal}
         monthId={currentMonth.id}
       />

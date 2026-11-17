@@ -266,6 +266,7 @@ export function TransactionTable({
             <tbody className="divide-y divide-hairline-soft">
               {rows.map((r) => (
                 <tr
+                  id={`transaction-${r.id}`}
                   key={r.id}
                   className={
                     selected.has(r.id) ? "bg-surface" : "hover:bg-surface"
