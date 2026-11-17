@@ -109,6 +109,8 @@ export default async function CostSetupPage({
         }))}
         payrollEditor={
           <PayrollSection
+            businessId={business.id}
+            revision={manual.payrollRevision}
             fiscalMonthId={month.id}
             employees={manual.employees
               .filter((e) => e.active || (payroll.get(e.id)?.amount ?? 0) !== 0)

@@ -53,8 +53,23 @@ export default async function AppLayout({
 
       {/* Mobile content column */}
       <div className="min-h-dvh min-w-0 flex flex-col">
-        <MobileNav title={current?.name ?? "61 Bistro"}>{navBody}</MobileNav>
-        <main className="flex-1 min-w-0">{children}</main>
+        <MobileNav title={current?.name ?? ui("เลือกธุรกิจ")}>
+          {navBody}
+        </MobileNav>
+        <main className="flex-1 min-w-0">
+          {!current && businesses.length > 0 ? (
+            <div
+              role="alert"
+              className="m-6 rounded-card border border-hairline bg-surface p-6 text-sm"
+            >
+              {ui(
+                "ธุรกิจที่เลือกไว้ไม่พร้อมใช้งาน กรุณาเลือกธุรกิจจากเมนูอีกครั้ง ระบบจะไม่สลับข้อมูลไปอีกร้านให้อัตโนมัติ"
+              )}
+            </div>
+          ) : (
+            children
+          )}
+        </main>
       </div>
     </div>
   );

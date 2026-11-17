@@ -3,6 +3,7 @@ import { test } from "node:test";
 import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
+import * as payrollVersion from "../lib/payroll-revision.ts";
 import { z } from "zod";
 import * as flexible from "../lib/flexible-costs.ts";
 import { PAYROLL_EXTRA_LABELS } from "../lib/payroll-labels.ts";
@@ -17,15 +18,21 @@ async function harness(role = "OWNER") {
       { businessId: 1, fiscalMonthId: 2, type: "OT", amount: 80 },
     ],
     payroll: [] as any[],
+    closed: false,
   };
   const invalidations: string[] = [];
   const tx: any = {
+    supplier: { findMany: async () => [{ id: 1 }] },
+    monthlyClosing: {
+      findUnique: async () => (state.closed ? { status: "CLOSED" } : null),
+    },
     fiscalMonth: {
       findUnique: async ({ where }: any) =>
         [1, 2].includes(where.id) ? { id: where.id } : null,
     },
     employee: { findMany: async () => [{ id: 1 }] },
     employeePayroll: {
+      findMany: async () => state.payroll,
       deleteMany: async () => {
         state.payroll = [];
       },
@@ -69,6 +76,12 @@ async function harness(role = "OWNER") {
       },
     },
     fixedCost: {
+      findMany: async ({ where }: any) =>
+        state.costs.filter(
+          (c) =>
+            c.businessId === where.businessId &&
+            c.fiscalMonthId === where.fiscalMonthId
+        ),
       upsert: async ({ create, update }: any) => {
         const row = state.costs.find(
           (c) =>
@@ -90,6 +103,12 @@ async function harness(role = "OWNER") {
       },
     },
     payrollExtra: {
+      findMany: async ({ where }: any) =>
+        state.legacy.filter(
+          (c) =>
+            c.businessId === where.businessId &&
+            c.fiscalMonthId === where.fiscalMonthId
+        ),
       deleteMany: async ({ where }: any) => {
         state.legacy = state.legacy.filter(
           (c) =>
@@ -120,6 +139,7 @@ async function harness(role = "OWNER") {
     "@/lib/prisma": { prisma },
     "@/lib/business": { requireBusiness: async () => ({ id: 1 }) },
     "@/lib/flexible-costs": flexible,
+    "@/lib/payroll-revision": payrollVersion,
     "@/lib/payroll-labels": { PAYROLL_EXTRA_LABELS },
     "next/cache": {
       revalidatePath: (path: string) => invalidations.push(path),
@@ -153,7 +173,18 @@ async function harness(role = "OWNER") {
   });
   await module.evaluate();
   return {
-    actions: module.namespace as any,
+    actions: {
+      ...module.namespace,
+      savePayroll: async (input: any) =>
+        (module.namespace as any).savePayroll({
+          revision: await payrollVersion.readPayrollRevision(
+            tx,
+            1,
+            input.fiscalMonthId
+          ),
+          ...input,
+        }),
+    } as any,
     state: () => state,
     invalidations,
   };
@@ -168,6 +199,7 @@ test("default extras remain readable until a user saves, with no startup migrati
 test("payroll saves arbitrary names and extra rows atomically, without double counting or altering another month", async () => {
   const h = await harness();
   await h.actions.savePayroll({
+    businessId: 1,
     fiscalMonthId: 1,
     payroll: [{ employeeId: 1, amount: 900 }],
     extras: [
@@ -189,6 +221,7 @@ test("payroll saves arbitrary names and extra rows atomically, without double co
   );
   assert.ok(h.state().categories.filter((c) => !c.active).length === 3);
   await h.actions.savePayroll({
+    businessId: 1,
     fiscalMonthId: 1,
     payroll: [],
     extras: rows.map((r) => ({ ...r, amount: r.amount + 1 })),
@@ -203,7 +236,12 @@ test("payroll saves arbitrary names and extra rows atomically, without double co
 });
 test("removing every extra persists after reload while historical legacy payments remain visible", async () => {
   const h = await harness();
-  await h.actions.savePayroll({ fiscalMonthId: 1, payroll: [], extras: [] });
+  await h.actions.savePayroll({
+    businessId: 1,
+    fiscalMonthId: 1,
+    payroll: [],
+    extras: [],
+  });
   assert.deepEqual(flexible.payrollExtraRows(h.state().categories, [], []), []);
   const history = flexible.payrollExtraRows(
     h.state().categories,
@@ -256,6 +294,7 @@ test("foreign IDs, category substitution and invalid input cannot mutate costs; 
   );
   await assert.rejects(
     h.actions.savePayroll({
+      businessId: 1,
       fiscalMonthId: 1,
       payroll: [{ employeeId: 1, amount: 1000 }],
       extras: [{ id: 10, name: "Wrong", amount: 1 }],
@@ -288,4 +327,65 @@ test("staff and unauthenticated requests cannot write custom costs", async () =>
     );
     assert.deepEqual(plain(h.state()), before);
   }
+});
+
+test("payroll rejects stale tabs, changed business and invalid money without clearing existing amounts", async () => {
+  const h = await harness();
+  const before = plain(h.state());
+  for (const patch of [
+    { revision: "0".repeat(64) },
+    { businessId: 2 },
+    { payroll: [{ employeeId: 1, amount: "not-money" }] },
+  ]) {
+    await assert.rejects(
+      h.actions.savePayroll({
+        businessId: 1,
+        fiscalMonthId: 1,
+        payroll: [{ employeeId: 1, amount: 50 }],
+        extras: [],
+        ...patch,
+      })
+    );
+    assert.deepEqual(plain(h.state()), before);
+  }
+});
+test("closed months block payroll and legacy supplier/category endpoints atomically", async () => {
+  const h = await harness();
+  h.state().closed = true;
+  const before = plain(h.state());
+  for (const [action, input] of [
+    [
+      "savePayroll",
+      {
+        businessId: 1,
+        fiscalMonthId: 1,
+        payroll: [{ employeeId: 1, amount: 50 }],
+        extras: [],
+      },
+    ],
+    [
+      "saveSuppliers",
+      { fiscalMonthId: 1, purchases: [{ supplierId: 1, amount: 50 }] },
+    ],
+    ["saveFixed", { fiscalMonthId: 1, costs: [{ categoryId: 1, amount: 50 }] }],
+  ] as const)
+    await assert.rejects(h.actions[action](input));
+  assert.deepEqual(plain(h.state()), before);
+});
+test("legacy supplier and category upserts reject foreign IDs before any write", async () => {
+  const h = await harness();
+  const before = plain(h.state());
+  await assert.rejects(
+    h.actions.saveSuppliers({
+      fiscalMonthId: 1,
+      purchases: [{ supplierId: 2, amount: 50 }],
+    })
+  );
+  await assert.rejects(
+    h.actions.saveFixed({
+      fiscalMonthId: 1,
+      costs: [{ categoryId: 2, amount: 50 }],
+    })
+  );
+  assert.deepEqual(plain(h.state()), before);
 });

@@ -1,3 +1,5 @@
+import { assertLocalDatabaseTool } from "../lib/database-safety";
+assertLocalDatabaseTool();
 import { PrismaClient, type Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 

@@ -1,5 +1,6 @@
 "use server";
 
+import type { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { parseFoodstoryBuffer, type ParsedBill } from "@/lib/foodstory-parser";
@@ -23,7 +24,7 @@ export async function importPosBills(
   formData: FormData
 ): Promise<ImportResult> {
   const session = await auth();
-  if (!session) {
+  if (!session || !["OWNER", "ACCOUNTANT"].includes(session.user.role)) {
     return baseError("unauthorized");
   }
 
@@ -33,6 +34,9 @@ export async function importPosBills(
   } catch (e) {
     return baseError((e as Error).message);
   }
+
+  if (Number(formData.get("businessId")) !== biz.id)
+    return baseError("ธุรกิจเปลี่ยนไปแล้ว กรุณารีเฟรชหน้า");
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
@@ -65,51 +69,61 @@ export async function importPosBills(
     };
   }
 
-  // Check existing IDs in one query (scoped to this business)
-  const ids = parseResult.rows.map((r) => r.id);
-  const existing = new Set(
-    (
-      await prisma.posBill.findMany({
-        where: { businessId: biz.id, id: { in: ids } },
-        select: { id: true },
-      })
-    ).map((b) => b.id)
-  );
-
+  let batch: { id: number };
   let inserted = 0;
   let updated = 0;
-
-  // Create batch first so we can FK each bill to it
-  const batch = await prisma.posImportBatch.create({
-    data: {
-      businessId: biz.id,
-      fileName: file.name,
-      rowsTotal: parseResult.totalDataRows,
-      rowsErrored: parseResult.errors.length,
-      errorSample:
-        parseResult.errors
-          .slice(0, 5)
-          .map((e) => e.message)
-          .join("\n") || null,
-      uploadedById: session.user.id,
-    },
-  });
-
-  // Bulk upsert in chunks to keep transaction size small
-  const CHUNK = 100;
-  for (let i = 0; i < parseResult.rows.length; i += CHUNK) {
-    const chunk = parseResult.rows.slice(i, i + CHUNK);
-    await prisma.$transaction(chunk.map((r) => upsertOp(r, batch.id, biz.id)));
-    for (const r of chunk) {
-      if (existing.has(r.id)) updated++;
-      else inserted++;
-    }
+  try {
+    const saved = await prisma.$transaction(
+      async (tx) => {
+        const ids = parseResult.rows.map((r) => r.id);
+        const existing = new Set(
+          (
+            await tx.posBill.findMany({
+              where: { businessId: biz.id, id: { in: ids } },
+              select: { id: true },
+            })
+          ).map((b) => b.id)
+        );
+        const batch = await tx.posImportBatch.create({
+          data: {
+            businessId: biz.id,
+            fileName: file.name,
+            rowsTotal: parseResult.totalDataRows,
+            rowsErrored: parseResult.errors.length,
+            errorSample:
+              parseResult.errors
+                .slice(0, 5)
+                .map((e) => e.message)
+                .join("\n") || null,
+            uploadedById: session.user.id,
+          },
+        });
+        // Chunk inside ONE transaction: a failed later chunk cannot leave a partial import.
+        for (let i = 0; i < parseResult.rows.length; i += 100) {
+          await Promise.all(
+            parseResult.rows
+              .slice(i, i + 100)
+              .map((r) => upsertOp(r, batch.id, biz.id, tx))
+          );
+        }
+        const updated = parseResult.rows.filter((r) =>
+          existing.has(r.id)
+        ).length;
+        const inserted = parseResult.rows.length - updated;
+        await tx.posImportBatch.update({
+          where: { id: batch.id },
+          data: { rowsInserted: inserted, rowsUpdated: updated },
+        });
+        return { batch, inserted, updated };
+      },
+      { isolationLevel: "Serializable", timeout: 60_000 }
+    );
+    ({ batch, inserted, updated } = saved);
+  } catch {
+    return baseError(
+      "นำเข้าไม่สำเร็จ ไม่มีการบันทึกข้อมูลบางส่วน กรุณาลองใหม่"
+    );
   }
-
-  await prisma.posImportBatch.update({
-    where: { id: batch.id },
-    data: { rowsInserted: inserted, rowsUpdated: updated },
-  });
 
   for (const path of [
     "/pos-sales",
@@ -137,7 +151,12 @@ export async function importPosBills(
   };
 }
 
-function upsertOp(r: ParsedBill, batchId: number, businessId: number) {
+function upsertOp(
+  r: ParsedBill,
+  batchId: number,
+  businessId: number,
+  db: Prisma.TransactionClient
+) {
   const data = {
     paidAt: r.paidAt,
     paymentDate: r.paymentDate,
@@ -176,7 +195,7 @@ function upsertOp(r: ParsedBill, batchId: number, businessId: number) {
     lineManAdjustAmt: r.lineManAdjustAmt,
     importBatchId: batchId,
   };
-  return prisma.posBill.upsert({
+  return db.posBill.upsert({
     where: { businessId_id: { businessId, id: r.id } },
     update: data,
     create: { id: r.id, businessId, ...data },

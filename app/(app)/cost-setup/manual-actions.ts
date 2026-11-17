@@ -62,6 +62,17 @@ export async function saveManualCostPlan(input: z.input<typeof schema>) {
           }))
         )
           throw Error("ไม่พบเดือนนี้");
+        const closing = await tx.monthlyClosing.findUnique({
+          where: {
+            businessId_fiscalMonthId: {
+              businessId: business.id,
+              fiscalMonthId: d.fiscalMonthId,
+            },
+          },
+          select: { status: true },
+        });
+        if (closing && closing.status !== "OPEN")
+          throw Error("เดือนนี้ปิดบัญชีแล้ว กรุณาเปิดบัญชีก่อนแก้ไข");
         const current = await getManualCostData(
           business.id,
           d.fiscalMonthId,
@@ -243,7 +254,7 @@ export async function saveManualCostPlan(input: z.input<typeof schema>) {
       ok: false as const,
       message:
         error instanceof Error &&
-        /ไม่มีสิทธิ์|กรุณาตรวจ|ธุรกิจเปลี่ยน|ไม่พบ|ข้อมูลต้นทุน|หมวดต้นทุนขาย|มีหมวด/.test(
+        /เดือนนี้ปิดบัญชี|ไม่มีสิทธิ์|กรุณาตรวจ|ธุรกิจเปลี่ยน|ไม่พบ|ข้อมูลต้นทุน|หมวดต้นทุนขาย|มีหมวด/.test(
           error.message
         )
           ? error.message

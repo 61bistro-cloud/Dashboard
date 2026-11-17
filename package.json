@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "db:push": "prisma db push",
+    "db:push": "tsx scripts/local-db.ts push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "typecheck": "tsc --noEmit",
@@ -19,7 +19,10 @@
     "test:evidence": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/evidence-upload.test.mts",
     "test:matching": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/evidence-match.test.mts tests/evidence-category.test.mts tests/evidence-auto.test.mts",
     "test:i18n": "node --import tsx --test --test-isolation=none tests/i18n.test.mts",
-    "test:accounts": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/bank-account-management.test.mts"
+    "test:accounts": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/bank-account-management.test.mts",
+    "test:safety": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/data-safety.test.mts",
+    "data:snapshot": "node --use-env-proxy scripts/data-integrity.mjs",
+    "test:pos": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/pos-safety.test.mts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

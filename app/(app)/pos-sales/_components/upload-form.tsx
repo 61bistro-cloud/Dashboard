@@ -6,7 +6,7 @@ import { useRef, useState, useTransition } from "react";
 import { Upload, FolderOpen, Check, X } from "lucide-react";
 import { importPosBills, type ImportResult } from "../actions";
 
-export function UploadForm() {
+export function UploadForm({ businessId }: { businessId: number }) {
   const { ui } = useUi();
   const [pending, start] = useTransition();
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -18,6 +18,7 @@ export function UploadForm() {
     const fd = new FormData(e.currentTarget);
     start(async () => {
       setResult(null);
+      fd.set("businessId", String(businessId));
       const r = await importPosBills(fd);
       setResult(r);
       if (r.ok && fileRef.current) {

@@ -4,6 +4,7 @@ import vm from "node:vm";
 import ts from "typescript";
 import { readFileSync } from "node:fs";
 import { z } from "zod";
+import * as payrollVersion from "../lib/payroll-revision.ts";
 import * as crypto from "node:crypto";
 import * as plan from "../lib/cost-plan.ts";
 import * as flexible from "../lib/flexible-costs.ts";
@@ -119,6 +120,7 @@ async function harness(role = "OWNER") {
       { id: 1, businessId: 1, fiscalMonthId: 5, type: "OT", amount: 10 },
     ],
     fail: false,
+    closed: false,
   };
   const invalidated: string[] = [];
   const find =
@@ -126,6 +128,9 @@ async function harness(role = "OWNER") {
     async ({ where }: any) =>
       (state[key] as any[]).filter((r) => matches(r, where));
   const db: any = {
+    monthlyClosing: {
+      findUnique: async () => (state.closed ? { status: "CLOSED" } : null),
+    },
     fiscalMonth: {
       findUnique: async ({ where }: any) =>
         [5, 6].includes(where.id) ? { id: where.id } : null,
@@ -227,6 +232,7 @@ async function harness(role = "OWNER") {
     "@/lib/cost-plan": plan,
     "./cost-plan": plan,
     "./flexible-costs": flexible,
+    "./payroll-revision": payrollVersion,
   };
   async function load(name: string): Promise<vm.Module> {
     if (modules.has(name)) return modules.get(name)!;
@@ -486,4 +492,19 @@ test("staff and unauthenticated users cannot save costs", async () => {
     );
     assert.deepEqual(plain(h.state()), before);
   }
+});
+
+test("closed months reject the entire cost plan without mutation", async () => {
+  const h = await harness();
+  h.state().closed = true;
+  const before = plain(h.state());
+  const current = await h.read();
+  const result = await h.save({
+    businessId: 1,
+    fiscalMonthId: 5,
+    revision: current.revision,
+    items: current.items,
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(plain(h.state()), before);
 });

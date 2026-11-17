@@ -31,14 +31,20 @@ type ExtraRow = FlexibleCostRow;
 
 export function PayrollSection({
   fiscalMonthId,
+  businessId,
+  revision,
   employees,
   extras,
 }: {
   fiscalMonthId: number;
+  businessId: number;
+  revision: string;
   employees: EmpRow[];
   extras: ExtraRow[];
 }) {
   const { ui } = useUi();
+  const [version, setVersion] = useState(revision);
+  useEffect(() => setVersion(revision), [revision]);
   const [emps, setEmps] = useState<EmpRow[]>(employees);
   const [exts, setExts] = useState<ExtraRow[]>(extras);
 
@@ -100,9 +106,11 @@ export function PayrollSection({
       icon={Users}
       title={ui("ค่าแรงพนักงาน (Payroll)")}
       total={total}
-      onSave={() => {
+      onSave={async () => {
         validateFlexibleCostRows(exts);
-        return savePayroll({
+        const result = await savePayroll({
+          revision: version,
+          businessId,
           fiscalMonthId,
           payroll: emps.map((e) => ({
             employeeId: e.id,
@@ -111,6 +119,7 @@ export function PayrollSection({
           })),
           extras: exts,
         });
+        setVersion(result.revision);
       }}
     >
       <div className="space-y-1">

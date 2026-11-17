@@ -224,7 +224,7 @@ export default async function PosSalesPage({
       </div>
 
       {/* Upload */}
-      {canImport && <UploadForm />}
+      {canImport && <UploadForm businessId={business.id} />}
 
       {/* Recent imports */}
       {recentBatches.length > 0 && (

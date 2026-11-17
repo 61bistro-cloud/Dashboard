@@ -3736,5 +3736,17 @@
   },
   "เงินเดือนและค่าจ้างพิเศษให้บันทึกในส่วนค่าแรง ส่วนรายการอื่นใช้ปุ่มบันทึกต้นทุน": {
     "en": "Save salaries and extra pay in the labor section. Use Save costs for other entries."
+  },
+  "เดือนนี้ปิดบัญชีแล้ว กรุณาเปิดบัญชีก่อนแก้ไข": {
+    "en": "This month is closed. Reopen it before editing."
+  },
+  "รายได้ใช้ยอดขายหน้าร้าน กรุณาแก้ไขที่ยอดขายหน้าร้าน": {
+    "en": "Revenue comes from POS sales. Make changes on the POS sales page."
+  },
+  "ธุรกิจที่เลือกไว้ไม่พร้อมใช้งาน กรุณาเลือกธุรกิจจากเมนูอีกครั้ง ระบบจะไม่สลับข้อมูลไปอีกร้านให้อัตโนมัติ": {
+    "en": "Your selected business is unavailable. Select a business from the menu again. The system will not switch your data to another shop automatically."
+  },
+  "นำเข้าไม่สำเร็จ ไม่มีการบันทึกข้อมูลบางส่วน กรุณาลองใหม่": {
+    "en": "Import failed. No partial changes were saved. Please try again."
   }
 }

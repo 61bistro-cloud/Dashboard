@@ -1,3 +1,4 @@
+import { payrollRevision } from "./payroll-revision";
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
@@ -38,6 +39,13 @@ export async function getManualCostData(
     employees,
     payroll,
     payrollExtras,
+    payrollRevision: payrollRevision(businessId, fiscalMonthId, {
+      employees,
+      payroll,
+      extras,
+      categories,
+      costs,
+    }),
     suppliers,
     purchases,
     categories,

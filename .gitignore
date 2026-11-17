@@ -19,3 +19,7 @@ next-env.d.ts
 Thumbs.db
 .vscode/
 .idea/
+
+# Financial snapshots / private recovery data
+private-backups/
+*.snapshot.json

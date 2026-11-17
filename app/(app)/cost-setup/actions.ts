@@ -1,5 +1,6 @@
 "use server";
 
+import { readPayrollRevision } from "@/lib/payroll-revision";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -42,11 +43,31 @@ const moneyField = z
   .transform((v) => {
     if (v == null || v === "") return 0;
     const n = typeof v === "string" ? Number(v.replace(/,/g, "")) : v;
-    return Number.isFinite(n) ? n : 0;
+    return n;
   })
-  .pipe(z.number().min(0).max(99_999_999));
+  .pipe(z.number().finite().min(0).max(99_999_999));
 
 const fiscalMonthId = z.coerce.number().int().positive();
+
+async function assertOpenMonth(
+  tx: Prisma.TransactionClient,
+  businessId: number,
+  monthId: number
+) {
+  if (
+    !(await tx.fiscalMonth.findUnique({
+      where: { id: monthId },
+      select: { id: true },
+    }))
+  )
+    throw new Error("ไม่พบเดือนนี้");
+  const closing = await tx.monthlyClosing.findUnique({
+    where: { businessId_fiscalMonthId: { businessId, fiscalMonthId: monthId } },
+    select: { status: true },
+  });
+  if (closing && closing.status !== "OPEN")
+    throw new Error("เดือนนี้ปิดบัญชีแล้ว กรุณาเปิดบัญชีก่อนแก้ไข");
+}
 
 // ───── PAYROLL ─────
 
@@ -94,6 +115,7 @@ async function saveFlexibleRows(
     }))
   )
     throw new Error("ไม่พบเดือนนี้");
+  await assertOpenMonth(tx, businessId, monthId);
   const marker = kind === "extra" ? EXTRA_MARKER : OTHER_MARKER;
   const categories = await tx.fixedCostCategory.findMany({
     where: { businessId },
@@ -225,12 +247,14 @@ export async function saveOtherCosts(input: {
   await prisma.$transaction(
     (tx) =>
       saveFlexibleRows(tx, biz.id, data.fiscalMonthId, "other", data.rows),
-    { timeout: 30_000 }
+    { isolationLevel: "Serializable", timeout: 30_000 }
   );
   revalidateCostViews();
 }
 
 const savePayrollSchema = z.object({
+  revision: z.string().regex(/^[a-f0-9]{64}$/),
+  businessId: z.number().int().positive(),
   fiscalMonthId,
   payroll: z.array(
     z.object({
@@ -247,9 +271,17 @@ export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
   await requireAccess();
   const biz = await requireBusiness();
   const data = savePayrollSchema.parse(input);
+  if (data.businessId !== biz.id)
+    throw new Error("ธุรกิจเปลี่ยนไปแล้ว กรุณารีเฟรชหน้า");
 
-  await prisma.$transaction(
+  const revision = await prisma.$transaction(
     async (tx) => {
+      if (
+        data.revision !==
+        (await readPayrollRevision(tx, biz.id, data.fiscalMonthId))
+      )
+        throw new Error("ข้อมูลต้นทุนเปลี่ยนไปแล้ว กรุณารีเฟรชและตรวจสอบใหม่");
+      await assertOpenMonth(tx, biz.id, data.fiscalMonthId);
       const owned = await tx.employee.findMany({
         where: {
           businessId: biz.id,
@@ -298,11 +330,13 @@ export async function savePayroll(input: z.input<typeof savePayrollSchema>) {
         "extra",
         data.extras
       );
+      return readPayrollRevision(tx, biz.id, data.fiscalMonthId);
     },
-    { timeout: 30_000 }
+    { isolationLevel: "Serializable", timeout: 30_000 }
   );
 
   revalidateCostViews();
+  return { revision };
 }
 
 // ───── SUPPLIERS ─────
@@ -326,18 +360,29 @@ export async function saveSuppliers(
   const data = saveSuppliersSchema.parse(input);
 
   await prisma.$transaction(
-    data.purchases.map((p) => {
-      const override =
-        p.nameOverride && p.nameOverride.length > 0 ? p.nameOverride : null;
-      return p.amount === 0 && override == null
-        ? prisma.supplierPurchase.deleteMany({
+    async (tx) => {
+      await assertOpenMonth(tx, biz.id, data.fiscalMonthId);
+      const owned = await tx.supplier.findMany({
+        where: {
+          businessId: biz.id,
+          id: { in: data.purchases.map((p) => p.supplierId) },
+        },
+        select: { id: true },
+      });
+      if (data.purchases.some((p) => !owned.some((s) => s.id === p.supplierId)))
+        throw new Error("ไม่พบรายการนี้ในธุรกิจปัจจุบัน");
+      for (const p of data.purchases) {
+        const override = p.nameOverride || null;
+        if (p.amount === 0 && override == null)
+          await tx.supplierPurchase.deleteMany({
             where: {
               businessId: biz.id,
               supplierId: p.supplierId,
               fiscalMonthId: data.fiscalMonthId,
             },
-          })
-        : prisma.supplierPurchase.upsert({
+          });
+        else
+          await tx.supplierPurchase.upsert({
             where: {
               supplierId_fiscalMonthId: {
                 supplierId: p.supplierId,
@@ -353,7 +398,9 @@ export async function saveSuppliers(
               nameOverride: override,
             },
           });
-    })
+      }
+    },
+    { isolationLevel: "Serializable", timeout: 30_000 }
   );
 
   revalidateCostViews();
@@ -377,16 +424,28 @@ export async function saveFixed(input: z.input<typeof saveFixedSchema>) {
   const data = saveFixedSchema.parse(input);
 
   await prisma.$transaction(
-    data.costs.map((c) =>
-      c.amount === 0
-        ? prisma.fixedCost.deleteMany({
+    async (tx) => {
+      await assertOpenMonth(tx, biz.id, data.fiscalMonthId);
+      const owned = await tx.fixedCostCategory.findMany({
+        where: {
+          businessId: biz.id,
+          id: { in: data.costs.map((c) => c.categoryId) },
+        },
+        select: { id: true },
+      });
+      if (data.costs.some((c) => !owned.some((s) => s.id === c.categoryId)))
+        throw new Error("ไม่พบรายการนี้ในธุรกิจปัจจุบัน");
+      for (const c of data.costs) {
+        if (c.amount === 0)
+          await tx.fixedCost.deleteMany({
             where: {
               businessId: biz.id,
               categoryId: c.categoryId,
               fiscalMonthId: data.fiscalMonthId,
             },
-          })
-        : prisma.fixedCost.upsert({
+          });
+        else
+          await tx.fixedCost.upsert({
             where: {
               categoryId_fiscalMonthId: {
                 categoryId: c.categoryId,
@@ -400,8 +459,10 @@ export async function saveFixed(input: z.input<typeof saveFixedSchema>) {
               fiscalMonthId: data.fiscalMonthId,
               amount: c.amount,
             },
-          })
-    )
+          });
+      }
+    },
+    { isolationLevel: "Serializable", timeout: 30_000 }
   );
 
   revalidateCostViews();
@@ -419,32 +480,9 @@ export async function saveRevenueOverride(
   input: z.input<typeof saveOverrideSchema>
 ) {
   await requireAccess();
-  const biz = await requireBusiness();
-  const data = saveOverrideSchema.parse(input);
-
-  if (data.amount === 0) {
-    await prisma.monthlyRevenueOverride.deleteMany({
-      where: { businessId: biz.id, fiscalMonthId: data.fiscalMonthId },
-    });
-  } else {
-    await prisma.monthlyRevenueOverride.upsert({
-      where: {
-        businessId_fiscalMonthId: {
-          businessId: biz.id,
-          fiscalMonthId: data.fiscalMonthId,
-        },
-      },
-      update: { amount: data.amount, note: data.note || null },
-      create: {
-        businessId: biz.id,
-        fiscalMonthId: data.fiscalMonthId,
-        amount: data.amount,
-        note: data.note || null,
-      },
-    });
-  }
-
-  revalidateCostViews();
+  await requireBusiness();
+  saveOverrideSchema.parse(input);
+  throw new Error("รายได้ใช้ยอดขายหน้าร้าน กรุณาแก้ไขที่ยอดขายหน้าร้าน");
 }
 
 // ───── FIXED CATEGORY CRUD ─────

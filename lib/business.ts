@@ -41,14 +41,16 @@ export async function getAccessibleBusinesses(): Promise<BusinessLite[]> {
 /**
  * The business the user is currently working in.
  * Reads the `businessId` cookie and validates it against the accessible
- * list (falls back to the first accessible business). Null = no access.
+ * list. Only an absent selection uses the first business; stale selections fail closed.
  */
 export async function getCurrentBusiness(): Promise<BusinessLite | null> {
   const accessible = await getAccessibleBusinesses();
   if (accessible.length === 0) return null;
   const store = await cookies();
-  const id = Number(store.get(BUSINESS_COOKIE)?.value);
-  return accessible.find((b) => b.id === id) ?? accessible[0];
+  const selected = store.get(BUSINESS_COOKIE)?.value;
+  return selected
+    ? (accessible.find((b) => String(b.id) === selected) ?? null)
+    : accessible[0];
 }
 
 /**

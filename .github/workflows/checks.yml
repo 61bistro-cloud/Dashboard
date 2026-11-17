@@ -1,0 +1,19 @@
+name: Data safety and regressions
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://localhost/dashboard_test
+      DIRECT_URL: postgresql://localhost/dashboard_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:safety && npm run test:pos && npm run test:costs && npm run test:accounts && npm run test:bank && npm run test:bank-delete && npm run test:matching && npm run test:evidence && npm run test:line && npm run test:i18n
+      - run: npm run typecheck

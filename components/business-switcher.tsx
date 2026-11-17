@@ -23,7 +23,7 @@ export function BusinessSwitcher({
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
 
-  const current = businesses.find((b) => b.id === currentId) ?? businesses[0];
+  const current = businesses.find((b) => b.id === currentId);
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -36,7 +36,7 @@ export function BusinessSwitcher({
   }, []);
 
   // Single business → no dropdown, just a label
-  if (businesses.length <= 1) {
+  if (businesses.length === 0 || (businesses.length === 1 && current)) {
     return (
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-card bg-ink text-canvas">
