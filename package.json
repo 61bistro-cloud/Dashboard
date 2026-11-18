@@ -25,7 +25,8 @@
     "test:pos": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/pos-safety.test.mts",
     "test:advice": "node --import tsx --test --test-isolation=none tests/business-advice.test.mts",
     "test:client": "node --import tsx --test --test-isolation=none tests/client-boundaries.test.mts",
-    "test:documents": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/document-review.test.mts tests/document-processing.test.mts"
+    "test:documents": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/document-review.test.mts tests/document-processing.test.mts",
+    "test:remarks": "node --experimental-vm-modules --import tsx --test --test-isolation=none tests/transaction-remark.test.mts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

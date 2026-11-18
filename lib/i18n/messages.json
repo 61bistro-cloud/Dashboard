@@ -1400,7 +1400,7 @@
     "en": "Finalized again with latest figures"
   },
   "แก้ไขหมายเหตุ": {
-    "en": "Edit note"
+    "en": "Edit remark"
   },
   "ต้องระบุรายละเอียด": {
     "en": "Enter a description"
@@ -4147,5 +4147,45 @@
   },
   "ยังระบุหมวดไม่ได้": {
     "en": "Category unknown"
+  },
+  "Remark / หมายเหตุ": {
+    "th": "หมายเหตุ",
+    "en": "Remark"
+  },
+  "ไม่มีสิทธิ์แก้ไขหมายเหตุ": {
+    "en": "You do not have permission to edit remarks."
+  },
+  "กรุณาตรวจข้อมูล หมายเหตุยาวได้ไม่เกิน 2,000 ตัวอักษร": {
+    "en": "Check the input. Remarks can contain up to 2,000 characters."
+  },
+  "ไม่พบรายการนี้ในบัญชีและเดือนที่เลือก": {
+    "en": "This transaction was not found in the selected account and month."
+  },
+  "หมายเหตุเปลี่ยนไปแล้ว กรุณาตรวจข้อความล่าสุดก่อนบันทึก": {
+    "en": "The remark has changed. Review the latest text before saving."
+  },
+  "บันทึกหมายเหตุไม่สำเร็จ ข้อความที่แก้ไขยังอยู่ กรุณาลองใหม่": {
+    "en": "Could not save the remark. Your draft is retained. Please retry."
+  },
+  "หมายเหตุของรายการ {v0}": {
+    "en": "Remark for transaction {v0}"
+  },
+  "แก้ไขหมายเหตุของรายการ {v0}": {
+    "en": "Edit remark for transaction {v0}"
+  },
+  "บันทึกหมายเหตุ": {
+    "en": "Save remark"
+  },
+  "เพิ่มหมายเหตุ": {
+    "en": "Add remark"
+  },
+  "บันทึกหมายเหตุแล้ว": {
+    "en": "Remark saved"
+  },
+  "หมายเหตุล่าสุดในระบบ": {
+    "en": "Latest saved remark"
+  },
+  "ใช้ข้อความล่าสุดแทนข้อความที่กำลังแก้ไข": {
+    "en": "Replace this draft with the latest text"
   }
 }

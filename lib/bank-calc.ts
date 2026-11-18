@@ -1,3 +1,5 @@
+import { transactionRemark } from "./transaction-remark";
+import { transactionRemarkVersion } from "./transaction-remark-server";
 import { prisma } from "@/lib/prisma";
 
 export type BankMonthData = {
@@ -15,6 +17,8 @@ export type BankMonthData = {
     runningBalance: number;
     channel: string | null;
     note: string | null;
+    remark?: string;
+    remarkVersion?: string;
     categoryName: string | null;
     categoryId: number | null;
   }>;
@@ -50,6 +54,8 @@ export async function getBankMonth(
       runningBalance: running,
       channel: t.channel,
       note: t.note,
+      remark: transactionRemark(t.note),
+      remarkVersion: transactionRemarkVersion(t.note),
       categoryName: t.category?.name ?? null,
       categoryId: t.categoryId,
     };

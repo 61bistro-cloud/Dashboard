@@ -1,4 +1,5 @@
 "use client";
+import { transactionRemark } from "@/lib/transaction-remark";
 
 import { Fragment, useId, useMemo, useState } from "react";
 import type { StatementCostDetail } from "@/lib/statement-cost-details";
@@ -202,12 +203,13 @@ export function StatementExpensesPanel({
                             </Link>
                           </div>
                           <div className="overflow-x-auto rounded-input border border-hairline bg-canvas">
-                            <table className="w-full min-w-[720px] text-xs">
+                            <table className="w-full min-w-[960px] text-xs">
                               <thead className="bg-surface text-left">
                                 <tr>
                                   {[
                                     "วันที่ / เวลา",
-                                    "รายละเอียด / หมายเหตุ",
+                                    "รายการ",
+                                    "Remark / หมายเหตุ",
                                     "บัญชีที่จ่าย",
                                     "ช่องทาง",
                                     "จำนวนเงิน",
@@ -237,16 +239,9 @@ export function StatementExpensesPanel({
                                         {item.description ||
                                           ui("(ไม่มีรายละเอียด)")}
                                       </p>
-                                      {item.note && (
-                                        <details className="mt-2 text-muted">
-                                          <summary className="cursor-pointer">
-                                            {ui("หมายเหตุ")}
-                                          </summary>
-                                          <p className="mt-1 whitespace-pre-wrap break-words">
-                                            {item.note}
-                                          </p>
-                                        </details>
-                                      )}
+                                    </td>
+                                    <td className="px-3 py-3 align-top min-w-[220px] max-w-sm whitespace-pre-wrap break-words">
+                                      {transactionRemark(item.note) || "—"}
                                     </td>
                                     <td className="px-3 py-3 align-top">
                                       <p>{item.accountName}</p>
@@ -304,7 +299,7 @@ export function StatementExpensesPanel({
                               </tbody>
                               <tfoot className="border-t border-hairline bg-surface font-medium">
                                 <tr>
-                                  <td colSpan={4} className="px-3 py-2">
+                                  <td colSpan={5} className="px-3 py-2">
                                     {ui("รวม")}
                                   </td>
                                   <td className="px-3 py-2 text-right tabular-nums">

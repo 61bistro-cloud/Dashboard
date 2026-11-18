@@ -91,6 +91,7 @@ test("actual browser fiscal utilities load without Prisma initialization or serv
 for (const path of [
   "app/(app)/cost-setup/_components/statement-expenses-panel.tsx",
   "app/(app)/bank/_components/transaction-table.tsx",
+  "app/(app)/bank/_components/transaction-remark.tsx",
   "app/(app)/bank/_components/statement-upload.tsx",
   "app/(app)/bank/evidence/_components/evidence-matcher.tsx",
   "app/(app)/closing/_components/adjustments.tsx",

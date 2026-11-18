@@ -47,6 +47,8 @@ async function setup(
       },
     },
     "@/lib/fiscal": { fmtTHB: String },
+    "@/lib/transaction-remark": { transactionRemark: () => "" },
+    "./transaction-remark": { TransactionRemark: "remark-cell" },
     "./tx-category-select": { TxCategorySelect: "category-select" },
     "./delete-button": { DeleteButton: "delete-button" },
   };

@@ -520,6 +520,7 @@ export default async function BankPage({
         />
 
         <TransactionTable
+          businessId={business.id}
           key={`${currentAccount.id}:${currentMonth.id}`}
           fiscalMonthId={currentMonth.id}
           accountId={currentAccount.id}

@@ -1,0 +1,9 @@
+# Bank transaction remarks
+
+Bank & Reconcile has a separate remark column, with explicit add/edit/save/cancel controls and a 2,000-character limit. The payment detail table under Cost Setup shows the same remark directly in its own column. Thai UI uses “หมายเหตุ”, English uses “Remark”; entered text is never translated.
+
+The manual annotation is stored in the existing `BankTransaction.note` as `BANK_REMARK_V1` JSON. Imported plain-text notes and per-evidence confirmed remarks remain intact. When no manual annotation exists, readable legacy/evidence text is shown. An explicitly saved empty annotation clears the displayed remark without erasing the evidence audit. System metadata is not rendered as remark text. Later evidence updates preserve the manual override.
+
+The action requires an OWNER/ACCOUNTANT and the rendered business/account/month/transaction scope. It checks account ownership and the selected business again on the server, rejects finalized months and uses a SHA-256 revision of the complete stored note plus a compare-and-swap update in a serializable transaction. A stale edit cannot overwrite newer notes or evidence metadata. Failed saves retain the draft; the user may explicitly load the latest text. Save writes only `note`, never money, dates, categories, evidence links or cost data. Bank/evidence and Cost Setup views are revalidated.
+
+There are no migrations, seeds, startup conversions or deployment backfills. `test:remarks` covers scoped edits, legacy compatibility, clearing, evidence preservation, stale revisions, role/closed-period guards and note-only writes. Client import graph checks include the editor. Browser fixtures cover both languages, both themes, mobile/desktop, Cost Setup display, save failures, cancellation, conflicts and clearing without production writes.

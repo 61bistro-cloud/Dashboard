@@ -1,4 +1,6 @@
 "use client";
+import { transactionRemark } from "@/lib/transaction-remark";
+import { TransactionRemark } from "./transaction-remark";
 import { displayMonth } from "@/lib/i18n/core";
 
 import { useUi } from "@/lib/i18n/use-ui";
@@ -12,6 +14,7 @@ import { TxCategorySelect } from "./tx-category-select";
 import { DeleteButton } from "./delete-button";
 
 type Props = {
+  businessId: number;
   fiscalMonthId: number;
   accountId: number;
   accountName: string;
@@ -27,6 +30,7 @@ type Props = {
 };
 
 export function TransactionTable({
+  businessId,
   fiscalMonthId,
   accountId,
   accountName,
@@ -224,7 +228,7 @@ export function TransactionTable({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
+          <table className="w-full min-w-[1150px] text-xs">
             <thead className="bg-surface text-left">
               <tr>
                 {editing && (
@@ -259,6 +263,9 @@ export function TransactionTable({
                 </th>
                 <th className="px-3 py-2 font-medium">{ui("ช่องทาง")}</th>
                 <th className="px-3 py-2 font-medium">{ui("หมวด")}</th>
+                <th className="px-3 py-2 font-medium">
+                  {ui("Remark / หมายเหตุ")}
+                </th>
                 <th className="px-3 py-2 font-medium">{ui("หลักฐาน")}</th>
                 <th className="px-3 py-2 font-medium"></th>
               </tr>
@@ -294,17 +301,7 @@ export function TransactionTable({
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-1.5">
-                    {r.description}
-                    {r.note && (
-                      <details className="mt-1 text-muted">
-                        <summary className="cursor-pointer text-[10px]">
-                          {ui("Remark / บันทึก")}
-                        </summary>
-                        <p className="whitespace-pre-line mt-1">{r.note}</p>
-                      </details>
-                    )}
-                  </td>
+                  <td className="px-3 py-1.5">{r.description}</td>
                   <td className="px-3 py-1.5 text-right tabular-nums text-emerald-700">
                     {r.deposit > 0 ? fmtTHB(r.deposit) : ""}
                   </td>
@@ -325,6 +322,18 @@ export function TransactionTable({
                       txId={r.id}
                       categoryId={r.categoryId}
                       categories={categories}
+                    />
+                  </td>
+                  <td className="px-3 py-1.5 align-top">
+                    <TransactionRemark
+                      businessId={businessId}
+                      accountId={accountId}
+                      fiscalMonthId={fiscalMonthId}
+                      transactionId={r.id}
+                      description={r.description}
+                      remark={r.remark ?? transactionRemark(r.note)}
+                      version={r.remarkVersion}
+                      disabled={pending || confirming}
                     />
                   </td>
                   <td className="px-3 py-1.5">
