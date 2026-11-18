@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { GOOGLE_STATE_COOKIE, newGoogleState } from "@/lib/google-oauth-state";
 import { auth } from "@/auth";
 import { getCurrentBusiness } from "@/lib/business";
 import { consentUrl, googleConfigured } from "@/lib/google";
@@ -17,6 +19,14 @@ export async function GET(req: Request) {
   if (!biz) return new Response("no business", { status: 403 });
 
   const origin = new URL(req.url).origin;
-  const url = consentUrl(`${origin}/api/google/callback`, String(biz.id));
+  const state = newGoogleState(session.user.id, biz.id);
+  (await cookies()).set(GOOGLE_STATE_COOKIE, state.cookie, {
+    httpOnly: true,
+    secure: new URL(req.url).protocol === "https:",
+    sameSite: "lax",
+    path: "/api/google",
+    maxAge: 600,
+  });
+  const url = consentUrl(`${origin}/api/google/callback`, state.state);
   return Response.redirect(url);
 }

@@ -23,11 +23,12 @@ export function UserBusinessAssign({
   const [pending, startTransition] = useTransition();
   const [sel, setSel] = useState<number[]>(assigned);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
   if (isOwner) {
     return (
       <span className="text-xs text-muted">
-        {ui("เห็นทุกธุรกิจ (เจ้าของ)")}
+        {ui("ผู้ดูแลระบบ — เข้าถึงทุกธุรกิจ")}
       </span>
     );
   }
@@ -41,8 +42,13 @@ export function UserBusinessAssign({
 
   function save() {
     startTransition(async () => {
-      await setUserBusinesses({ userId, businessIds: sel });
-      setSaved(true);
+      setError("");
+      try {
+        await setUserBusinesses({ userId, businessIds: sel });
+        setSaved(true);
+      } catch (e) {
+        setError((e as Error).message);
+      }
     });
   }
 
@@ -84,6 +90,11 @@ export function UserBusinessAssign({
           )}{" "}
           {ui("บันทึก")}
         </button>
+      )}
+      {error && (
+        <p role="alert" className="text-xs text-red-600">
+          {ui(error)}
+        </p>
       )}
       {saved && !dirty && <span className="text-xs text-emerald-600">✓</span>}
     </div>

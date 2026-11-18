@@ -12,15 +12,14 @@ export const BUSINESS_COOKIE = "businessId";
 
 /**
  * Businesses the current user may access.
- *   OWNER         → every active business (super-admin)
- *   ACCOUNTANT /  → only businesses linked via UserBusiness
- *   STAFF
+ *   System admin → every active business.
+ *   Shop OWNER / ACCOUNTANT / STAFF → explicit UserBusiness links only.
  */
 export async function getAccessibleBusinesses(): Promise<BusinessLite[]> {
   const session = await auth();
   if (!session) return [];
 
-  if (session.user.role === "OWNER") {
+  if (session.user.isSystemAdmin === true) {
     return prisma.business.findMany({
       where: { active: true },
       orderBy: { sortOrder: "asc" },

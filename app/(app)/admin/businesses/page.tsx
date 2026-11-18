@@ -10,7 +10,7 @@ export default async function BusinessesAdminPage() {
   const { ui } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
-  if (session.user.role !== "OWNER") redirect("/");
+  if (!session.user.isSystemAdmin) redirect("/");
 
   const businesses = await prisma.business.findMany({
     orderBy: { sortOrder: "asc" },

@@ -1,3 +1,5 @@
+import { isSystemAdmin } from "@/lib/system-admin-policy";
+import { CustomerOnboarding } from "./_components/customer-onboarding";
 import { dateLocale } from "@/lib/i18n/core";
 
 import { getUi } from "@/lib/i18n/server";
@@ -14,7 +16,7 @@ export default async function UsersAdminPage() {
   const { ui, uiLocale } = await getUi();
   const session = await auth();
   if (!session) redirect("/sign-in");
-  if (session.user.role !== "OWNER") redirect("/");
+  if (!session.user.isSystemAdmin) redirect("/");
 
   const [users, businesses] = await Promise.all([
     prisma.user.findMany({
@@ -46,7 +48,15 @@ export default async function UsersAdminPage() {
         )}
       />
 
-      <AddUserForm />
+      <CustomerOnboarding />
+      <details className="rounded-card border border-hairline p-4">
+        <summary className="text-sm font-semibold cursor-pointer">
+          {ui("เพิ่มผู้ใช้ในธุรกิจเดิม")}
+        </summary>
+        <div className="mt-4">
+          <AddUserForm businesses={businesses} />
+        </div>
+      </details>
 
       <div className="overflow-hidden rounded-card border border-hairline bg-canvas">
         <table className="w-full text-sm">
@@ -79,21 +89,31 @@ export default async function UsersAdminPage() {
                   </td>
                   <td className="px-4 py-3 text-ink/75">{u.email}</td>
                   <td className="px-4 py-3">
-                    <RoleSelect id={u.id} currentRole={u.role} isMe={isMe} />
+                    <RoleSelect
+                      id={u.id}
+                      currentRole={u.role}
+                      isMe={isMe}
+                      systemAdmin={isSystemAdmin(u)}
+                    />
                   </td>
                   <td className="px-4 py-3">
                     <UserBusinessAssign
                       userId={u.id}
                       allBusinesses={businesses}
                       assigned={u.businesses.map((b) => b.businessId)}
-                      isOwner={u.role === "OWNER"}
+                      isOwner={isSystemAdmin(u)}
                     />
                   </td>
                   <td className="px-4 py-3 text-muted">
                     {u.createdAt.toLocaleDateString(dateLocale(uiLocale))}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <DeleteUserButton id={u.id} email={u.email} isMe={isMe} />
+                    <DeleteUserButton
+                      id={u.id}
+                      email={u.email}
+                      isMe={isMe}
+                      systemAdmin={isSystemAdmin(u)}
+                    />
                   </td>
                 </tr>
               );
@@ -116,12 +136,14 @@ export default async function UsersAdminPage() {
             )}
           </li>
           <li>
-            {ui("ลบบัญชีตัวเองไม่ได้ และต้องมี OWNER อย่างน้อย 1 คนเสมอ")}
+            {ui(
+              "การถอนสิทธิ์จะหยุดการเข้าถึง โดยเก็บผู้ใช้และประวัติรายการเดิมไว้"
+            )}
           </li>
           <li>
             <strong>{ui("สิทธิ์")}</strong>
             {ui(
-              ": เจ้าของร้าน = ทุกอย่าง · บัญชี = ยกเว้นจัดการผู้ใช้ · พนักงาน = ดูได้บางส่วน"
+              ": เจ้าของร้านดูแลเฉพาะธุรกิจที่ได้รับสิทธิ์ ผู้ดูแลระบบเท่านั้นที่จัดการลูกค้าและธุรกิจทั้งหมดได้"
             )}
           </li>
         </ul>

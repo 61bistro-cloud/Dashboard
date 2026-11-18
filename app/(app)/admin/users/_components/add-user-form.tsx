@@ -6,7 +6,11 @@ import { useState, useTransition } from "react";
 import { UserPlus, Loader2 } from "lucide-react";
 import { addUser } from "../actions";
 
-export function AddUserForm() {
+export function AddUserForm({
+  businesses,
+}: {
+  businesses: { id: number; name: string }[];
+}) {
   const { ui } = useUi();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +25,7 @@ export function AddUserForm() {
           email: String(formData.get("email") ?? ""),
           name: String(formData.get("name") ?? ""),
           role: formData.get("role") as "OWNER" | "ACCOUNTANT" | "STAFF",
+          businessIds: [Number(formData.get("businessId"))],
         });
         setOk(
           ui("เพิ่มผู้ใช้เรียบร้อย — ผู้ใช้สามารถ login ด้วย Google ได้ทันที")
@@ -103,6 +108,22 @@ export function AddUserForm() {
         </div>
       </div>
 
+      <label className="mt-3 block text-xs text-muted">
+        {ui("เลือกธุรกิจให้ผู้ใช้")}
+        <select
+          name="businessId"
+          required
+          defaultValue=""
+          className="mt-1 w-full rounded-input border border-hairline bg-canvas p-2 text-sm"
+        >
+          <option value="">{ui("— เลือกธุรกิจ —")}</option>
+          {businesses.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
+          ))}
+        </select>
+      </label>
       {error && (
         <div className="mt-3 rounded-input bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-800">
           {ui(error)}
@@ -116,7 +137,7 @@ export function AddUserForm() {
 
       <p className="mt-3 text-xs text-muted">
         {ui(
-          "💡 ผู้ใช้ใหม่ต้องเป็น Gmail (Google account) และต้อง login ผ่านปุ่ม “เข้าสู่ระบบด้วย Google” ในหน้า sign-in"
+          "ผู้ใช้ต้องใช้อีเมลที่ผูกกับบัญชี Google และจะเข้าถึงเฉพาะธุรกิจที่เลือก"
         )}
       </p>
     </form>

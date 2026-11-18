@@ -6,15 +6,8 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { BUSINESS_COOKIE, getAccessibleBusinesses } from "@/lib/business";
+import { requireSystemAdmin } from "@/lib/system-admin";
 import { seedBusinessDefaults } from "@/lib/business-defaults";
-
-async function requireOwner() {
-  const session = await auth();
-  if (!session || session.user.role !== "OWNER") {
-    throw new Error("เฉพาะเจ้าของร้านเท่านั้นที่จัดการธุรกิจได้");
-  }
-  return session;
-}
 
 /**
  * Switch the active business. Validates the target is one the user may
@@ -52,7 +45,7 @@ const createBusinessSchema = z.object({
 export async function createBusiness(
   input: z.input<typeof createBusinessSchema>
 ) {
-  await requireOwner();
+  await requireSystemAdmin();
   const data = createBusinessSchema.parse(input);
 
   // Ensure a unique slug
@@ -85,7 +78,7 @@ const renameBusinessSchema = z.object({
 export async function renameBusiness(
   input: z.input<typeof renameBusinessSchema>
 ) {
-  await requireOwner();
+  await requireSystemAdmin();
   const data = renameBusinessSchema.parse(input);
   await prisma.business.update({
     where: { id: data.id },
@@ -96,7 +89,7 @@ export async function renameBusiness(
 
 /** Soft enable/disable a business (hidden from switcher when inactive). */
 export async function setBusinessActive(id: number, active: boolean) {
-  await requireOwner();
+  await requireSystemAdmin();
   if (!active) {
     const remaining = await prisma.business.count({ where: { active: true } });
     if (remaining <= 1) {

@@ -4576,5 +4576,181 @@
   "อ่านรายการกรุงเทพไม่ครบหรือยอดไม่ต่อเนื่อง กรุณาตรวจไฟล์ต้นฉบับ": {
     "th": "อ่านรายการกรุงเทพไม่ครบหรือยอดไม่ต่อเนื่อง กรุณาตรวจไฟล์ต้นฉบับ",
     "en": "The Bangkok Bank statement could not be read completely or balances do not reconcile. Check the original file."
+  },
+  "เพิ่มลูกค้าทดลอง — ธุรกิจใหม่": {
+    "th": "เพิ่มลูกค้าทดลอง — ธุรกิจใหม่",
+    "en": "Add trial customer — new business"
+  },
+  "สร้างพื้นที่ธุรกิจใหม่และบัญชีเจ้าของร้าน ลูกค้าจะเห็นเฉพาะธุรกิจของตนเอง ไม่คัดลอกยอดขาย ต้นทุน บัญชีธนาคาร หรือการเชื่อมต่อจากร้านเดิม": {
+    "th": "สร้างพื้นที่ธุรกิจใหม่และบัญชีเจ้าของร้าน ลูกค้าจะเห็นเฉพาะธุรกิจของตนเอง ไม่คัดลอกยอดขาย ต้นทุน บัญชีธนาคาร หรือการเชื่อมต่อจากร้านเดิม",
+    "en": "Create a new business workspace and shop-owner account. Customers see only their own business. Sales, costs, bank accounts and connections are not copied from existing shops."
+  },
+  "ชื่อธุรกิจลูกค้า": {
+    "th": "ชื่อธุรกิจลูกค้า",
+    "en": "Customer business name"
+  },
+  "อีเมล Google ของลูกค้า": {
+    "th": "อีเมล Google ของลูกค้า",
+    "en": "Customer Google email"
+  },
+  "ตรวจข้อมูลก่อนสร้าง": {
+    "th": "ตรวจข้อมูลก่อนสร้าง",
+    "en": "Review before creating"
+  },
+  "เจ้าของร้านเข้าถึงเฉพาะธุรกิจใหม่ ผู้ดูแลระบบยังช่วยดูแลได้ เริ่มต้นโดยไม่มีรายการเงินจริง และไม่มีวันหมดอายุอัตโนมัติจนกว่าจะกำหนดแพ็กเกจ": {
+    "th": "เจ้าของร้านเข้าถึงเฉพาะธุรกิจใหม่ ผู้ดูแลระบบยังช่วยดูแลได้ เริ่มต้นโดยไม่มีรายการเงินจริง และไม่มีวันหมดอายุอัตโนมัติจนกว่าจะกำหนดแพ็กเกจ",
+    "en": "The owner can access only the new business; system operators can provide support. Starts with no financial transactions. No automatic trial expiry is applied until a package policy is configured."
+  },
+  "กำลังสร้างบัญชีลูกค้า…": {
+    "th": "กำลังสร้างบัญชีลูกค้า…",
+    "en": "Creating customer account…"
+  },
+  "ยืนยันสร้างบัญชีลูกค้า": {
+    "th": "ยืนยันสร้างบัญชีลูกค้า",
+    "en": "Confirm customer account creation"
+  },
+  "บัญชีลูกค้าพร้อมใช้งาน": {
+    "th": "บัญชีลูกค้าพร้อมใช้งาน",
+    "en": "Customer account is ready"
+  },
+  "ให้ลูกค้าเปิดลิงก์ด้านล่าง แล้วกดเข้าสู่ระบบด้วย Google โดยเลือกอีเมลนี้ ไม่ต้องสร้างรหัสผ่านใหม่": {
+    "th": "ให้ลูกค้าเปิดลิงก์ด้านล่าง แล้วกดเข้าสู่ระบบด้วย Google โดยเลือกอีเมลนี้ ไม่ต้องสร้างรหัสผ่านใหม่",
+    "en": "Ask the customer to open the link below and sign in with Google using this email. No new password is needed."
+  },
+  "คัดลอกลิงก์ให้ลูกค้า": {
+    "th": "คัดลอกลิงก์ให้ลูกค้า",
+    "en": "Copy customer sign-in link"
+  },
+  "คัดลอกลิงก์เข้าสู่ระบบแล้ว": {
+    "th": "คัดลอกลิงก์เข้าสู่ระบบแล้ว",
+    "en": "Sign-in link copied"
+  },
+  "คัดลอกไม่สำเร็จ กรุณาคัดลอกลิงก์ด้านบน": {
+    "th": "คัดลอกไม่สำเร็จ กรุณาคัดลอกลิงก์ด้านบน",
+    "en": "Copy failed. Copy the link above manually."
+  },
+  "ระบบไม่ได้ส่งอีเมลให้ลูกค้าอัตโนมัติ": {
+    "th": "ระบบไม่ได้ส่งอีเมลให้ลูกค้าอัตโนมัติ",
+    "en": "No email is sent to the customer automatically."
+  },
+  "ลูกค้าเริ่มใช้งานอย่างไร และข้อมูลเก็บที่ไหน": {
+    "th": "ลูกค้าเริ่มใช้งานอย่างไร และข้อมูลเก็บที่ไหน",
+    "en": "How customers get started and where data is stored"
+  },
+  "ใช้บัญชี Google ที่ผู้ดูแลเพิ่มไว้ เข้าลิงก์เดียวกัน แต่แต่ละรายเห็นเฉพาะธุรกิจที่ได้รับสิทธิ์": {
+    "th": "ใช้บัญชี Google ที่ผู้ดูแลเพิ่มไว้ เข้าลิงก์เดียวกัน แต่แต่ละรายเห็นเฉพาะธุรกิจที่ได้รับสิทธิ์",
+    "en": "Sign in at the same link using the Google account added by the administrator. Each customer sees only assigned businesses."
+  },
+  "เพิ่มบัญชีธนาคารและช่องทางของร้านเอง แล้วนำเข้า POS หรือรายการเดินบัญชีของร้านนั้น": {
+    "th": "เพิ่มบัญชีธนาคารและช่องทางของร้านเอง แล้วนำเข้า POS หรือรายการเดินบัญชีของร้านนั้น",
+    "en": "Add the shop’s own bank accounts and channels, then import its POS sales or bank statements."
+  },
+  "ข้อมูลตัวเลขเก็บในฐานข้อมูลกลาง แยกด้วยรหัสธุรกิจและตรวจสิทธิ์ฝั่งเซิร์ฟเวอร์ เอกสารเชื่อม Google Drive และ LINE แยกต่อธุรกิจ": {
+    "th": "ข้อมูลตัวเลขเก็บในฐานข้อมูลกลาง แยกด้วยรหัสธุรกิจและตรวจสิทธิ์ฝั่งเซิร์ฟเวอร์ เอกสารเชื่อม Google Drive และ LINE แยกต่อธุรกิจ",
+    "en": "Financial data is stored in a shared database, scoped by business ID and server-side permissions. Google Drive and LINE connections are separate for each business."
+  },
+  "หาก Google แจ้งว่าแอปอยู่ในช่วงทดสอบ ให้เพิ่มอีเมลลูกค้าในผู้ใช้ทดสอบของ Google Cloud ก่อนลองใหม่": {
+    "th": "หาก Google แจ้งว่าแอปอยู่ในช่วงทดสอบ ให้เพิ่มอีเมลลูกค้าในผู้ใช้ทดสอบของ Google Cloud ก่อนลองใหม่",
+    "en": "If Google says the app is in testing, add customer emails as Google Cloud test users before retrying."
+  },
+  "เพิ่มผู้ใช้ในธุรกิจเดิม": {
+    "th": "เพิ่มผู้ใช้ในธุรกิจเดิม",
+    "en": "Add a user to an existing business"
+  },
+  "เลือกธุรกิจให้ผู้ใช้": {
+    "th": "เลือกธุรกิจให้ผู้ใช้",
+    "en": "Select the user’s business"
+  },
+  "— เลือกธุรกิจ —": {
+    "th": "— เลือกธุรกิจ —",
+    "en": "— Select business —"
+  },
+  "ผู้ใช้ต้องใช้อีเมลที่ผูกกับบัญชี Google และจะเข้าถึงเฉพาะธุรกิจที่เลือก": {
+    "th": "ผู้ใช้ต้องใช้อีเมลที่ผูกกับบัญชี Google และจะเข้าถึงเฉพาะธุรกิจที่เลือก",
+    "en": "Use an email linked to a Google account. The user can access only the selected business."
+  },
+  "ผู้ดูแลระบบ": {
+    "th": "ผู้ดูแลระบบ",
+    "en": "System administrator"
+  },
+  "ผู้ดูแลระบบ — เข้าถึงทุกธุรกิจ": {
+    "th": "ผู้ดูแลระบบ — เข้าถึงทุกธุรกิจ",
+    "en": "System administrator — all businesses"
+  },
+  "การถอนสิทธิ์จะหยุดการเข้าถึง โดยเก็บผู้ใช้และประวัติรายการเดิมไว้": {
+    "th": "การถอนสิทธิ์จะหยุดการเข้าถึง โดยเก็บผู้ใช้และประวัติรายการเดิมไว้",
+    "en": "Revoking access stops sign-in while retaining the user and transaction history."
+  },
+  ": เจ้าของร้านดูแลเฉพาะธุรกิจที่ได้รับสิทธิ์ ผู้ดูแลระบบเท่านั้นที่จัดการลูกค้าและธุรกิจทั้งหมดได้": {
+    "th": ": เจ้าของร้านดูแลเฉพาะธุรกิจที่ได้รับสิทธิ์ ผู้ดูแลระบบเท่านั้นที่จัดการลูกค้าและธุรกิจทั้งหมดได้",
+    "en": ": Shop owners manage only assigned businesses. Only system administrators manage all customers and businesses."
+  },
+  "ถอนสิทธิ์ผู้ใช้ {v0} หรือไม่? จะเก็บผู้ใช้และประวัติข้อมูลเดิมไว้": {
+    "th": "ถอนสิทธิ์ผู้ใช้ {v0} หรือไม่? จะเก็บผู้ใช้และประวัติข้อมูลเดิมไว้",
+    "en": "Revoke access for {v0}? The user and existing history will be retained."
+  },
+  "ถอนสิทธิ์เข้าใช้": {
+    "th": "ถอนสิทธิ์เข้าใช้",
+    "en": "Revoke access"
+  },
+  "สิทธิ์ผู้ดูแลระบบต้องจัดการผ่านการตั้งค่าระบบ": {
+    "th": "สิทธิ์ผู้ดูแลระบบต้องจัดการผ่านการตั้งค่าระบบ",
+    "en": "Manage system administrator access through system configuration."
+  },
+  "เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการลูกค้าและธุรกิจได้": {
+    "th": "เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการลูกค้าและธุรกิจได้",
+    "en": "Only system administrators can manage customers and businesses."
+  },
+  "บัญชีธุรกิจ": {
+    "th": "บัญชีธุรกิจ",
+    "en": "Business accounts"
+  },
+  "บัญชี Google นี้ยังไม่ได้รับสิทธิ์หรือธุรกิจถูกพักใช้งาน — ติดต่อผู้ดูแลระบบ": {
+    "th": "บัญชี Google นี้ยังไม่ได้รับสิทธิ์หรือธุรกิจถูกพักใช้งาน — ติดต่อผู้ดูแลระบบ",
+    "en": "This Google account has not been granted access, or its business is inactive. Contact the administrator."
+  },
+  "ใช้อีเมลที่ผูกกับบัญชี Google และได้รับเชิญเท่านั้น แต่ละบัญชีเข้าถึงเฉพาะธุรกิจที่ได้รับสิทธิ์": {
+    "th": "ใช้อีเมลที่ผูกกับบัญชี Google และได้รับเชิญเท่านั้น แต่ละบัญชีเข้าถึงเฉพาะธุรกิจที่ได้รับสิทธิ์",
+    "en": "Use an invited email linked to a Google account. Each account accesses only assigned businesses."
+  },
+  "ผู้ใช้ใหม่ติดต่อผู้ดูแลระบบเพื่อเปิดธุรกิจและเพิ่มอีเมล": {
+    "th": "ผู้ใช้ใหม่ติดต่อผู้ดูแลระบบเพื่อเปิดธุรกิจและเพิ่มอีเมล",
+    "en": "New users should contact the administrator to create their business and add their email."
+  },
+  "สร้างบัญชีลูกค้าไม่สำเร็จ กรุณาตรวจข้อมูลแล้วลองใหม่": {
+    "th": "สร้างบัญชีลูกค้าไม่สำเร็จ กรุณาตรวจข้อมูลแล้วลองใหม่",
+    "en": "Could not create the customer account. Check the details and retry."
+  },
+  "อีเมลนี้เป็นผู้ดูแลระบบ กรุณาใช้อีเมลลูกค้าอื่น": {
+    "th": "อีเมลนี้เป็นผู้ดูแลระบบ กรุณาใช้อีเมลลูกค้าอื่น",
+    "en": "This email belongs to a system operator. Use a different customer email."
+  },
+  "ไม่พบธุรกิจที่เลือกหรือธุรกิจปิดใช้งานแล้ว": {
+    "th": "ไม่พบธุรกิจที่เลือกหรือธุรกิจปิดใช้งานแล้ว",
+    "en": "The selected business does not exist or is inactive."
+  },
+  "กรุณาเลือกธุรกิจให้ผู้ใช้": {
+    "th": "กรุณาเลือกธุรกิจให้ผู้ใช้",
+    "en": "Select a business for the user."
+  },
+  "ข้อมูลธุรกิจซ้ำ": {
+    "th": "ข้อมูลธุรกิจซ้ำ",
+    "en": "Duplicate business selection."
+  },
+  "ผู้ดูแลระบบเข้าถึงธุรกิจผ่านสิทธิ์ระบบ": {
+    "th": "ผู้ดูแลระบบเข้าถึงธุรกิจผ่านสิทธิ์ระบบ",
+    "en": "System operators access businesses through system permissions."
+  },
+  "LINE นี้เชื่อมกับธุรกิจอื่นแล้ว กรุณาใช้ช่องทางแยกต่อธุรกิจ": {
+    "th": "LINE นี้เชื่อมกับธุรกิจอื่นแล้ว กรุณาใช้ช่องทางแยกต่อธุรกิจ",
+    "en": "This LINE channel is connected to another business. Use a separate channel for each business."
+  },
+  "ไม่พบรายการในธุรกิจและเดือนที่เลือก": {
+    "th": "ไม่พบรายการในธุรกิจและเดือนที่เลือก",
+    "en": "No record was found in the selected business and month."
+  },
+  "ไม่พบเดือนที่เลือก": {
+    "th": "ไม่พบเดือนที่เลือก",
+    "en": "Selected month not found."
   }
 }

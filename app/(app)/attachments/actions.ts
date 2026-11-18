@@ -50,15 +50,64 @@ export async function attachFile(formData: FormData) {
       return { ok: false as const, message: "ไฟล์ใหญ่เกิน 15MB" };
     }
 
-    let monthFolder: string | null = null;
-    if (fmId) {
-      const fm = await prisma.fiscalMonth.findUnique({
-        where: { id: fmId },
-        select: { calendarYear: true, calendarMonth: true },
+    const fm = fmId
+      ? await prisma.fiscalMonth.findUnique({
+          where: { id: fmId },
+          select: {
+            calendarYear: true,
+            calendarMonth: true,
+            daysInMonth: true,
+          },
+        })
+      : null;
+    if (formData.get("fiscalMonthId") && (!Number.isSafeInteger(fmId) || !fm))
+      return { ok: false as const, message: "ไม่พบเดือนที่เลือก" };
+    const numericId = Number(refId);
+    let owned = false;
+    if (refType === "POS") {
+      const bill = await prisma.posBill.findFirst({
+        where: { id: refId, businessId: biz.id },
+        select: { businessDate: true },
       });
-      if (fm)
-        monthFolder = `${fm.calendarYear}-${String(fm.calendarMonth).padStart(2, "0")}`;
+      owned =
+        !!bill &&
+        (!fm ||
+          bill.businessDate.startsWith(
+            `${fm.calendarYear}-${String(fm.calendarMonth).padStart(2, "0")}-`
+          ));
+    } else if (
+      /^[1-9]\d*$/.test(refId) &&
+      Number.isSafeInteger(numericId) &&
+      numericId > 0
+    ) {
+      const where = {
+        id: numericId,
+        businessId: biz.id,
+        ...(fmId ? { fiscalMonthId: fmId } : {}),
+      };
+      owned = !!(refType === "BANK_TX"
+        ? await prisma.bankTransaction.findFirst({
+            where,
+            select: { id: true },
+          })
+        : refType === "PURCHASE"
+          ? await prisma.supplierPurchase.findFirst({
+              where,
+              select: { id: true },
+            })
+          : await prisma.monthlyClosing.findFirst({
+              where,
+              select: { id: true },
+            }));
     }
+    if (!owned)
+      return {
+        ok: false as const,
+        message: "ไม่พบรายการในธุรกิจและเดือนที่เลือก",
+      };
+    const monthFolder = fm
+      ? `${fm.calendarYear}-${String(fm.calendarMonth).padStart(2, "0")}`
+      : null;
 
     const mimeType =
       file.type && file.type.length ? file.type : "application/octet-stream";

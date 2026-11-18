@@ -89,6 +89,10 @@ test("actual browser fiscal utilities load without Prisma initialization or serv
   assert.equal(w.values[3], 1);
 });
 for (const path of [
+  "app/(app)/admin/users/_components/customer-onboarding.tsx",
+  "app/(app)/admin/users/_components/add-user-form.tsx",
+  "app/(app)/admin/users/_components/user-businesses.tsx",
+  "components/sidebar-nav.tsx",
   "app/(app)/bank/grab/_components/grab-upload.tsx",
   "app/(app)/bank/grab/_components/grab-details.tsx",
   "app/(app)/cost-setup/_components/statement-expenses-panel.tsx",

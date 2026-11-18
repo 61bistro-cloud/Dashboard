@@ -30,10 +30,13 @@ export async function POST(req: Request) {
     },
     select: { id: true, lineChannelSecret: true, lineChannelToken: true },
   });
-  const biz = businesses.find((b) =>
+  const matches = businesses.filter((b) =>
     verifyLineSignature(raw, signature, b.lineChannelSecret!)
   );
-  if (!biz) return new Response("bad signature", { status: 401 });
+  if (!matches.length) return new Response("bad signature", { status: 401 });
+  if (matches.length !== 1)
+    return new Response("ambiguous channel", { status: 409 });
+  const biz = matches[0];
 
   // Verification needs no fiscal-month lookup, Google SDK, Drive or LINE calls.
   if (body.events.length === 0) return new Response("ok");

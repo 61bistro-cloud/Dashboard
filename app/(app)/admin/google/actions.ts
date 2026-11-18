@@ -207,14 +207,38 @@ export async function saveLineConfig(input: z.input<typeof lineSchema>) {
     await requireOwner();
     const biz = await requireBusiness();
     const data = lineSchema.parse(input);
-    await prisma.business.update({
-      where: { id: biz.id },
-      data: {
-        // only overwrite a field when a new value is given (blank = keep old)
-        lineChannelSecret: data.channelSecret || undefined,
-        lineChannelToken: data.channelToken || undefined,
+    await prisma.$transaction(
+      async (tx) => {
+        const current = await tx.business.findUnique({
+          where: { id: biz.id },
+          select: { lineChannelSecret: true, lineChannelToken: true },
+        });
+        const secret = data.channelSecret || current?.lineChannelSecret;
+        const token = data.channelToken || current?.lineChannelToken;
+        const checks = [
+          ...(secret ? [{ lineChannelSecret: secret }] : []),
+          ...(token ? [{ lineChannelToken: token }] : []),
+        ];
+        if (
+          checks.length &&
+          (await tx.business.findFirst({
+            where: { id: { not: biz.id }, OR: checks },
+            select: { id: true },
+          }))
+        )
+          throw new Error(
+            "LINE นี้เชื่อมกับธุรกิจอื่นแล้ว กรุณาใช้ช่องทางแยกต่อธุรกิจ"
+          );
+        await tx.business.update({
+          where: { id: biz.id },
+          data: {
+            lineChannelSecret: data.channelSecret || undefined,
+            lineChannelToken: data.channelToken || undefined,
+          },
+        });
       },
-    });
+      { isolationLevel: "Serializable", timeout: 15000 }
+    );
     revalidatePath("/admin/google");
     return { ok: true as const };
   } catch (e) {

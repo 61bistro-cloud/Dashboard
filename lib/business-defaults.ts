@@ -33,7 +33,7 @@ const DEFAULT_BANK_ACCOUNTS = [
 ];
 
 /** Default transaction categories every new business starts with. */
-const DEFAULT_TX_CATEGORIES: Array<{
+export const DEFAULT_TX_CATEGORIES: Array<{
   name: string;
   kind: "INCOME" | "EXPENSE" | "TRANSFER";
   posChannel?: string;

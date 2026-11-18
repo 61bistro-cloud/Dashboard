@@ -17,7 +17,7 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  if (!canAccess(pathname, session.user.role)) {
+  if (!canAccess(pathname, session.user.role, session.user.isSystemAdmin)) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 

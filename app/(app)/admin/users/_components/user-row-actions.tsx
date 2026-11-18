@@ -11,10 +11,12 @@ export function RoleSelect({
   id,
   currentRole,
   isMe,
+  systemAdmin = false,
 }: {
   id: string;
   currentRole: Role;
   isMe: boolean;
+  systemAdmin?: boolean;
 }) {
   const { ui } = useUi();
   const [pending, startTransition] = useTransition();
@@ -32,6 +34,7 @@ export function RoleSelect({
     });
   }
 
+  if (systemAdmin) return <span className="text-xs">{ui("ผู้ดูแลระบบ")}</span>;
   return (
     <div className="inline-flex items-center gap-2">
       <select
@@ -59,22 +62,27 @@ export function DeleteUserButton({
   id,
   email,
   isMe,
+  systemAdmin = false,
 }: {
   id: string;
   email: string;
   isMe: boolean;
+  systemAdmin?: boolean;
 }) {
   const { ui } = useUi();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   function onDelete() {
-    if (isMe) return;
+    if (isMe || systemAdmin) return;
     if (
       !confirm(
-        ui("ลบผู้ใช้ {v0} จริงหรือไม่? ผู้ใช้คนนี้จะไม่สามารถ login ได้อีก", {
-          v0: email,
-        })
+        ui(
+          "ถอนสิทธิ์ผู้ใช้ {v0} หรือไม่? จะเก็บผู้ใช้และประวัติข้อมูลเดิมไว้",
+          {
+            v0: email,
+          }
+        )
       )
     ) {
       return;
@@ -94,8 +102,14 @@ export function DeleteUserButton({
     <button
       type="button"
       onClick={onDelete}
-      disabled={pending || isMe}
-      title={isMe ? ui("ลบบัญชีตัวเองไม่ได้") : ui("ลบผู้ใช้")}
+      disabled={pending || isMe || systemAdmin}
+      title={
+        systemAdmin
+          ? ui("สิทธิ์ผู้ดูแลระบบต้องจัดการผ่านการตั้งค่าระบบ")
+          : isMe
+            ? ui("ลบบัญชีตัวเองไม่ได้")
+            : ui("ถอนสิทธิ์เข้าใช้")
+      }
       className="inline-flex items-center justify-center rounded-pill border border-hairline px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed"
     >
       {pending ? (

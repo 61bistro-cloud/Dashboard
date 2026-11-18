@@ -7,7 +7,7 @@ type SearchParams = Promise<{ from?: string; error?: string }>;
 
 const ERROR_MESSAGES: Record<string, string> = {
   AccessDenied:
-    "บัญชี Google นี้ยังไม่ได้รับสิทธิ์เข้าระบบ — ติดต่อเจ้าของร้านเพื่อขอเพิ่มสิทธิ์",
+    "บัญชี Google นี้ยังไม่ได้รับสิทธิ์หรือธุรกิจถูกพักใช้งาน — ติดต่อผู้ดูแลระบบ",
   OAuthSignin: "เกิดข้อผิดพลาดระหว่างเชื่อมต่อ Google — ลองอีกครั้ง",
   OAuthCallback: "เกิดข้อผิดพลาดระหว่างเชื่อมต่อ Google — ลองอีกครั้ง",
   Configuration: "ระบบ Google Login ยังไม่ได้ตั้งค่า — ติดต่อ admin",
@@ -32,7 +32,7 @@ export default async function SignInPage({
             <UtensilsCrossed className="h-6 w-6" strokeWidth={1.75} />
           </div>
           <h1 className="mt-5 text-[28px] font-semibold tracking-tight">
-            61 Bistro
+            {ui("บัญชีธุรกิจ")}
           </h1>
           <p className="mt-1 text-[15px] text-muted">{ui("ระบบบัญชี 2569")}</p>
         </div>
@@ -40,7 +40,13 @@ export default async function SignInPage({
         <form
           action={async () => {
             "use server";
-            await signIn("google", { redirectTo: from || "/" });
+            const destination =
+              from?.startsWith("/") &&
+              !from.startsWith("//") &&
+              !from.includes("\\")
+                ? from
+                : "/";
+            await signIn("google", { redirectTo: destination });
           }}
         >
           <button
@@ -63,9 +69,10 @@ export default async function SignInPage({
           </div>
           <p>
             {ui(
-              "เฉพาะ Gmail ที่อยู่ในรายชื่อที่ได้รับอนุญาตเท่านั้นที่เข้าระบบได้"
+              "ใช้อีเมลที่ผูกกับบัญชี Google และได้รับเชิญเท่านั้น แต่ละบัญชีเข้าถึงเฉพาะธุรกิจที่ได้รับสิทธิ์"
             )}
-            <br /> {ui("ผู้ใช้ใหม่ติดต่อเจ้าของร้านเพื่อเพิ่มสิทธิ์")}
+            <br />{" "}
+            {ui("ผู้ใช้ใหม่ติดต่อผู้ดูแลระบบเพื่อเปิดธุรกิจและเพิ่มอีเมล")}
           </p>
         </div>
       </div>

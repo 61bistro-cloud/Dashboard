@@ -53,7 +53,7 @@ async function load(
   await mod.evaluate();
   return mod.namespace as any;
 }
-async function route() {
+async function route(duplicate = false) {
   const jobs: Array<() => Promise<void>> = [];
   const work: any[] = [];
   let queries = 0,
@@ -71,6 +71,15 @@ async function route() {
               assert.equal(query.where.lineChannelToken.not, null);
               return [
                 { id: 7, lineChannelSecret: secret, lineChannelToken: token },
+                ...(duplicate
+                  ? [
+                      {
+                        id: 8,
+                        lineChannelSecret: secret,
+                        lineChannelToken: token,
+                      },
+                    ]
+                  : []),
               ];
             },
           },
@@ -279,4 +288,14 @@ test("an exact repeated file with a new LINE message does not create a second Dr
   assert.equal(h.writes.length, 0);
   assert.equal(h.processed.length, 0);
   assert.equal(h.replies.length, 1);
+});
+
+test("a shared LINE secret across businesses is rejected without sending documents to either tenant", async () => {
+  const h = await route(true);
+  const body = JSON.stringify({
+    events: [{ type: "message", message: { type: "image", id: "123" } }],
+  });
+  assert.equal((await h.post(body, sign(body))).status, 409);
+  assert.equal(h.jobs.length, 0);
+  assert.equal(h.loads(), 0);
 });

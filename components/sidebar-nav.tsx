@@ -16,10 +16,19 @@ const REPORT_PATHS = new Set([
   "/closing",
 ]);
 
-export function SidebarNav({ role }: { role: Role }) {
+export function SidebarNav({
+  role,
+  systemAdmin = false,
+}: {
+  role: Role;
+  systemAdmin?: boolean;
+}) {
   const { ui } = useUi();
   const pathname = usePathname();
-  const items = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const items = NAV_ITEMS.filter(
+    (item) =>
+      item.roles.includes(role) && (!item.systemAdminOnly || systemAdmin)
+  );
   const sections = [
     {
       label: ui("ภาพรวมและรายงาน"),

@@ -12,6 +12,7 @@ export type NavItem = {
   label: string;
   icon: LucideIcon;
   roles: Role[];
+  systemAdminOnly?: boolean;
 };
 
 export const NAV_ITEMS: NavItem[] = [
@@ -77,12 +78,14 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/admin/businesses",
+    systemAdminOnly: true,
     label: "จัดการธุรกิจ",
     icon: NAV_ICONS["/admin/businesses"],
     roles: ["OWNER"],
   },
   {
     href: "/admin/users",
+    systemAdminOnly: true,
     label: "จัดการผู้ใช้",
     icon: NAV_ICONS["/admin/users"],
     roles: ["OWNER"],
@@ -95,11 +98,15 @@ export const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-export function canAccess(pathname: string, role: Role): boolean {
+export function canAccess(
+  pathname: string,
+  role: Role,
+  systemAdmin = false
+): boolean {
   if (pathname === "/sign-in") return true;
-  const item = NAV_ITEMS.find(
-    (i) => i.href === pathname || pathname.startsWith(i.href + "/")
-  );
+  const item = [...NAV_ITEMS]
+    .sort((a, b) => b.href.length - a.href.length)
+    .find((i) => i.href === pathname || pathname.startsWith(i.href + "/"));
   if (!item) return true;
-  return item.roles.includes(role);
+  return item.roles.includes(role) && (!item.systemAdminOnly || systemAdmin);
 }

@@ -1,6 +1,12 @@
+import { cookies } from "next/headers";
+import {
+  GOOGLE_STATE_COOKIE,
+  validGoogleState,
+  googleStateBusiness,
+} from "@/lib/google-oauth-state";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getAccessibleBusinesses } from "@/lib/business";
+import { getCurrentBusiness } from "@/lib/business";
 import { exchangeCode } from "@/lib/google";
 
 // Google redirects here after consent. Store the refresh token on the business.
@@ -18,11 +24,16 @@ export async function GET(req: Request) {
   if (err || !code || !state) {
     return Response.redirect(`${origin}/admin/google?error=denied`);
   }
-  const businessId = Number(state);
-
-  // Only let the owner connect a business they can actually access.
-  const accessible = await getAccessibleBusinesses();
-  if (!accessible.some((b) => b.id === businessId)) {
+  const store = await cookies();
+  const savedState = store.get(GOOGLE_STATE_COOKIE)?.value;
+  store.delete({ name: GOOGLE_STATE_COOKIE, path: "/api/google" });
+  const businessId = googleStateBusiness(savedState);
+  const current = await getCurrentBusiness();
+  if (
+    !businessId ||
+    current?.id !== businessId ||
+    !validGoogleState(savedState, state, session.user.id, businessId)
+  ) {
     return Response.redirect(`${origin}/admin/google?error=forbidden`);
   }
 

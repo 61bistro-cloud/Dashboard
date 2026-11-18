@@ -58,8 +58,8 @@ model Business {
   reconEntries        ReconEntry[]
 }
 
-// Which businesses a non-OWNER user can access. OWNER sees all businesses
-// implicitly (no rows needed).
+// Explicit business access for shop OWNER, ACCOUNTANT and STAFF. Only system
+// operators from the server-side administrator allowlist bypass these links.
 model UserBusiness {
   id         Int    @id @default(autoincrement())
   userId     String
