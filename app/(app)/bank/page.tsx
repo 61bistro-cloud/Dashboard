@@ -499,6 +499,7 @@ export default async function BankPage({
 
         {supportsStatement(currentAccount) ? (
           <StatementUpload
+            key={`${business.id}-${currentMonth.id}-${currentAccount.id}`}
             fiscalMonthId={currentMonth.id}
             accountId={currentAccount.id}
             accountName={currentAccount.name}

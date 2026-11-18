@@ -7,6 +7,7 @@ const LOGO_DIR = path.join(process.cwd(), "public", "logos");
 /** Map BankAccount.code → { display props for fallback monogram } */
 const FALLBACK: Record<string, { letter: string; bg: string; text: string }> = {
   KBANK: { letter: "ก", bg: "bg-emerald-500", text: "text-canvas" },
+  KTB: { letter: "K", bg: "bg-sky-500", text: "text-white" },
   SCB: { letter: "S", bg: "bg-purple-700", text: "text-canvas" },
   CASH: { letter: "฿", bg: "bg-surface", text: "text-ink" },
   KBANK_CREDIT: { letter: "💳", bg: "bg-amber-100", text: "text-amber-900" },
@@ -53,7 +54,7 @@ export function BankLogo({
     );
   }
 
-  const f = FALLBACK[code] ?? {
+  const f = FALLBACK[/^KTB\d*$/.test(code) ? "KTB" : code] ?? {
     letter: name.slice(0, 1).toUpperCase(),
     bg: "bg-surface",
     text: "text-ink",

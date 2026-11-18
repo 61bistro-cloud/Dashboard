@@ -104,6 +104,7 @@ export async function addBankAccount(input: {
           "KBANK",
           "SCB",
           "KRUNGSRI",
+          "KTB",
           "CASH",
           "GRAB",
           "LINEMAN",

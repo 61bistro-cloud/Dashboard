@@ -28,6 +28,7 @@ export function StatementUpload({
 }) {
   const { ui } = useUi();
   const [pending, startTransition] = useTransition();
+  const [scopeNotice, setScopeNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [needPassword, setNeedPassword] = useState(false);
   const [wrongPassword, setWrongPassword] = useState(false);
@@ -40,6 +41,7 @@ export function StatementUpload({
 
   function onParse(formData: FormData) {
     setError(null);
+    setScopeNotice(null);
     setNeedPassword(false);
     setWrongPassword(false);
     setImported(null);
@@ -55,6 +57,7 @@ export function StatementUpload({
           setRows([]);
           return;
         }
+        setScopeNotice(result.scopeNotice ?? null);
         setRows(
           result.preview.map((r) => ({
             ...r,
@@ -130,7 +133,10 @@ export function StatementUpload({
         <summary className="cursor-pointer px-5 py-3 flex items-center justify-between hover:bg-surface">
           <div className="flex items-center gap-2 text-sm font-medium">
             <FileUp className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
-            {ui("นำเข้า PDF Statement (KBANK / SCB / กรุงศรี) —")} {accountName}
+            {ui(
+              "นำเข้า PDF Statement (กสิกร / ไทยพาณิชย์ / กรุงศรี / กรุงไทย) —"
+            )}{" "}
+            {accountName}
           </div>
           <span className="text-xs text-muted group-open:hidden">
             {ui("เปิด ▾")}
@@ -167,7 +173,7 @@ export function StatementUpload({
               <input
                 type="password"
                 name="password"
-                placeholder="ddmmyyyy"
+                placeholder={ui("รหัสเปิดไฟล์จากธนาคาร")}
                 autoComplete="off"
                 className="block w-full rounded-pill border border-hairline bg-canvas px-3 py-1.5 text-xs"
               />
@@ -186,6 +192,20 @@ export function StatementUpload({
             </button>
           </form>
 
+          <p className="text-xs text-muted">
+            {ui(
+              "กรุงไทย: ใช้เลขบัตรประชาชนเจ้าของบัญชีตามที่ธนาคารกำหนด • ธนาคารอื่นตรวจวิธีตั้งรหัสในอีเมล Statement"
+            )}
+          </p>
+          {scopeNotice && rows.length > 0 && (
+            <p
+              role="status"
+              className="rounded-card border border-hairline bg-surface p-3 text-xs"
+            >
+              {ui(scopeNotice)}
+            </p>
+          )}
+
           {error && (
             <div className="flex items-start gap-2 rounded-card border border-red-200 bg-red-50 p-3 text-xs text-red-800">
               <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
@@ -193,7 +213,9 @@ export function StatementUpload({
                 {ui(error)}
                 {needPassword && (
                   <div className="mt-1 text-red-700/80">
-                    {ui("ลองใส่วันเกิด 8 หลัก (วันเดือนปีค.ศ.) เช่น 20051994")}
+                    {ui(
+                      "กรุงไทยใช้เลขบัตรประชาชนเจ้าของบัญชี ส่วนธนาคารอื่นให้ตรวจรหัสในอีเมล Statement"
+                    )}
                   </div>
                 )}
                 {wrongPassword && (
@@ -239,7 +261,7 @@ export function StatementUpload({
                       {fmtTHB(openingBalance)}
                     </strong>{" "}
                     {ui(
-                      "(จากบรรทัด “ยอดยกมา” ใน statement) — แนะนำให้ติ๊ก เพื่อให้ยอดคงเหลือตรงกับ statement"
+                      "(อ่านหรือคำนวณจาก Statement ของเดือนที่เลือก) — ตรวจยอดก่อนยืนยันนำเข้า"
                     )}
                   </span>
                 </label>

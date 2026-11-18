@@ -2,6 +2,7 @@ export const ACCOUNT_OPTIONS = [
   { kind: "KBANK", name: "ธนาคารกสิกรไทย", statement: true },
   { kind: "SCB", name: "ธนาคารไทยพาณิชย์", statement: true },
   { kind: "KRUNGSRI", name: "ธนาคารกรุงศรีอยุธยา", statement: true },
+  { kind: "KTB", name: "ธนาคารกรุงไทย", statement: true },
   { kind: "CASH", name: "เงินสดหน้าร้าน", statement: false },
   { kind: "GRAB", name: "Grab", statement: false },
   { kind: "LINEMAN", name: "LINE MAN", statement: false },
@@ -24,6 +25,7 @@ export function accountKind(account: {
   if (/^ACCT\d*$/.test(account.code)) {
     if (["กรุงศรี", "ธนาคารกรุงศรีอยุธยา"].includes(account.name))
       return "KRUNGSRI";
+    if (["กรุงไทย", "ธนาคารกรุงไทย"].includes(account.name)) return "KTB";
     if (["กสิกรไทย", "ธนาคารกสิกรไทย"].includes(account.name)) return "KBANK";
     if (["ไทยพาณิชย์", "ธนาคารไทยพาณิชย์"].includes(account.name)) return "SCB";
   }
@@ -31,7 +33,9 @@ export function accountKind(account: {
 }
 export function supportsStatement(account: Parameters<typeof accountKind>[0]) {
   const kind = accountKind(account);
-  return kind === "KBANK" || kind === "SCB" || kind === "KRUNGSRI";
+  return (
+    kind === "KBANK" || kind === "SCB" || kind === "KRUNGSRI" || kind === "KTB"
+  );
 }
 export function rowsMatchMonth(
   rows: { date: string }[],

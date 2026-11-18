@@ -410,7 +410,7 @@ export async function setTransactionCategory(
   revalidateBankCosts();
 }
 
-// ───── PDF STATEMENT IMPORT (KBANK) ─────
+// ───── PDF STATEMENT IMPORT (SUPPORTED BANKS) ─────
 
 export type PreviewTx = {
   /** Index in the parse — used as React key + select identity */
@@ -430,6 +430,7 @@ export type PreviewTx = {
 
 export type ParseStatementResult = {
   ok: boolean;
+  scopeNotice?: string;
   message?: string;
   needPassword?: boolean;
   wrongPassword?: boolean;
@@ -498,7 +499,27 @@ export async function parseStatementPdf(
         message: "ธนาคารในไฟล์ไม่ตรงกับบัญชีที่เลือก",
         preview: [],
       };
-    if (!rowsMatchMonth(parsed.rows, context.month))
+    let statementRows = parsed.rows;
+    let openingBalance = parsed.openingBalance ?? null;
+    let scopeNotice: string | undefined;
+    if (
+      parsed.bank === "KTB" &&
+      new Set(parsed.rows.map((r) => r.date.slice(0, 7))).size > 1
+    ) {
+      statementRows = parsed.rows.filter((r) =>
+        rowsMatchMonth([r], context.month)
+      );
+      if (!statementRows.length)
+        return { ok: false, message: WRONG_MONTH, preview: [] };
+      const first = statementRows[0];
+      openingBalance =
+        first.balance == null
+          ? null
+          : Math.round((first.balance - first.deposit + first.withdraw) * 100) /
+            100;
+      scopeNotice = `ไฟล์มีรายการหลายเดือน แสดงเฉพาะเดือนที่เลือก ${statementRows.length} จาก ${parsed.rows.length} รายการ พร้อมยอดยกมาตามเดือนที่เลือก`;
+    }
+    if (!rowsMatchMonth(statementRows, context.month))
       return { ok: false, message: WRONG_MONTH, preview: [] };
 
     // Resolve suggested category name → id (within the current business)
@@ -528,7 +549,7 @@ export async function parseStatementPdf(
       }
     }
 
-    const preview: PreviewTx[] = parsed.rows.map((r, idx) => {
+    const preview: PreviewTx[] = statementRows.map((r, idx) => {
       const suggestedName = suggestCategoryName(
         r.description,
         r.deposit,
@@ -564,7 +585,8 @@ export async function parseStatementPdf(
     return {
       ok: true,
       preview,
-      openingBalance: parsed.openingBalance ?? null,
+      openingBalance,
+      scopeNotice,
       rawText: parsed.rawText.join("\n\n"),
     };
   } catch (e) {

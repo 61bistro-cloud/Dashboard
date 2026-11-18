@@ -56,6 +56,7 @@ test("KBANK keeps dates, times, debit/credit, balance and channel", async () => 
         [350, "2,000.00"],
         [450, "EDC"],
       ],
+      [[140, "KRUNGTHAI BANK"]],
     ]),
     undefined
   );
@@ -196,6 +197,51 @@ test(
     }
   }
 );
+
+test("Krungthai PDF dispatch reads English table headers and separate time lines", async () => {
+  const result = await parseBankStatement(
+    pdf([
+      [[20, "KRUNGTHAI BANK"]],
+      [
+        [20, "Date/Time"],
+        [82, "Transaction"],
+        [210, "Details/Cheque No."],
+        [341, "Withdrawal"],
+        [405, "Deposit"],
+        [471, "Balance"],
+        [542, "Branch"],
+      ],
+      [
+        [20, "10/06/69"],
+        [82, "transfer"],
+        [210, "SCB reference"],
+        [411, "100.00"],
+        [487, "100.07"],
+        [541, "1217"],
+      ],
+      [[20, "13:10"]],
+      [
+        [20, "11/06/69"],
+        [82, "withdraw"],
+        [352, "50.00"],
+        [491, "50.07"],
+        [544, "188"],
+      ],
+      [[20, "15:33"]],
+    ]),
+    undefined
+  );
+  assert.equal(result.ok, true);
+  assert.equal(result.bank, "KTB");
+  assert.equal(result.openingBalance, 0.07);
+  assert.deepEqual(
+    result.rows.map((r) => [r.time, r.deposit, r.withdraw, r.balance]),
+    [
+      ["13:10", 100, 0, 100.07],
+      ["15:33", 0, 50, 50.07],
+    ]
+  );
+});
 
 test("unknown issuing banks are rejected instead of falling back to KBANK", async () => {
   const result = await parseBankStatement(

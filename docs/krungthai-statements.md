@@ -1,0 +1,11 @@
+# Krungthai statement support
+
+Account manager offers Krungthai Bank (KTB), including multiple accounts (KTB2, etc.). Existing generic ACCT accounts are recognized only for exact known Krungthai names. No accounts or financial records are created during deployment; no seed or schema migration is required.
+
+The PDF upload uses the existing authenticated business/account/month preview and explicit confirmation. Select Krungthai, upload the original savings e-statement and enter its PDF password according to the bank’s instructions. The supplied document uses the account holder’s national ID rather than the date-of-birth convention used by some other banks. The application does not store the PDF password.
+
+The parser identifies the bank’s legal name, reads withdrawal/deposit/balance columns from each page’s header, joins the time and reference continuation lines, and excludes the branch number from balance and channel. Direction comes from columns, including interest/tax rows, not transaction keywords. Every running balance and available printed debit/credit totals and counts must reconcile; inconsistent statements fail without partial import. Transaction codes stay in the description; channel is left empty when not supplied by the bank.
+
+For KTB files containing multiple sales-calendar months, preview displays only the selected fiscal month’s transactions and an explicit selected/total row notice. Opening balance comes from the first selected transaction’s prior balance, not the beginning of the whole file. A month with no rows is rejected. Confirmation still rejects any row outside the selected month. Existing bank/month/ownership checks and re-import deduplication remain in effect. No statement withdrawals are added automatically to owner-entered P&L costs.
+
+Tests: `npm run test:bank`, `npm run test:accounts`, `npm run test:i18n`, `npm run test:client`. The original attachment is optional and private: set KTB_TEST_PDF and either KTB_TEST_PASSWORD or KTB_TEST_PASSWORD_FILE. No credentials, account identifiers or original statements are committed. The supplied three-page file reconciles 53 transactions (29 withdrawals, 24 deposits), withdrawals 109,200.34, deposits 109,200.58, opening 0.07 and closing 0.31. Transaction months are June, July, August and October 2026, despite the broader statement request range.

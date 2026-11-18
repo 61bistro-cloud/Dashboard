@@ -1,5 +1,7 @@
+import { parseKtbRows } from "./ktb-parser";
+
 /**
- * Bank statement PDF parser (KBANK + SCB + Krungsri).
+ * Bank statement PDF parser (KBANK + SCB + Krungsri + Krungthai).
  *
  * Approach:
  *   1. Use unpdf (pdfjs) to open the password-protected PDF and pull every
@@ -11,8 +13,8 @@
  *      - SCB:   direction inferred from the running-balance delta (robust),
  *               with DESC/NOTE descriptions stitched from adjacent lines.
  *
- * Anything unparseable is simply skipped; the user verifies/edits the rest in
- * the preview UI before importing.
+ * The preview requires explicit user confirmation. Krungthai rejects malformed
+ * transactions or inconsistent balances/totals instead of importing partial data.
  */
 
 // pdfjs needs the legacy build for Node serverless environments.
@@ -38,7 +40,7 @@ export type ParsedTx = {
 
 export type ParseResult = {
   ok: boolean;
-  bank?: "KBANK" | "SCB" | "BAY";
+  bank?: "KBANK" | "SCB" | "BAY" | "KTB";
   password?: "missing" | "wrong";
   message?: string;
   rows: ParsedTx[];
@@ -96,7 +98,7 @@ const NUMERIC_RE = /^-?\d{1,3}(,\d{3})*(\.\d+)?$/;
 const Y_TOL = 2.5;
 
 type Cell = { x: number; text: string };
-type Row = { cells: Cell[] };
+type Row = { cells: Cell[]; page?: number };
 
 function isNumeric(s: string): boolean {
   return NUMERIC_RE.test(s.trim());
@@ -143,7 +145,7 @@ async function extractRows(
         password: need,
         message:
           need === "wrong"
-            ? "รหัสผ่านไม่ถูกต้อง — statement ใช้วันเกิด 8 หลัก (ddmmyyyy)"
+            ? "รหัสผ่าน PDF ไม่ถูกต้อง กรุณาตรวจรหัสที่ธนาคารกำหนด"
             : "ไฟล์ PDF มีรหัสผ่าน กรุณาใส่รหัส",
       };
     }
@@ -184,7 +186,7 @@ async function extractRows(
         .get(k)!
         .sort((a, b) => a.x - b.x)
         .map((c) => ({ x: c.x, text: c.text }));
-      rows.push({ cells });
+      rows.push({ cells, page: p });
     }
   }
 
@@ -192,8 +194,16 @@ async function extractRows(
 }
 
 /** Detect which bank issued the statement from its text. */
-function detectBank(rawText: string[]): "SCB" | "KBANK" | "BAY" | null {
+function detectBank(rawText: string[]): "SCB" | "KBANK" | "BAY" | "KTB" | null {
   const all = rawText.join(" ");
+  // Require KTB's table layout as well as its brand: other banks may mention
+  // Krungthai as the transfer counterparty inside transaction descriptions.
+  if (
+    /ธนาคารกรุงไทย\s*จำกัด|KRUNG\s*THAI\s+BANK/i.test(all) &&
+    /วันที่\/เวลา|Date\/Time/i.test(all) &&
+    /รายละเอียด\/หมายเลขเช็ค|Details\/Cheque No\./i.test(all) &&
+    /รายการถอน|Withdrawal/i.test(all) && /รายการฝาก|Deposit/i.test(all)
+  ) return "KTB";
   if (/ธนาคารกรุงศรีอยุธยา|KRUNGSRI|BANK OF AYUDHYA/i.test(all)) return "BAY";
   if (/ไทยพาณิชย์|SIAM COMMERCIAL/i.test(all)) return "SCB";
   if (/กสิกรไทย|KASIKORN|K-BANK|\bKBANK\b/i.test(all)) return "KBANK";
@@ -240,10 +250,30 @@ export async function parseKbankPdf(
   if (!bank)
     return {
       ok: false,
-      message: "รองรับเฉพาะ Statement กสิกรไทย ไทยพาณิชย์ และกรุงศรี",
+      message: "รองรับเฉพาะ Statement กสิกรไทย ไทยพาณิชย์ กรุงศรี และกรุงไทย",
       rows: [],
       rawText: ex.rawText,
     };
+  if (bank === "KTB") {
+    try {
+      const rows = parseKtbRows(ex.rows);
+      const first = rows[0];
+      const openingBalance =
+        first?.balance != null
+          ? round2(first.balance - first.deposit + first.withdraw)
+          : null;
+      return { ok: true, bank, rows, openingBalance, rawText: ex.rawText };
+    } catch {
+      return {
+        ok: false,
+        bank,
+        rows: [],
+        rawText: ex.rawText,
+        message:
+          "อ่านรายการกรุงไทยไม่ครบหรือยอดไม่ต่อเนื่อง กรุณาตรวจไฟล์ต้นฉบับ",
+      };
+    }
+  }
   const rows =
     bank === "BAY"
       ? parseKrungsriRows(ex.rows)

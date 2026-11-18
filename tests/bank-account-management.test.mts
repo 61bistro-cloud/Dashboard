@@ -217,6 +217,7 @@ test("only supported templates can create accounts; multiple bank accounts get d
     "KBANK",
     "SCB",
     "KRUNGSRI",
+    "KTB",
     "CASH",
     "GRAB",
     "LINEMAN",
@@ -229,6 +230,7 @@ test("only supported templates can create accounts; multiple bank accounts get d
     );
   assert.ok(h.state().accounts.some((a) => a.code === "KBANK2"));
   assert.ok(h.state().accounts.some((a) => a.code === "SCB2"));
+  assert.ok(h.state().accounts.some((a) => a.code === "KTB"));
 });
 test("deletion requires the deletion password and explicit preview token, even for empty accounts", async () => {
   const h = await harness();
@@ -383,6 +385,12 @@ test("account classification preserves supported legacy banks and keeps cash/del
     }),
     true
   );
+  for (const account of [
+    { code: "KTB", name: "ธนาคารกรุงไทย", accountType: "BANK" },
+    { code: "KTB2", name: "Custom name", accountType: "BANK" },
+    { code: "ACCT", name: "กรุงไทย", accountType: "BANK" },
+  ])
+    assert.equal(options.supportsStatement(account), true);
   for (const code of ["CASH", "GRAB", "DELIVERY", "ACCT", "BANGKOK"])
     assert.equal(
       options.supportsStatement({ code, name: "Bank", accountType: "BANK" }),
@@ -515,6 +523,13 @@ test("statement actions reject unsupported accounts, wrong issuing banks and wro
   assert.equal((await parse()).ok, true);
   assert.equal((await actions.importStatementRows(input())).ok, true);
   assert.equal(writes, 1);
+  account.code = "KTB";
+  assert.equal((await parse()).ok, false);
+  issuingBank = "KTB";
+  assert.equal((await parse()).ok, true);
+  account.code = "KBANK";
+  assert.equal((await parse()).ok, false);
+  issuingBank = "KBANK";
   for (const code of ["CASH", "GRAB", "DELIVERY"]) {
     account.code = code;
     await actions.addTransaction({
@@ -552,4 +567,104 @@ test("statement actions reject unsupported accounts, wrong issuing banks and wro
     actions.setOpeningBalance({ fiscalMonthId: 5, accountId: 10, amount: 100 })
   );
   assert.equal(writes, 4);
+});
+
+test("KTB multi-month previews select only the chosen month and derive its own opening; imports still reject foreign dates", async () => {
+  let bank = "KTB",
+    month = 10,
+    writes = 0;
+  const rows = [
+    { date: "2026-06-10", deposit: 100, withdraw: 0, balance: 100.07 },
+    { date: "2026-06-30", deposit: 5.58, withdraw: 0, balance: 105.65 },
+    { date: "2026-07-08", deposit: 0, withdraw: 100, balance: 5.65 },
+    { date: "2026-10-23", deposit: 200, withdraw: 0, balance: 205.65 },
+    { date: "2026-10-23", deposit: 0, withdraw: 200, balance: 5.65 },
+  ].map((r, i) => ({
+    ...r,
+    time: `10:0${i}`,
+    description: "synthetic reference",
+    channel: null,
+  }));
+  const actions = await load("../app/(app)/bank/actions.ts", {
+    zod: { z },
+    "@/auth": { auth: async () => ({ user: { role: "OWNER", id: "owner" } }) },
+    "@/lib/business": { requireBusiness: async () => ({ id: 1 }) },
+    "next/cache": { revalidatePath() {} },
+    "@/lib/bank-account-options": options,
+    "@/lib/kbank-parser": {
+      parseKbankPdf: async () => ({
+        ok: true,
+        bank,
+        rows,
+        openingBalance: 0.07,
+        rawText: [],
+      }),
+      suggestCategoryName: () => null,
+    },
+    "@/lib/prisma": {
+      prisma: {
+        bankAccount: {
+          findFirst: async () => ({
+            id: 10,
+            businessId: 1,
+            active: true,
+            code: bank,
+            name: "Bank",
+            accountType: "BANK",
+          }),
+        },
+        fiscalMonth: {
+          findUnique: async () => ({
+            calendarYear: 2026,
+            calendarMonth: month,
+            daysInMonth: 31,
+          }),
+        },
+        transactionCategory: { findMany: async () => [] },
+        bankTransaction: {
+          findMany: async () => [],
+          createMany: async () => {
+            writes++;
+            return { count: 1 };
+          },
+        },
+      },
+    },
+  });
+  const parse = () => {
+    const f = new FormData();
+    f.set("accountId", "10");
+    f.set("fiscalMonthId", "7");
+    f.set("file", new File(["pdf"], "statement.pdf"));
+    return actions.parseStatementPdf(f);
+  };
+  let result = await parse();
+  assert.equal(result.ok, true);
+  assert.equal(result.preview.length, 2);
+  assert.equal(result.openingBalance, 5.65);
+  assert.ok(result.preview.every((r: any) => r.date === "2026-10-23"));
+  assert.match(result.scopeNotice, /2.*5/);
+  assert.equal(writes, 0);
+  month = 7;
+  result = await parse();
+  assert.equal(result.preview.length, 1);
+  assert.equal(result.openingBalance, 105.65);
+  month = 8;
+  assert.equal((await parse()).ok, false);
+  month = 10;
+  bank = "KBANK";
+  assert.equal((await parse()).ok, false);
+  bank = "KTB";
+  assert.equal(
+    (
+      await actions.importStatementRows({
+        accountId: 10,
+        fiscalMonthId: 7,
+        rows: [{ ...rows[0], categoryId: null }],
+        setOpening: false,
+      })
+    ).ok,
+    false
+  );
+  assert.equal(writes, 0);
 });
