@@ -503,7 +503,7 @@ export async function parseStatementPdf(
     let openingBalance = parsed.openingBalance ?? null;
     let scopeNotice: string | undefined;
     if (
-      parsed.bank === "KTB" &&
+      (parsed.bank === "KTB" || parsed.bank === "BBL") &&
       new Set(parsed.rows.map((r) => r.date.slice(0, 7))).size > 1
     ) {
       statementRows = parsed.rows.filter((r) =>

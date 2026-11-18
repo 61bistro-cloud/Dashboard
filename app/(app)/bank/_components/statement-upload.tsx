@@ -134,7 +134,7 @@ export function StatementUpload({
           <div className="flex items-center gap-2 text-sm font-medium">
             <FileUp className="h-4 w-4 text-muted-soft" strokeWidth={1.75} />
             {ui(
-              "นำเข้า PDF Statement (กสิกร / ไทยพาณิชย์ / กรุงศรี / กรุงไทย) —"
+              "นำเข้า PDF Statement (กสิกร / ไทยพาณิชย์ / กรุงศรี / กรุงไทย / กรุงเทพ) —"
             )}{" "}
             {accountName}
           </div>
@@ -194,7 +194,7 @@ export function StatementUpload({
 
           <p className="text-xs text-muted">
             {ui(
-              "กรุงไทย: ใช้เลขบัตรประชาชนเจ้าของบัญชีตามที่ธนาคารกำหนด • ธนาคารอื่นตรวจวิธีตั้งรหัสในอีเมล Statement"
+              "กรุงเทพ: ใช้วันเดือนปีเกิดตามที่ธนาคารกำหนด • กรุงไทย: ใช้เลขบัตรประชาชนเจ้าของบัญชี • ธนาคารอื่นตรวจวิธีตั้งรหัสในอีเมล Statement"
             )}
           </p>
           {scopeNotice && rows.length > 0 && (
@@ -214,7 +214,7 @@ export function StatementUpload({
                 {needPassword && (
                   <div className="mt-1 text-red-700/80">
                     {ui(
-                      "กรุงไทยใช้เลขบัตรประชาชนเจ้าของบัญชี ส่วนธนาคารอื่นให้ตรวจรหัสในอีเมล Statement"
+                      "กรุงเทพใช้วันเดือนปีเกิดตามที่ธนาคารกำหนด กรุงไทยใช้เลขบัตรประชาชน ส่วนธนาคารอื่นให้ตรวจรหัสในอีเมล Statement"
                     )}
                   </div>
                 )}

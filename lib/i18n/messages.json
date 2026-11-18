@@ -647,9 +647,6 @@
     "en": "Read PDF",
     "th": "อ่านไฟล์"
   },
-  "ลองใส่วันเกิด 8 หลัก (วันเดือนปีค.ศ.) เช่น 20051994": {
-    "en": "Try your 8-digit date of birth (ddmmyyyy), e.g. 20051994."
-  },
   "รหัสผ่านผิด — โปรดตรวจสอบและลองอีกครั้ง": {
     "en": "Incorrect password. Check and try again."
   },
@@ -4551,5 +4548,33 @@
   "(อ่านหรือคำนวณจาก Statement ของเดือนที่เลือก) — ตรวจยอดก่อนยืนยันนำเข้า": {
     "th": "(อ่านหรือคำนวณจากรายการเดินบัญชีของเดือนที่เลือก) — ตรวจยอดก่อนยืนยันนำเข้า",
     "en": "(Read or derived from the selected month’s statement) — check the amount before confirming import"
+  },
+  "ธนาคารกรุงเทพ": {
+    "th": "ธนาคารกรุงเทพ",
+    "en": "Bangkok Bank"
+  },
+  "รองรับเฉพาะ Statement กสิกรไทย ไทยพาณิชย์ กรุงศรี กรุงไทย และกรุงเทพ": {
+    "th": "รองรับเฉพาะรายการเดินบัญชีของกสิกรไทย ไทยพาณิชย์ กรุงศรี กรุงไทย และกรุงเทพ",
+    "en": "Only KBANK, SCB, Krungsri, Krungthai and Bangkok Bank statements are supported"
+  },
+  "นำเข้า PDF ได้เฉพาะกสิกรไทย ไทยพาณิชย์ กรุงศรี กรุงไทย และกรุงเทพ • เงินสดและแอปเดลิเวอรีใช้บันทึกรายการเอง": {
+    "th": "นำเข้าไฟล์ได้เฉพาะกสิกรไทย ไทยพาณิชย์ กรุงศรี กรุงไทย และกรุงเทพ • เงินสดและแอปเดลิเวอรีใช้บันทึกรายการเอง",
+    "en": "PDF imports support KBANK, SCB, Krungsri, Krungthai and Bangkok Bank. Cash and delivery channels use manual entries."
+  },
+  "นำเข้า PDF Statement (กสิกร / ไทยพาณิชย์ / กรุงศรี / กรุงไทย / กรุงเทพ) —": {
+    "th": "นำเข้าไฟล์รายการเดินบัญชี (กสิกร / ไทยพาณิชย์ / กรุงศรี / กรุงไทย / กรุงเทพ) —",
+    "en": "Import PDF statement (KBANK / SCB / Krungsri / Krungthai / Bangkok Bank) —"
+  },
+  "กรุงเทพ: ใช้วันเดือนปีเกิดตามที่ธนาคารกำหนด • กรุงไทย: ใช้เลขบัตรประชาชนเจ้าของบัญชี • ธนาคารอื่นตรวจวิธีตั้งรหัสในอีเมล Statement": {
+    "th": "กรุงเทพ: ใช้วันเดือนปีเกิดตามที่ธนาคารกำหนด • กรุงไทย: ใช้เลขบัตรประชาชนเจ้าของบัญชี • ธนาคารอื่นตรวจวิธีตั้งรหัสในอีเมลรายการเดินบัญชี",
+    "en": "Bangkok Bank: use the date of birth specified by the bank. Krungthai: use the account holder’s national ID. For other banks, check the password instructions in the statement email."
+  },
+  "กรุงเทพใช้วันเดือนปีเกิดตามที่ธนาคารกำหนด กรุงไทยใช้เลขบัตรประชาชน ส่วนธนาคารอื่นให้ตรวจรหัสในอีเมล Statement": {
+    "th": "กรุงเทพใช้วันเดือนปีเกิดตามที่ธนาคารกำหนด กรุงไทยใช้เลขบัตรประชาชน ส่วนธนาคารอื่นให้ตรวจรหัสในอีเมลรายการเดินบัญชี",
+    "en": "For Bangkok Bank, use the date of birth specified by the bank. Krungthai uses the account holder’s national ID. For other banks, check the statement email."
+  },
+  "อ่านรายการกรุงเทพไม่ครบหรือยอดไม่ต่อเนื่อง กรุณาตรวจไฟล์ต้นฉบับ": {
+    "th": "อ่านรายการกรุงเทพไม่ครบหรือยอดไม่ต่อเนื่อง กรุณาตรวจไฟล์ต้นฉบับ",
+    "en": "The Bangkok Bank statement could not be read completely or balances do not reconcile. Check the original file."
   }
 }

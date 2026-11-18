@@ -218,6 +218,7 @@ test("only supported templates can create accounts; multiple bank accounts get d
     "SCB",
     "KRUNGSRI",
     "KTB",
+    "BBL",
     "CASH",
     "GRAB",
     "LINEMAN",
@@ -231,6 +232,7 @@ test("only supported templates can create accounts; multiple bank accounts get d
   assert.ok(h.state().accounts.some((a) => a.code === "KBANK2"));
   assert.ok(h.state().accounts.some((a) => a.code === "SCB2"));
   assert.ok(h.state().accounts.some((a) => a.code === "KTB"));
+  assert.ok(h.state().accounts.some((a) => a.code === "BBL"));
 });
 test("deletion requires the deletion password and explicit preview token, even for empty accounts", async () => {
   const h = await harness();
@@ -386,6 +388,9 @@ test("account classification preserves supported legacy banks and keeps cash/del
     true
   );
   for (const account of [
+    { code: "BBL", name: "ธนาคารกรุงเทพ", accountType: "BANK" },
+    { code: "BBL2", name: "Custom name", accountType: "BANK" },
+    { code: "ACCT", name: "กรุงเทพ", accountType: "BANK" },
     { code: "KTB", name: "ธนาคารกรุงไทย", accountType: "BANK" },
     { code: "KTB2", name: "Custom name", accountType: "BANK" },
     { code: "ACCT", name: "กรุงไทย", accountType: "BANK" },
@@ -529,6 +534,13 @@ test("statement actions reject unsupported accounts, wrong issuing banks and wro
   assert.equal((await parse()).ok, true);
   account.code = "KBANK";
   assert.equal((await parse()).ok, false);
+  issuingBank = "BBL";
+  assert.equal((await parse()).ok, false);
+  account.code = "BBL";
+  assert.equal((await parse()).ok, true);
+  issuingBank = "SCB";
+  assert.equal((await parse()).ok, false);
+  account.code = "KBANK";
   issuingBank = "KBANK";
   for (const code of ["CASH", "GRAB", "DELIVERY"]) {
     account.code = code;
@@ -569,7 +581,7 @@ test("statement actions reject unsupported accounts, wrong issuing banks and wro
   assert.equal(writes, 4);
 });
 
-test("KTB multi-month previews select only the chosen month and derive its own opening; imports still reject foreign dates", async () => {
+test("KTB and BBL multi-month previews select only the chosen month and derive its own opening; imports still reject foreign dates", async () => {
   let bank = "KTB",
     month = 10,
     writes = 0;
@@ -645,6 +657,13 @@ test("KTB multi-month previews select only the chosen month and derive its own o
   assert.ok(result.preview.every((r: any) => r.date === "2026-10-23"));
   assert.match(result.scopeNotice, /2.*5/);
   assert.equal(writes, 0);
+  bank = "BBL";
+  result = await parse();
+  assert.equal(result.ok, true);
+  assert.equal(result.preview.length, 2);
+  assert.equal(result.openingBalance, 5.65);
+  assert.match(result.scopeNotice, /2.*5/);
+  bank = "KTB";
   month = 7;
   result = await parse();
   assert.equal(result.preview.length, 1);

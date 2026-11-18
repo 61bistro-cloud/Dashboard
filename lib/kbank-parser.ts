@@ -1,7 +1,8 @@
 import { parseKtbRows } from "./ktb-parser";
+import { parseBblRows } from "./bbl-parser";
 
 /**
- * Bank statement PDF parser (KBANK + SCB + Krungsri + Krungthai).
+ * Bank statement PDF parser (KBANK + SCB + Krungsri + Krungthai + Bangkok Bank).
  *
  * Approach:
  *   1. Use unpdf (pdfjs) to open the password-protected PDF and pull every
@@ -40,7 +41,7 @@ export type ParsedTx = {
 
 export type ParseResult = {
   ok: boolean;
-  bank?: "KBANK" | "SCB" | "BAY" | "KTB";
+  bank?: "KBANK" | "SCB" | "BAY" | "KTB" | "BBL";
   password?: "missing" | "wrong";
   message?: string;
   rows: ParsedTx[];
@@ -194,16 +195,29 @@ async function extractRows(
 }
 
 /** Detect which bank issued the statement from its text. */
-function detectBank(rawText: string[]): "SCB" | "KBANK" | "BAY" | "KTB" | null {
+function detectBank(
+  rawText: string[]
+): "SCB" | "KBANK" | "BAY" | "KTB" | "BBL" | null {
   const all = rawText.join(" ");
+  if (
+    /ธนาคารกรุงเทพ|Bangkok Bank Public Company Limited/i.test(all) &&
+    /Particulars/i.test(all) &&
+    /Chq\.No\./i.test(all) &&
+    /Withdrawal/i.test(all) &&
+    /Deposit/i.test(all) &&
+    /Balance/i.test(all)
+  )
+    return "BBL";
   // Require KTB's table layout as well as its brand: other banks may mention
   // Krungthai as the transfer counterparty inside transaction descriptions.
   if (
     /ธนาคารกรุงไทย\s*จำกัด|KRUNG\s*THAI\s+BANK/i.test(all) &&
     /วันที่\/เวลา|Date\/Time/i.test(all) &&
     /รายละเอียด\/หมายเลขเช็ค|Details\/Cheque No\./i.test(all) &&
-    /รายการถอน|Withdrawal/i.test(all) && /รายการฝาก|Deposit/i.test(all)
-  ) return "KTB";
+    /รายการถอน|Withdrawal/i.test(all) &&
+    /รายการฝาก|Deposit/i.test(all)
+  )
+    return "KTB";
   if (/ธนาคารกรุงศรีอยุธยา|KRUNGSRI|BANK OF AYUDHYA/i.test(all)) return "BAY";
   if (/ไทยพาณิชย์|SIAM COMMERCIAL/i.test(all)) return "SCB";
   if (/กสิกรไทย|KASIKORN|K-BANK|\bKBANK\b/i.test(all)) return "KBANK";
@@ -250,10 +264,26 @@ export async function parseKbankPdf(
   if (!bank)
     return {
       ok: false,
-      message: "รองรับเฉพาะ Statement กสิกรไทย ไทยพาณิชย์ กรุงศรี และกรุงไทย",
+      message:
+        "รองรับเฉพาะ Statement กสิกรไทย ไทยพาณิชย์ กรุงศรี กรุงไทย และกรุงเทพ",
       rows: [],
       rawText: ex.rawText,
     };
+  if (bank === "BBL") {
+    try {
+      const parsed = parseBblRows(ex.rows);
+      return { ok: true, bank, ...parsed, rawText: ex.rawText };
+    } catch {
+      return {
+        ok: false,
+        bank,
+        rows: [],
+        rawText: ex.rawText,
+        message:
+          "อ่านรายการกรุงเทพไม่ครบหรือยอดไม่ต่อเนื่อง กรุณาตรวจไฟล์ต้นฉบับ",
+      };
+    }
+  }
   if (bank === "KTB") {
     try {
       const rows = parseKtbRows(ex.rows);

@@ -4,11 +4,15 @@ import { readFileSync } from "node:fs";
 import { parseBankStatement } from "../lib/kbank-parser.ts";
 
 // Small, synthetic PDFs exercise extraction and dispatch without private data.
-function pdf(lines: Array<Array<[number, string]>>): ArrayBuffer {
+function pdf(
+  lines: Array<Array<[number, string]>>,
+  fontSize = 10
+): ArrayBuffer {
   const stream = lines
     .flatMap((line, i) =>
       line.map(
-        ([x, text]) => `BT /F1 10 Tf ${x} ${750 - i * 20} Td (${text}) Tj ET`
+        ([x, text]) =>
+          `BT /F1 ${fontSize} Tf ${x} ${750 - i * 20} Td (${text}) Tj ET`
       )
     )
     .join("\n");
@@ -56,7 +60,7 @@ test("KBANK keeps dates, times, debit/credit, balance and channel", async () => 
         [350, "2,000.00"],
         [450, "EDC"],
       ],
-      [[140, "KRUNGTHAI BANK"]],
+      [[140, "KRUNGTHAI BANK BANGKOK BANK"]],
     ]),
     undefined
   );
@@ -239,6 +243,74 @@ test("Krungthai PDF dispatch reads English table headers and separate time lines
     [
       ["13:10", 100, 0, 100.07],
       ["15:33", 0, 50, 50.07],
+    ]
+  );
+});
+
+test("Bangkok Bank dispatch uses columns, excludes B/F and preserves Via without inventing time", async () => {
+  const result = await parseBankStatement(
+    pdf(
+      [
+        [[20, "Bangkok Bank Public Company Limited"]],
+        [
+          [29, "Date"],
+          [80, "Particulars"],
+          [164, "Chq.No."],
+          [244, "Withdrawal"],
+          [327, "Deposit"],
+          [397, "Balance"],
+          [498, "Via"],
+        ],
+        [
+          [25, "01/10/26"],
+          [57, "B/F"],
+          [405, "148.25"],
+        ],
+        [
+          [25, "02/10/26"],
+          [57, "TRF. PROMPTPAY"],
+          [337, "65.00"],
+          [405, "213.25"],
+          [433, "mPhone"],
+        ],
+        [
+          [25, "03/10/26"],
+          [57, "TRF. PROMPTPAY"],
+          [267, "60.00"],
+          [405, "153.25"],
+          [433, "Gtway"],
+        ],
+        [
+          [20, "Total No. of Debits"],
+          [275, "1"],
+          [297, "Total Debit Amount"],
+          [542, "60.00"],
+        ],
+        [
+          [20, "Total No. of Credits"],
+          [275, "1"],
+          [297, "Total Credit Amount"],
+          [542, "65.00"],
+        ],
+      ],
+      7
+    ),
+    undefined
+  );
+  assert.equal(result.ok, true);
+  assert.equal(result.bank, "BBL");
+  assert.equal(result.openingBalance, 148.25);
+  assert.deepEqual(
+    result.rows.map((r) => [
+      r.time,
+      r.deposit,
+      r.withdraw,
+      r.balance,
+      r.channel,
+    ]),
+    [
+      [null, 65, 0, 213.25, "mPhone"],
+      [null, 0, 60, 153.25, "Gtway"],
     ]
   );
 });
