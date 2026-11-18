@@ -97,7 +97,7 @@ export async function saveTransactionRemark(input: z.input<typeof schema>) {
         if (!updated.count)
           return {
             ok: false as const,
-            message: "ข้อมูลเปลี่ยนไประหว่างบันทึก กรุณาลองใหม่",
+            message: "ข้อมูลเปลี่ยนไประหว่างบันทึก กรุณารีเฟรชและตรวจใหม่",
           };
         return {
           ok: true as const,
