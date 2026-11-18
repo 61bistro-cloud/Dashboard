@@ -4513,19 +4513,19 @@
     "en": "Krungthai Bank"
   },
   "รองรับเฉพาะ Statement กสิกรไทย ไทยพาณิชย์ กรุงศรี และกรุงไทย": {
-    "th": "รองรับเฉพาะ Statement กสิกรไทย ไทยพาณิชย์ กรุงศรี และกรุงไทย",
+    "th": "รองรับเฉพาะรายการเดินบัญชีของกสิกรไทย ไทยพาณิชย์ กรุงศรี และกรุงไทย",
     "en": "Only KBANK, SCB, Krungsri and Krungthai statements are supported"
   },
   "นำเข้า PDF ได้เฉพาะกสิกรไทย ไทยพาณิชย์ กรุงศรี และกรุงไทย • เงินสดและแอปเดลิเวอรีใช้บันทึกรายการเอง": {
-    "th": "นำเข้า PDF ได้เฉพาะกสิกรไทย ไทยพาณิชย์ กรุงศรี และกรุงไทย • เงินสดและแอปเดลิเวอรีใช้บันทึกรายการเอง",
+    "th": "นำเข้าไฟล์ได้เฉพาะกสิกรไทย ไทยพาณิชย์ กรุงศรี และกรุงไทย • เงินสดและแอปเดลิเวอรีใช้บันทึกรายการเอง",
     "en": "PDF imports support KBANK, SCB, Krungsri and Krungthai. Cash and delivery channels use manual entries."
   },
   "นำเข้า PDF Statement (กสิกร / ไทยพาณิชย์ / กรุงศรี / กรุงไทย) —": {
-    "th": "นำเข้า PDF Statement (กสิกร / ไทยพาณิชย์ / กรุงศรี / กรุงไทย) —",
+    "th": "นำเข้าไฟล์รายการเดินบัญชี (กสิกร / ไทยพาณิชย์ / กรุงศรี / กรุงไทย) —",
     "en": "Import PDF statement (KBANK / SCB / Krungsri / Krungthai) —"
   },
   "รหัสผ่าน PDF ไม่ถูกต้อง กรุณาตรวจรหัสที่ธนาคารกำหนด": {
-    "th": "รหัสผ่าน PDF ไม่ถูกต้อง กรุณาตรวจรหัสที่ธนาคารกำหนด",
+    "th": "รหัสผ่านไฟล์ไม่ถูกต้อง กรุณาตรวจรหัสที่ธนาคารกำหนด",
     "en": "Incorrect PDF password. Check the password specified by the bank."
   },
   "รหัสเปิดไฟล์จากธนาคาร": {
@@ -4533,11 +4533,11 @@
     "en": "PDF password from the bank"
   },
   "กรุงไทย: ใช้เลขบัตรประชาชนเจ้าของบัญชีตามที่ธนาคารกำหนด • ธนาคารอื่นตรวจวิธีตั้งรหัสในอีเมล Statement": {
-    "th": "กรุงไทย: ใช้เลขบัตรประชาชนเจ้าของบัญชีตามที่ธนาคารกำหนด • ธนาคารอื่นตรวจวิธีตั้งรหัสในอีเมล Statement",
+    "th": "กรุงไทย: ใช้เลขบัตรประชาชนเจ้าของบัญชีตามที่ธนาคารกำหนด • ธนาคารอื่นตรวจวิธีตั้งรหัสในอีเมลรายการเดินบัญชี",
     "en": "Krungthai: use the account holder’s national ID as specified by the bank. For other banks, check the password instructions in the statement email."
   },
   "กรุงไทยใช้เลขบัตรประชาชนเจ้าของบัญชี ส่วนธนาคารอื่นให้ตรวจรหัสในอีเมล Statement": {
-    "th": "กรุงไทยใช้เลขบัตรประชาชนเจ้าของบัญชี ส่วนธนาคารอื่นให้ตรวจรหัสในอีเมล Statement",
+    "th": "กรุงไทยใช้เลขบัตรประชาชนเจ้าของบัญชี ส่วนธนาคารอื่นให้ตรวจรหัสในอีเมลรายการเดินบัญชี",
     "en": "For Krungthai, use the account holder’s national ID. For other banks, check the password in the statement email."
   },
   "อ่านรายการกรุงไทยไม่ครบหรือยอดไม่ต่อเนื่อง กรุณาตรวจไฟล์ต้นฉบับ": {
@@ -4549,7 +4549,7 @@
     "en": "This file spans multiple months. Showing {v0} of {v1} rows for the selected month, with its opening balance."
   },
   "(อ่านหรือคำนวณจาก Statement ของเดือนที่เลือก) — ตรวจยอดก่อนยืนยันนำเข้า": {
-    "th": "(อ่านหรือคำนวณจาก Statement ของเดือนที่เลือก) — ตรวจยอดก่อนยืนยันนำเข้า",
+    "th": "(อ่านหรือคำนวณจากรายการเดินบัญชีของเดือนที่เลือก) — ตรวจยอดก่อนยืนยันนำเข้า",
     "en": "(Read or derived from the selected month’s statement) — check the amount before confirming import"
   }
 }
