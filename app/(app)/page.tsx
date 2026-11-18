@@ -1,3 +1,4 @@
+import { GrabOverview } from "@/components/grab-overview";
 import { displayMonth } from "@/lib/i18n/core";
 
 import { useUi } from "@/lib/i18n/use-ui";
@@ -156,6 +157,10 @@ export default async function DashboardPage() {
           }
         />
       </div>
+
+      {["OWNER", "ACCOUNTANT"].includes(session.user.role) && (
+        <GrabOverview businessId={business.id} yearBE={latestYear.yearBE} />
+      )}
 
       <SectionTitle
         icon={ChefHat}

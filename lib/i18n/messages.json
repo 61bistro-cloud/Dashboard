@@ -4187,5 +4187,325 @@
   },
   "ใช้ข้อความล่าสุดแทนข้อความที่กำลังแก้ไข": {
     "en": "Replace this draft with the latest text"
+  },
+  "สรุป Grab": {
+    "th": "สรุป Grab",
+    "en": "Grab summary"
+  },
+  "grab.upload": {
+    "th": "นำเข้ารายงานธุรกรรม Grab",
+    "en": "Import Grab transaction report"
+  },
+  "grab.uploadHelp": {
+    "th": "เลือกเดือนขายด้านบน แล้วอัปโหลด CSV จาก Grab (ไม่เกิน 2 MB / 3,000 รายการ) ตรวจตัวอย่างก่อนยืนยัน รองรับ GrabFood: ชำระเงิน / Auto-Paid / โอนแล้ว ส่วนไฟล์ที่มีคืนเงิน ยกเลิก หรือรายการประเภทอื่นยังไม่รองรับ",
+    "en": "Select the sales month above, then upload a Grab CSV (up to 2 MB / 3,000 rows). Preview before confirming. Supports settled GrabFood Auto-Paid payments; reports containing refunds, cancellations or other transaction types are not yet supported."
+  },
+  "grab.connect": {
+    "th": "กรุณาเชื่อม Google Drive เพื่อเก็บไฟล์ต้นฉบับก่อนนำเข้า",
+    "en": "Connect Google Drive to archive the original file before importing."
+  },
+  "grab.connections": {
+    "th": "ไปหน้าเชื่อมต่อ",
+    "en": "Open connections"
+  },
+  "grab.file": {
+    "th": "ไฟล์ CSV รายงานธุรกรรม Grab",
+    "en": "Grab transaction report CSV file"
+  },
+  "grab.working": {
+    "th": "กำลังตรวจสอบ…",
+    "en": "Checking…"
+  },
+  "grab.preview": {
+    "th": "ตรวจไฟล์และดูตัวอย่าง",
+    "en": "Validate and preview"
+  },
+  "grab.storeId": {
+    "th": "รหัสร้านค้า Grab",
+    "en": "Grab store ID"
+  },
+  "grab.confirm": {
+    "th": "ยืนยันว่าร้านและเดือนในตัวอย่างถูกต้อง และข้อมูลนี้ใช้ตรวจเทียบ โดยไม่เพิ่มยอดขายหรือค่าใช้จ่ายซ้ำ",
+    "en": "I confirm this is the correct store and sales month. This report is for reconciliation and will not add sales or costs again."
+  },
+  "grab.import": {
+    "th": "ยืนยันนำเข้ารายงาน",
+    "en": "Confirm report import"
+  },
+  "grab.sales": {
+    "th": "ยอดขาย Grab ก่อนหักค่าธรรมเนียม",
+    "en": "Grab sales before fees"
+  },
+  "grab.gp": {
+    "th": "ค่าคอมมิชชันแพลตฟอร์ม (GP รวมภาษี)",
+    "en": "Platform commission (GP incl. tax)"
+  },
+  "grab.net": {
+    "th": "ยอดหลังหักตามรายงาน",
+    "en": "Net settlement per report"
+  },
+  "grab.crossMonth": {
+    "th": "ยอดจากเดือนขายนี้ โอนข้ามเดือน",
+    "en": "Sales this month, transferred in another month"
+  },
+  "grab.policy": {
+    "th": "รายได้ในภาพรวมและกำไรขาดทุนยังใช้ POS เพียงแหล่งเดียว ต้นทุนใช้ยอดที่เจ้าของกรอกในสรุปต้นทุน รายงาน Grab ใช้ตรวจเทียบ ไม่บวกยอดขายหรือ GP อัตโนมัติ หากยังไม่ได้ลง GP ให้บันทึกในค่าใช้จ่ายการขายและการตลาดเพียงครั้งเดียว",
+    "en": "Dashboard and P&L revenue use POS only; costs use owner-entered Cost Setup amounts. Grab reports are for comparison and do not add sales or GP automatically. If GP has not been recorded, enter it once under selling and marketing expenses."
+  },
+  "grab.checkCosts": {
+    "th": "ตรวจค่า GP ในสรุปต้นทุน",
+    "en": "Check GP in Cost Setup"
+  },
+  "grab.posTitle": {
+    "th": "ตรวจเทียบยอดขาย Grab กับ POS รายวัน",
+    "en": "Compare daily Grab sales with POS"
+  },
+  "grab.posHelp": {
+    "th": "เทียบยอดขายก่อน GP กับยอดลูกค้าชำระใน POS เฉพาะช่องทางหรือการชำระเงินที่ระบุ Grab ส่วนรายได้กำไรขาดทุนใช้ยอดสุทธิ POS ยอดเท่ากันรายวันไม่ใช่การยืนยันรายบิล วันธุรกิจ POS ตัดรอบ 04:00 อาจต่างจากวันในรายงาน Grab และไฟล์ที่นำเข้าอาจยังไม่ครบเดือน",
+    "en": "Compares pre-GP sales with POS customer payments identified as Grab by channel or payment type. P&L uses POS net revenue. Equal daily totals do not verify individual bills. POS business days close at 04:00 and may differ from Grab calendar dates; uploaded reports may cover only part of the month."
+  },
+  "grab.openPos": {
+    "th": "ตรวจรายการขายใน POS",
+    "en": "Inspect POS sales"
+  },
+  "grab.date": {
+    "th": "วันที่ขาย",
+    "en": "Sales date"
+  },
+  "grab.grabOrders": {
+    "th": "รายการ Grab",
+    "en": "Grab orders"
+  },
+  "grab.posOrders": {
+    "th": "บิล POS",
+    "en": "POS bills"
+  },
+  "grab.posAmount": {
+    "th": "ยอดชำระใน POS (Grab)",
+    "en": "POS payments (Grab)"
+  },
+  "grab.diff": {
+    "th": "ส่วนต่าง POS − Grab",
+    "en": "Difference: POS − Grab"
+  },
+  "grab.dailyEqual": {
+    "th": "ยอดและจำนวนรายวันตรงกัน",
+    "en": "Daily total and count agree"
+  },
+  "grab.noReportDay": {
+    "th": "ยังไม่มีรายงาน Grab ของวันนี้",
+    "en": "No Grab report rows for this day"
+  },
+  "grab.check": {
+    "th": "ตรวจรายละเอียด",
+    "en": "Review details"
+  },
+  "grab.total": {
+    "th": "รวม",
+    "en": "Total"
+  },
+  "grab.orderHelp": {
+    "th": "เลขอ้างอิงยาวตรงกันใช้ตรวจเทียบรายบิล ยอดและวันตรงกันอย่างเดียวแสดงเป็นคู่แนะนำ ถ้ามีหลายคู่หรือหนึ่งบิลถูกอ้างถึงหลายรายการจะให้ตรวจเอง ระบบไม่เขียนทับหรือสร้างบิล POS",
+    "en": "Long reference IDs support bill-level comparison. Date and amount alone produce suggestions. Multiple candidates or a bill shared by multiple rows require review. No POS bills are created or overwritten."
+  },
+  "grab.order": {
+    "th": "คำสั่งซื้อ Grab",
+    "en": "Grab order"
+  },
+  "grab.posStatus": {
+    "th": "ผลเทียบ POS",
+    "en": "POS comparison"
+  },
+  "grab.posBill": {
+    "th": "เลขบิล POS ที่พบ",
+    "en": "Candidate POS bill IDs"
+  },
+  "grab.status.reference": {
+    "th": "เลขอ้างอิงและยอดตรง (ยังไม่ยืนยัน)",
+    "en": "Reference and amount agree (unconfirmed)"
+  },
+  "grab.status.amount_diff": {
+    "th": "เลขอ้างอิงตรง แต่ยอดต่าง",
+    "en": "Reference agrees; amount differs"
+  },
+  "grab.status.suggested": {
+    "th": "คู่แนะนำ: วันและยอดตรง",
+    "en": "Suggested: same date and amount"
+  },
+  "grab.status.ambiguous": {
+    "th": "หลายคู่ / บิลถูกอ้างซ้ำ",
+    "en": "Ambiguous / bill referenced more than once"
+  },
+  "grab.status.missing": {
+    "th": "ไม่พบคู่ใน POS เดือนนี้",
+    "en": "No POS candidate in this month"
+  },
+  "grab.more": {
+    "th": "แสดงเพิ่ม 50 รายการ",
+    "en": "Show 50 more rows"
+  },
+  "grab.payoutTitle": {
+    "th": "รอบโอนและยอดเข้าธนาคาร",
+    "en": "Payout batches and bank credits"
+  },
+  "grab.payoutHelp": {
+    "th": "รวมตามรหัสรอบโอนและวันโอนจากทุกไฟล์ที่นำเข้า รวมรอบที่มีรายการคาบเดือน คู่แนะนำต้องวันและยอดตรง พร้อมคำว่า Grab เลขอ้างอิง หรือหมวดรายรับ Grab ในธนาคาร ทั้งหมดเป็นคู่แนะนำ ยังไม่ได้ยืนยันเงินเข้า หากรายงานไม่ครบหรือธนาคารรวม/แยกยอด ให้ตรวจ Statement เพิ่ม",
+    "en": "Groups all imported rows by settlement reference and transfer date, including cross-month sales. A bank suggestion requires the same date and amount plus Grab text, the settlement reference or a Grab income category. Suggestions do not confirm receipt. Partial reports or combined/split bank payments require statement review."
+  },
+  "grab.transferDate": {
+    "th": "วันโอนตามรายงาน",
+    "en": "Report transfer date"
+  },
+  "grab.settlement": {
+    "th": "รหัสรอบโอน",
+    "en": "Settlement reference"
+  },
+  "grab.bankStatus": {
+    "th": "ผลเทียบธนาคาร",
+    "en": "Bank comparison"
+  },
+  "grab.bankCandidates": {
+    "th": "รายการธนาคารที่แนะนำ",
+    "en": "Candidate bank credits"
+  },
+  "grab.bank.suggested": {
+    "th": "วันและยอดตรง รอตรวจยืนยัน",
+    "en": "Date and amount agree; review required"
+  },
+  "grab.bank.ambiguous": {
+    "th": "หลายคู่ / ยอดซ้ำ ต้องตรวจ",
+    "en": "Ambiguous / reused credit; review required"
+  },
+  "grab.bank.missing": {
+    "th": "ยังไม่พบคู่ธนาคาร",
+    "en": "No bank candidate found"
+  },
+  "grab.intro": {
+    "th": "1. นำเข้า CSV ของเดือนขาย  2. ตรวจยอดและคู่ POS  3. ตรวจรอบโอนกับ Statement  4. ตรวจ GP ที่ลงในสรุปต้นทุน · ยอดหลังหักเป็นเงินคงเหลือตามรายงาน ไม่ใช่กำไรหรือรายได้ใหม่",
+    "en": "1. Import the sales-month CSV. 2. Compare sales and POS bills. 3. Compare payout batches with statements. 4. Check GP recorded in Cost Setup. Net settlement is not profit or additional revenue."
+  },
+  "grab.empty": {
+    "th": "เดือนนี้ยังไม่มีรายงาน Grab เลือก CSV แล้วกดตรวจไฟล์และดูตัวอย่าง",
+    "en": "No Grab report for this month. Choose a CSV and select Validate and preview."
+  },
+  "grab.dashboardTitle": {
+    "th": "ยอดขาย Grab และค่าธรรมเนียม — ปีงบที่แสดง",
+    "en": "Grab sales and fees — displayed fiscal year"
+  },
+  "grab.dashboardHelp": {
+    "th": "ตรวจเทียบตามเดือนขายจากไฟล์ที่นำเข้า ยอด POS รวมอยู่ในรายได้ด้านบนแล้ว",
+    "en": "Comparison by sales month for imported reports. POS amounts are already included in revenue above."
+  },
+  "grab.open": {
+    "th": "เปิดสรุป Grab",
+    "en": "Open Grab summary"
+  },
+  "grab.posRevenue": {
+    "th": "รายได้ Grab จาก POS",
+    "en": "Grab net revenue from POS"
+  },
+  "grab.monthLabel": {
+    "th": "เดือนขาย",
+    "en": "Sales month"
+  },
+  "grab.emptyDashboard": {
+    "th": "ยังไม่ได้นำเข้า CSV ของปีงบนี้ จึงยังไม่ทราบ GP ตามรายงาน",
+    "en": "No CSV imported for this fiscal year; reported GP is not yet available."
+  },
+  "grab.bankLink": {
+    "th": "ยอดขาย · GP · เทียบ POS · รอบเงินเข้าธนาคาร",
+    "en": "Sales · GP · POS comparison · bank payouts"
+  },
+  "grab.csv": {
+    "th": "โครงสร้าง CSV ไม่ถูกต้อง กรุณาใช้ไฟล์ต้นฉบับจาก Grab",
+    "en": "Invalid CSV structure. Use the original Grab export."
+  },
+  "grab.size": {
+    "th": "กรุณาเลือกไฟล์ .csv ขนาดไม่เกิน 2 MB และไม่เกิน 3,000 รายการ",
+    "en": "Choose a .csv file up to 2 MB with at most 3,000 rows."
+  },
+  "grab.money": {
+    "th": "พบยอดเงินที่อ่านไม่ได้ กรุณาตรวจไฟล์ต้นฉบับ ยังไม่มีการนำเข้า",
+    "en": "An amount could not be parsed. Check the original file; nothing was imported."
+  },
+  "grab.invalidDate": {
+    "th": "พบวันที่ไม่ถูกต้องในไฟล์ กรุณาตรวจไฟล์ต้นฉบับ",
+    "en": "The file contains an invalid date. Check the original export."
+  },
+  "grab.conflict": {
+    "th": "เลขธุรกรรมเดิมมีรายละเอียดต่างจากที่นำเข้าไว้ ระบบไม่เขียนทับ กรุณาตรวจไฟล์เดิมและไฟล์ใหม่",
+    "en": "An existing transaction ID has different details. Existing data was preserved; compare the original and new reports."
+  },
+  "grab.format": {
+    "th": "ไฟล์ไม่ตรงรูปแบบรายงานธุรกรรม Grab ภาษาไทยที่รองรับ กรุณาใช้ CSV UTF-8 จาก Grab",
+    "en": "This file does not match the supported Thai Grab transaction report. Use the UTF-8 CSV exported by Grab."
+  },
+  "grab.unsupported": {
+    "th": "ไฟล์มีรายการที่ยังไม่รองรับ เช่น คืนเงิน ยกเลิก หรือยังไม่โอน ระบบหยุดทั้งไฟล์โดยไม่บันทึกบางส่วน",
+    "en": "The file contains unsupported rows, such as refunds, cancellations or unsettled payments. The entire import was stopped; no partial rows were saved."
+  },
+  "grab.store": {
+    "th": "กรุณานำเข้าไฟล์ของร้าน Grab เดียวต่อครั้ง",
+    "en": "Import one Grab store per file."
+  },
+  "grab.storeMismatch": {
+    "th": "รหัสร้าน Grab ต่างจากรายงานเดิมของธุรกิจนี้ กรุณาเปลี่ยนธุรกิจหรือตรวจไฟล์",
+    "en": "This Grab store ID differs from earlier reports for this business. Switch business or check the file."
+  },
+  "grab.stored": {
+    "th": "อ่านรายงาน Grab ที่เก็บไว้ไม่สำเร็จ กรุณาลองใหม่หรือติดต่อผู้ดูแล ระบบยังคงเก็บข้อมูลเดิมไว้",
+    "en": "Stored Grab reports could not be read. Retry or contact the administrator; existing data has been retained."
+  },
+  "grab.forbidden": {
+    "th": "ไม่มีสิทธิ์นำเข้ารายงาน Grab",
+    "en": "You do not have permission to import Grab reports."
+  },
+  "grab.business": {
+    "th": "ธุรกิจเปลี่ยนไปหรือไม่มีสิทธิ์ กรุณาเลือกธุรกิจและรีเฟรชหน้า",
+    "en": "Business changed or access is unavailable. Select the business and refresh."
+  },
+  "grab.month": {
+    "th": "วันที่ขายในไฟล์ไม่ตรงกับเดือนที่เลือก หรือไม่พบเดือน กรุณาตรวจเดือนก่อนนำเข้า",
+    "en": "The file’s sales dates do not match the selected month, or the month is unavailable. Check the sales month before importing."
+  },
+  "grab.stale": {
+    "th": "ข้อมูลหรือไฟล์เปลี่ยนแล้ว กรุณาตรวจตัวอย่างใหม่ ไฟล์ที่ส่งถึง Drive แล้วจะเก็บไว้โดยไม่ลบ",
+    "en": "The file or stored data changed. Preview again. Any original already uploaded to Drive is retained."
+  },
+  "grab.failed": {
+    "th": "นำเข้าไม่สำเร็จ กรุณาลองใหม่หรือตรวจการเชื่อม Google ข้อมูลเดิมยังอยู่ และไฟล์ที่ส่งถึง Drive แล้วจะเก็บไว้",
+    "en": "Import failed. Retry or check the Google connection. Existing data and any original already uploaded to Drive are retained."
+  },
+  "grab.previewCount {v0} {v1} {v2}": {
+    "th": "{v0} รายการ · ใหม่ {v1} · ซ้ำ {v2}",
+    "en": "{v0} rows · {v1} new · {v2} duplicates"
+  },
+  "grab.saved {v0} {v1}": {
+    "th": "นำเข้าใหม่ {v0} รายการ · ข้ามรายการซ้ำ {v1} รายการ",
+    "en": "Imported {v0} new rows · skipped {v1} duplicates"
+  },
+  "grab.taxInfo {v0}": {
+    "th": "ภาษีค่าธรรมเนียมที่รายงานแสดง {v0} บาท เป็นส่วนประกอบของยอดหัก ไม่หักซ้ำ สิทธิภาษีซื้อต้องตรวจใบกำกับภาษีและสถานะ VAT ของร้าน",
+    "en": "Reported fee tax: THB {v0}. This is included in deductions and is not deducted again. Input tax treatment depends on the tax invoice and the store’s VAT status."
+  },
+  "grab.otherInfo {v0}": {
+    "th": "ส่วนปรับปรุงอื่นตามรายงาน {v0} บาท · ยอดขาย − GP + ส่วนปรับปรุง = ยอดหลังหัก ใช้ยอดรายรายการ ไม่คำนวณ GP เหมาเป็นเปอร์เซ็นต์",
+    "en": "Other report adjustments: THB {v0}. Sales − GP + adjustments = net settlement. Uses actual row amounts rather than an assumed GP rate."
+  },
+  "grab.posTotals {v0} {v1} {v2}": {
+    "th": "POS รับชำระ {v0} · รายได้สุทธิ POS {v1} · ส่วนต่าง POS − Grab {v2}",
+    "en": "POS payments {v0} · POS net revenue {v1} · POS − Grab difference {v2}"
+  },
+  "grab.orderTitle {v0}": {
+    "th": "รายละเอียดคำสั่งซื้อและคู่ POS ({v0} รายการ)",
+    "en": "Orders and POS comparisons ({v0} rows)"
+  },
+  "grab.transfersInMonth {v0}": {
+    "th": "ยอดวันโอนอยู่ในเดือนที่เลือก จากไฟล์ที่นำเข้าทั้งหมด {v0} บาท (ยังไม่ยืนยันกับธนาคาร)",
+    "en": "Transfers dated in the selected month across all imported reports: THB {v0} (not bank-confirmed)"
+  },
+  "grab.originals {v0}": {
+    "th": "ไฟล์ต้นฉบับเดือนนี้ใน Drive ({v0} ไฟล์)",
+    "en": "Original files for this month in Drive ({v0} files)"
   }
 }

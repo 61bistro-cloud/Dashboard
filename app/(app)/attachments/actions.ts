@@ -98,7 +98,9 @@ export async function removeAttachment(id: number) {
   await requireAccess();
   const biz = await requireBusiness();
   // Unlink the record; the file itself stays in Drive.
-  await prisma.driveFile.deleteMany({ where: { id, businessId: biz.id } });
+  await prisma.driveFile.deleteMany({
+    where: { id, businessId: biz.id, kind: { in: ["SLIP", "BILL"] } },
+  });
   for (const p of REVALIDATE) revalidatePath(p);
   return { ok: true };
 }

@@ -207,6 +207,14 @@ export default async function BankPage({
         }
       />
 
+      <Link
+        href={`/bank/grab?month=${currentMonth.id}`}
+        className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-hairline bg-surface p-4 text-sm"
+      >
+        <span className="font-semibold">{ui("สรุป Grab")}</span>
+        <span className="text-xs text-muted">{ui("grab.bankLink")}</span>
+      </Link>
+
       {/* Account summary cards — click to switch active account */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {allAccountData.map((a) => {

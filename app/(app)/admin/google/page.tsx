@@ -227,7 +227,11 @@ export default async function GoogleAdminPage() {
                       : "bg-amber-100 text-amber-800")
                   }
                 >
-                  {f.kind === "SLIP" ? ui("สลิป") : ui("บิลซื้อ")}
+                  {f.kind === "GRAB_REPORT"
+                    ? ui("สรุป Grab")
+                    : f.kind === "SLIP"
+                      ? ui("สลิป")
+                      : ui("บิลซื้อ")}
                 </span>
                 <a
                   href={f.webViewLink}

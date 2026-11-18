@@ -67,6 +67,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/cost-setup": Settings,
   "/pos-sales": ReceiptText,
   "/bank": Landmark,
+  "/bank/grab": Bike,
   "/daily-recon": Scale,
   "/admin/users": Users,
   "/admin/businesses": Building2,

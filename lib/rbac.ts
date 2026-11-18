@@ -64,6 +64,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["OWNER", "ACCOUNTANT"],
   },
   {
+    href: "/bank/grab",
+    label: "สรุป Grab",
+    icon: NAV_ICONS["/bank/grab"],
+    roles: ["OWNER", "ACCOUNTANT"],
+  },
+  {
     href: "/daily-recon",
     label: "กระทบยอดรายวัน",
     icon: NAV_ICONS["/daily-recon"],

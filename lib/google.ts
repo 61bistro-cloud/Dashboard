@@ -351,3 +351,35 @@ export async function readEvidenceText(
         .catch(() => {});
   }
 }
+
+/** Original Grab reports have their own folder; they are never sent to OCR. */
+export async function uploadGrabReport(
+  businessId: number,
+  monthFolderName: string,
+  file: { name: string; mimeType: string; buffer: Buffer }
+) {
+  const ids = await ensureStructure(businessId);
+  const b = await getBiz(businessId);
+  const drive = google.drive({ version: "v3", auth: clientFor(b) });
+  const base = await findOrCreateFolder(
+    drive,
+    "รายงาน Grab",
+    ids.driveRootFolderId
+  );
+  const parent = await findOrCreateFolder(drive, monthFolderName, base);
+  const created = await drive.files.create(
+    {
+      requestBody: { name: file.name, parents: [parent] },
+      media: { mimeType: file.mimeType, body: Readable.from(file.buffer) },
+      fields: "id,webViewLink",
+    },
+    { timeout: 20000 }
+  );
+  if (!created.data.id) throw new Error("Grab original upload failed");
+  return {
+    driveFileId: created.data.id,
+    webViewLink:
+      created.data.webViewLink ??
+      `https://drive.google.com/file/d/${created.data.id}/view`,
+  };
+}

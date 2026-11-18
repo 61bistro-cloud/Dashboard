@@ -155,27 +155,8 @@ export type ReconRow = {
   status: "match" | "near" | "fee" | "diff" | "missing";
 };
 
-/** Map Foodstory PosBill.paymentType / channel → our internal posChannel buckets. */
-export function classifyBill(b: {
-  paymentType: string | null;
-  channel: string | null;
-}): string | null {
-  const pay = (b.paymentType ?? "").toLowerCase();
-  const ch = (b.channel ?? "").toLowerCase();
-  if (pay.includes("cash")) return "CASH";
-  if (
-    pay.includes("visa") ||
-    pay.includes("master") ||
-    pay.includes("jcb") ||
-    pay.includes("alipay")
-  )
-    return "EDC_PROMPTPAY";
-  if (pay.includes("promptpay") || pay.includes("qr")) return "EDC_PROMPTPAY";
-  if (pay.includes("bank transfer")) return "EDC_PROMPTPAY";
-  if (pay.includes("line man") || ch.includes("line man")) return "LINEMAN";
-  if (ch.includes("grab")) return "GRAB";
-  return null;
-}
+import { classifyBill } from "./pos-channel";
+export { classifyBill } from "./pos-channel";
 
 const CHANNEL_LABELS: Record<string, { label: string }> = {
   EDC_PROMPTPAY: { label: "EDC + PromptPay + Card" },
